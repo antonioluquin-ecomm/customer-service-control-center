@@ -1,0 +1,21 @@
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+  .metrics, .db-kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+  .fg.c4 { grid-template-columns: 1fr 1fr; }
+  .fg.c3 { grid-template-columns: 1fr 1fr; }
+  .resumen-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .page { padding: 16px; }
+  .metrics, .db-kpi-row { grid-template-columns: 1fr 1fr; }
+  .fg.c4, .fg.c3, .fg { grid-template-columns: 1fr; }
+  .criteria-row { grid-template-columns: 1fr; gap: 6px; }
+  .prod-row { grid-template-columns: 1fr; }
+  .topbar { flex-direction: column; gap: 10px; }
+  .topbar-right { width: 100%; flex-wrap: wrap; }
+  .filter-bar { flex-direction: column; align-items: stretch; }
+  .filter-bar input, .filter-bar select { max-width: none; }
+}
