@@ -174,7 +174,7 @@ function renderDashboard(){
     ? critRows.map(({n,pct,bloque,peso})=>{
         const tagCls=bloque==="Comunicacion"?"db-tag-c":"db-tag-g";
         const tagLabel=bloque==="Comunicacion"?"Com":"Ges";
-        const fillCol=pct>=50?"#991b1b":pct>=25?"#b45309":"#0a7040";
+        const fillCol=pct>=50?"#991b1b":pct>=25?"#92400e":"#0a7040";
         return `<div class="db-crit-row">
           <span class="db-crit-tag ${tagCls}">${tagLabel} ${peso}%</span>
           <span class="db-crit-name" title="${n}">${n}</span>
@@ -188,7 +188,7 @@ function renderDashboard(){
   const alerts=data.filter(a=>a.general<70).sort((a,b)=>a.general-b.general).slice(0,8);
   document.getElementById("db-alertas").innerHTML=alerts.length
     ? alerts.map(a=>{
-        const dotCol=a.general<40?"#991b1b":a.general<55?"#b45309":"#d97706";
+        const dotCol=a.general<40?"#991b1b":a.general<55?"#92400e":"#d97706";
         return `<div class="db-alert-row">
           <div class="db-alert-dot" style="background:${dotCol}"></div>
           <div class="db-alert-info">
