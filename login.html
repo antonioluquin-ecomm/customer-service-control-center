@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión — AuditCS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:      #1a3f6b;
+      --primary-hover:#14325a;
+      --primary-soft: #e8f0fb;
+      --danger:       #991b1b;
+      --danger-bg:    #fef2f2;
+      --success:      #0a7040;
+      --success-bg:   #ecfdf5;
+      --text:         #111827;
+      --muted:        #6b7280;
+      --line:         #e5e7eb;
+      --bg:           #f0f2f7;
+    }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .login-wrap {
+      width: 100%;
+      max-width: 380px;
+    }
+    .login-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .login-logo {
+      width: 48px;
+      height: 48px;
+      background: var(--primary);
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -.5px;
+      margin-bottom: 14px;
+    }
+    .login-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -.4px;
+    }
+    .login-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .login-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 16px rgba(17,24,39,.08), 0 1px 4px rgba(17,24,39,.04);
+      padding: 28px;
+    }
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .field input {
+      width: 100%;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      color: var(--text);
+      background: #fff;
+    }
+    .field input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26,63,107,.09);
+    }
+    .btn-login {
+      width: 100%;
+      padding: 10px;
+      background: var(--primary);
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background .15s;
+      margin-top: 4px;
+    }
+    .btn-login:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-login:disabled { opacity: .6; cursor: default; }
+    .alert-err {
+      display: none;
+      margin-top: 14px;
+      padding: 10px 14px;
+      background: var(--danger-bg);
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      color: var(--danger);
+      font-size: 13px;
+    }
+    .login-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-header">
+      <div class="login-logo">CS</div>
+      <div class="login-title">AuditCS</div>
+      <div class="login-sub">Sistema de Auditoría · Customer Service</div>
+    </div>
+    <div class="login-card">
+      <div class="field">
+        <label for="login-email">Correo electrónico</label>
+        <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="email" autofocus/>
+      </div>
+      <div class="field">
+        <label for="login-pwd">Contraseña</label>
+        <input type="password" id="login-pwd" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <button class="btn-login" id="btn-login" onclick="doLogin()">Iniciar sesión</button>
+      <div class="alert-err" id="login-err"></div>
+    </div>
+    <div class="login-footer">Herramienta interna — acceso restringido</div>
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script>
+    // Redirigir si ya hay sesión activa
+    if (getSession()) window.location.href = 'index.html';
+
+    document.getElementById('login-pwd').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    async function doLogin() {
+      const email  = document.getElementById('login-email').value.trim();
+      const pwd    = document.getElementById('login-pwd').value;
+      const errEl  = document.getElementById('login-err');
+      const btn    = document.getElementById('btn-login');
+      errEl.style.display = 'none';
+
+      if (!email || !pwd) {
+        errEl.textContent    = 'Completá los dos campos.';
+        errEl.style.display  = '';
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = 'Verificando...';
+
+      try {
+        const passwordHash = await sha256(pwd);
+        const res = await fetch(CONFIG.SCRIPT_URL, {
+          method:  'POST',
+          mode:    'cors',
+          headers: {'Content-Type': 'text/plain;charset=utf-8'},
+          body:    JSON.stringify({ _type: 'login', email, passwordHash }),
+        });
+        const data = await res.json().catch(() => null);
+        if (data && data.status === 'ok') {
+          setSession(data.user, data.sessionToken);
+          window.location.href = 'index.html';
+        } else {
+          errEl.textContent   = data?.message || 'Error al iniciar sesión.';
+          errEl.style.display = '';
+        }
+      } catch (err) {
+        errEl.textContent   = 'Sin conexión. Verificá tu red e intentá nuevamente.';
+        errEl.style.display = '';
+      } finally {
+        btn.disabled    = false;
+        btn.textContent = 'Iniciar sesión';
+      }
+    }
+  </script>
+</body>
+</html>

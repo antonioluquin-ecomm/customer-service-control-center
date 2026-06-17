@@ -26,6 +26,7 @@ const SHEET_LOG           = "log_envios";
 const SHEET_CONFIG        = "configuracion";
 const SHEET_CONFIG_LOG    = "log_configuracion";
 const SHEET_CRITERIOS     = "criterios_calidad";
+const SHEET_USUARIOS      = "usuarios";
 const PROP_INITIALIZED    = "sheets_initialized";
 const PROP_LAST_ID        = "last_auditoria_id";
 
@@ -64,6 +65,9 @@ const HEADERS = {
   ],
   criterios_calidad: [
     "cod","bloque","nombre","peso","activo","ultima_actualizacion",
+  ],
+  usuarios: [
+    "email","nombre","password_hash","role","activo","ultima_actualizacion",
   ],
 };
 
@@ -117,10 +121,12 @@ function checkToken(param_token) {
 // GET
 // ================================================================
 function doGet(e) {
-  const action = (e && e.parameter && e.parameter.action) || "ping";
-  const token  = (e && e.parameter && e.parameter.token) || "";
+  const action       = (e && e.parameter && e.parameter.action)       || "ping";
+  const token        = (e && e.parameter && e.parameter.token)        || "";
+  const sessionToken = (e && e.parameter && e.parameter.sessionToken) || "";
   try {
     if (!checkToken(token)) return jsonOut({ status:"error", message:"Unauthorized" });
+    if (!checkSessionToken(sessionToken)) return jsonOut({ status:"error", message:"Sesión requerida. Iniciá sesión nuevamente." });
     ensureSheetsOnce();
     if (action === "get_config")     return jsonOut(getConfig());
     if (action === "get_auditorias") return jsonOut(getAuditorias());
@@ -250,7 +256,16 @@ function doPost(e) {
       result = { status:"error", message:"Unauthorized" };
       return jsonOut(result);
     }
+    // Login y logout no requieren sesión previa
+    if (payload._type === "login")  { return jsonOut(handleLogin(payload)); }
+    if (payload._type === "logout") { return jsonOut(handleLogout(payload)); }
+    // Todos los demás endpoints requieren sesión válida
+    if (!checkSessionToken(payload.sessionToken)) {
+      result = { status:"error", message:"Sesión requerida. Iniciá sesión nuevamente." };
+      return jsonOut(result);
+    }
     ensureSheetsOnce();
+    if (payload._type === "updateUser") { return jsonOut(handleUpdateUser(payload)); }
     if (payload._type === "config_change") {
       handleConfigChange(payload);
       result = { status:"ok", type:"config_synced" };
@@ -454,6 +469,114 @@ function getSheet(name) {
   return ss.getSheetByName(name) || ss.insertSheet(name);
 }
 
+// ================================================================
+// AUTH — login, logout, sesiones, cambio de contraseña
+// Las sesiones se guardan en Script Properties (key: "session_<token>")
+// ================================================================
+
+function hashPassword(pwd) {
+  const bytes = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256, pwd, Utilities.Charset.UTF_8
+  );
+  return bytes.map(b => ('0' + (b & 0xff).toString(16)).slice(-2)).join('');
+}
+
+function checkSessionToken(token) {
+  if (!token) return false;
+  const raw = PropertiesService.getScriptProperties().getProperty("session_" + token);
+  if (!raw) return false;
+  try {
+    const s = JSON.parse(raw);
+    if (Date.now() > s.expiresAt) {
+      PropertiesService.getScriptProperties().deleteProperty("session_" + token);
+      return false;
+    }
+    return true;
+  } catch(_) { return false; }
+}
+
+function handleLogin(body) {
+  const email        = (body.email        || "").trim().toLowerCase();
+  const passwordHash = (body.passwordHash || "").trim();
+  if (!email || !passwordHash) return { status:"error", message:"Credenciales requeridas" };
+  ensureSheetsOnce();
+  const sheet = getSheet(SHEET_USUARIOS);
+  const last  = sheet.getLastRow();
+  if (last <= 1) return { status:"error", message:"No hay usuarios configurados. Ejecutá crearUsuarioInicial() en Apps Script." };
+  const rows = sheet.getRange(2, 1, last - 1, 6).getValues();
+  for (const row of rows) {
+    const [uEmail, uNombre, uHash, uRole, uActivo] = row;
+    if (String(uEmail).trim().toLowerCase() !== email) continue;
+    if (!uActivo) return { status:"error", message:"Usuario inactivo" };
+    if (uHash !== passwordHash) return { status:"error", message:"Contraseña incorrecta" };
+    const sessionToken = Utilities.getUuid();
+    const expiresAt    = Date.now() + 8 * 60 * 60 * 1000; // 8 horas
+    PropertiesService.getScriptProperties().setProperty(
+      "session_" + sessionToken,
+      JSON.stringify({ email: uEmail, name: uNombre, role: uRole, expiresAt })
+    );
+    return {
+      status: "ok",
+      sessionToken,
+      user: { email: uEmail, name: uNombre, role: uRole },
+    };
+  }
+  return { status:"error", message:"Usuario no encontrado" };
+}
+
+function handleLogout(body) {
+  const token = body.sessionToken || "";
+  if (token) PropertiesService.getScriptProperties().deleteProperty("session_" + token);
+  return { status:"ok" };
+}
+
+function handleUpdateUser(body) {
+  const email        = (body.email        || "").trim().toLowerCase();
+  const passwordHash = (body.passwordHash || "").trim();
+  if (!email || !passwordHash) return { status:"error", message:"Datos incompletos" };
+  const sheet = getSheet(SHEET_USUARIOS);
+  const last  = sheet.getLastRow();
+  if (last <= 1) return { status:"error", message:"Sin usuarios" };
+  const rows = sheet.getRange(2, 1, last - 1, 6).getValues();
+  for (let i = 0; i < rows.length; i++) {
+    if (String(rows[i][0]).trim().toLowerCase() === email) {
+      sheet.getRange(i + 2, 3).setValue(passwordHash);
+      sheet.getRange(i + 2, 6).setValue(new Date().toISOString());
+      return { status:"ok" };
+    }
+  }
+  return { status:"error", message:"Usuario no encontrado" };
+}
+
+// ================================================================
+// SETUP — ejecutar UNA SOLA VEZ desde el editor de Apps Script
+// para crear el primer usuario. Cambiar email/nombre y ejecutar
+// crearUsuarioInicial(). La contraseña inicial es "cambiarme123".
+// ================================================================
+function crearUsuarioInicial() {
+  const email    = "admin@tudominio.com"; // ← CAMBIAR antes de ejecutar
+  const nombre   = "Administrador";       // ← CAMBIAR antes de ejecutar
+  const password = "cambiarme123";        // ← cambiar INMEDIATAMENTE tras el primer login
+  const hash     = hashPassword(password);
+  ensureSheetsOnce();
+  const sheet = getSheet(SHEET_USUARIOS);
+  // Verificar que no exista ya
+  const last = sheet.getLastRow();
+  if (last > 1) {
+    const rows = sheet.getRange(2, 1, last - 1, 1).getValues();
+    for (const r of rows) {
+      if (String(r[0]).trim().toLowerCase() === email.toLowerCase()) {
+        Logger.log("El usuario " + email + " ya existe.");
+        return;
+      }
+    }
+  }
+  sheet.appendRow([email, nombre, hash, "auditor", true, new Date().toISOString()]);
+  Logger.log("✓ Usuario creado: " + email + " — contraseña inicial: " + password);
+  Logger.log("  Cambiala INMEDIATAMENTE desde la app.");
+}
+
+// ================================================================
 // FIX: ensureSheetsOnce — corre solo la primera vez usando PropertiesService
 // En requests normales de producción no añade overhead de verificar 8 hojas
 function ensureSheetsOnce() {
@@ -482,6 +605,21 @@ function reinitializeSheets() {
   PropertiesService.getScriptProperties().deleteProperty(PROP_INITIALIZED);
   ensureSheetsOnce();
   Logger.log("Sheets re-inicializados correctamente.");
+}
+
+// Limpia sesiones expiradas de Script Properties (ejecutar periódicamente si se desea)
+function limpiarSesionesExpiradas() {
+  const props = PropertiesService.getScriptProperties().getProperties();
+  const now   = Date.now();
+  let count   = 0;
+  for (const key of Object.keys(props)) {
+    if (!key.startsWith("session_")) continue;
+    try {
+      const s = JSON.parse(props[key]);
+      if (now > s.expiresAt) { PropertiesService.getScriptProperties().deleteProperty(key); count++; }
+    } catch(_) { PropertiesService.getScriptProperties().deleteProperty(key); count++; }
+  }
+  Logger.log("Sesiones expiradas eliminadas: " + count);
 }
 
 // Función de setup inicial — ejecutar manualmente una vez al crear el proyecto

@@ -5,7 +5,6 @@
 // Reintenta enviar a Sheets los registros que quedaron en la cola offline
 async function retrySyncPending(){
   if(!PENDING_QUEUE.length){ alert("No hay registros pendientes."); return; }
-  if(!CFG.sheets_url){ alert("Configurá la URL de Sheets primero."); return; }
   showSync(`Reintentando ${PENDING_QUEUE.length} registros...`);
   const retry=[...PENDING_QUEUE];
   PENDING_QUEUE=[];
@@ -27,8 +26,9 @@ async function retrySyncPending(){
 
 // Inicialización de la app
 (function init(){
-  loadLocalCfg();
+  if(!requireAuth()) return;
   loadPendingQueue();
+  renderUserChip();
   const today=new Date().toISOString().slice(0,10);
   document.getElementById("f-fecha").value=today;
   onFechaChange();

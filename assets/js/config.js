@@ -1,10 +1,19 @@
 // ================================================================
 // CONFIG — constantes, defaults y criterios iniciales
 // ================================================================
-const CFG_KEY = "auditcs_cfg_v5";
+
+const CONFIG = {
+  // URL del deploy de Apps Script — reemplazar con la URL real después del deploy.
+  SCRIPT_URL: "https://script.google.com/macros/s/REEMPLAZAR_CON_URL_DEL_DEPLOY/exec",
+  AUTH: {
+    SESSION_KEY:    "auditcs_session",
+    SESSION_TTL_MS: 8 * 60 * 60 * 1000, // 8 horas
+  }
+};
+
+const CFG_KEY = "auditcs_cfg_v6";
 
 let CFG = {
-  sheets_url:"",
   agentes:["Agostina Moya","Rodrigo Arrieta","Luciana Zurita","Lucas Veliz","Julieta Gallardo","Tania Cazorla","Santiago Jerez","Rodrigo Bacchi"],
   auditores:["Gabriel","Auditor 1","Auditor 2"],
   muestras_semana:4, horas_base:44, tickets_base:660,

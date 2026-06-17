@@ -80,7 +80,7 @@ function renderObservaciones(){
 async function deleteAuditoria(id){
   if(!confirm(`¿Eliminar ${id}? Esta acción no se puede deshacer.`)) return;
   DB.auditorias=DB.auditorias.filter(a=>a.id_auditoria!==id);
-  if(CFG.sheets_url) await postSheets({_type:"delete_auditoria",id_auditoria:id});
+  await postSheets({_type:"delete_auditoria",id_auditoria:id});
   renderRegistros(); renderDashboard();
 }
 

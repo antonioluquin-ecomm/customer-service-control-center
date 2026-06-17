@@ -390,19 +390,6 @@
       </div>
       <div id="config-saved" class="alert success hidden">✓ Configuración guardada y sincronizada con Sheets.</div>
 
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-header">
-          <div><div class="card-title">Conexión Google Sheets</div><div class="card-sub">URL de la Web App de Apps Script</div></div>
-          <div id="cfg-sheets-badge"></div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input type="text" id="cfg-sheets-url" style="flex:1;font-family:'DM Mono',monospace;font-size:12px" placeholder="https://script.google.com/macros/s/..."/>
-          <button class="btn sm primary" onclick="saveConfigSheets()">Guardar</button>
-          <button class="btn sm" onclick="testSheets()">Probar</button>
-          <button class="btn sm" onclick="reloadFromSheets()">↺ Recargar</button>
-        </div>
-      </div>
-
       <div class="grid2" style="margin-bottom:16px">
         <div class="card">
           <div class="card-header"><div><div class="card-title">Agentes</div><div class="card-sub">Aparecen en el selector del formulario</div></div></div>
@@ -495,6 +482,7 @@
 </div>
 
 <script src="assets/js/config.js"></script>
+<script src="assets/js/auth.js"></script>
 <script src="assets/js/state.js"></script>
 <script src="assets/js/storage.js"></script>
 <script src="assets/js/calculations.js"></script>

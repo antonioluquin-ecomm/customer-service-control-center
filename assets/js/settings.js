@@ -4,7 +4,6 @@
 
 // Carga los valores actuales de CFG en los inputs de configuración
 function renderConfigPage(){
-  document.getElementById("cfg-sheets-url").value=CFG.sheets_url||"";
   document.getElementById("cfg-horas-base").value=CFG.horas_base;
   document.getElementById("cfg-tickets-base").value=CFG.tickets_base;
   document.getElementById("cfg-muestras").value=CFG.muestras_semana;
@@ -20,8 +19,6 @@ function renderConfigPage(){
   renderListaAgentes(); renderListaAuditores();
   renderCriteriosConfig();
   checkPesosProd(); checkPesosGeneral();
-  const badge=document.getElementById("cfg-sheets-badge");
-  if(badge) badge.innerHTML=CFG.sheets_url?'<span class="badge badge-excelente">✓ Conectado</span>':'<span class="badge badge-observada">✗ Sin URL</span>';
 }
 
 // Lista editable de agentes
@@ -118,13 +115,6 @@ function checkPesosGeneral(){
   if(pp) pp.textContent=wp+"%";
 }
 
-// Guarda la URL de Sheets con validación de formato
-function saveConfigSheets(){
-  const url=document.getElementById("cfg-sheets-url").value.trim();
-  if(url&&!url.startsWith("https://script.google.com")){ alert("URL inválida. Debe ser de script.google.com"); return; }
-  CFG.sheets_url=url; persistUrl(); updateSheetsUI(url?"connected":"disconnected");
-}
-
 // Guarda todos los parámetros de configuración y sincroniza con Sheets
 async function saveConfig(){
   const wi=Number(document.getElementById("cfg-w-inter").value);
@@ -134,7 +124,6 @@ async function saveConfig(){
   const wc=Number(document.getElementById("cfg-w-calidad").value);
   const wprod=Number(document.getElementById("cfg-w-productividad").value);
   if(wc+wprod!==100){ alert("Calidad + Productividad deben sumar 100%."); return; }
-  saveConfigSheets();
   CFG.horas_base    =Number(document.getElementById("cfg-horas-base").value)||44;
   CFG.tickets_base  =Number(document.getElementById("cfg-tickets-base").value)||660;
   CFG.muestras_semana=Number(document.getElementById("cfg-muestras").value)||4;

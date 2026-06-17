@@ -215,9 +215,7 @@ function renderResumen(){
   const general=calcGeneral(cal,prod);
   const estado=calcEstado(general);
   const hs=v("f-horas"), obj=calcObjetivo(hs);
-  const sheetsLine=CFG.sheets_url
-    ?`<span style="color:var(--green);font-size:12px">✓ Se enviará a Google Sheets automáticamente</span>`
-    :`<span style="color:var(--amber);font-size:12px">⚠ Sheets no configurado — se guardará local</span>`;
+  const sheetsLine=`<span style="color:var(--green);font-size:12px">✓ Se enviará a Google Sheets automáticamente</span>`;
   document.getElementById("resumen-content").innerHTML=`
     <div class="score-summary" style="margin-bottom:18px">
       <div><div class="ss-value" style="color:var(--accent)">${cal}%</div><div class="ss-label">Calidad (${CFG.w_calidad}%)</div></div>
