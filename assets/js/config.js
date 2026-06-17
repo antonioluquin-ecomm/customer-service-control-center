@@ -2,6 +2,12 @@
 // CONFIG — constantes, defaults y criterios iniciales
 // ================================================================
 
+const VERSION = {
+  number: '12.1.0',
+  date:   '2026-06-17',
+  notes:  'Sidebar Standard: fixed position, brand-icon, mobile collapse, tokens'
+};
+
 const CONFIG = {
   // URL del deploy de Apps Script — reemplazar con la URL real después del deploy.
   SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyp88KZInCGa68llI8C4uiy8B-IOldWRCjLWFHsiGdzkDXDgJUhfWzwtN00z9FI-mq4/exec",

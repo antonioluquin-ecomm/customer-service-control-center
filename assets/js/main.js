@@ -25,8 +25,32 @@ async function retrySyncPending(){
 }
 
 // Inicialización de la app
+function initSidebarVersion() {
+  const el = document.getElementById('brandMeta');
+  if (el && typeof VERSION !== 'undefined') {
+    el.textContent = `Customer Service · v${VERSION.number}`;
+  }
+}
+
+function initMobileSidebar() {
+  const toggle  = document.getElementById('sidebarToggle');
+  const overlay = document.getElementById('sidebarOverlay');
+  const sidebar = document.getElementById('sidebar');
+  if (!toggle || !overlay || !sidebar) return;
+  toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('visible');
+  });
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('visible');
+  });
+}
+
 (function init(){
   if(!requireAuth()) return;
+  initSidebarVersion();
+  initMobileSidebar();
   loadPendingQueue();
   renderUserChip();
   const today=new Date().toISOString().slice(0,10);

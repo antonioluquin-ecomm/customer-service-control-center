@@ -42,6 +42,7 @@
   --info-mid:var(--primary-mid);
 
   /* ── Sidebar ─────────────────────────────────────────────── */
+  --sidebar-w:224px;
   --sidebar-bg:#f1f5f9;
   --sidebar-line:#e2e8f0;
 
