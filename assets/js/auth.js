@@ -15,7 +15,11 @@
       const raw = localStorage.getItem(_key());
       if (!raw) return null;
       const s = JSON.parse(raw);
-      if (Date.now() > s.expiresAt) { localStorage.removeItem(_key()); return null; }
+      // Sesión inválida si expiró o no tiene user/token (sesión rota)
+      if (Date.now() > s.expiresAt || !s.user || !s.sessionToken) {
+        localStorage.removeItem(_key());
+        return null;
+      }
       return s;
     } catch { return null; }
   };
