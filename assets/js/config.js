@@ -4,7 +4,7 @@
 
 const CONFIG = {
   // URL del deploy de Apps Script — reemplazar con la URL real después del deploy.
-  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyhG1f77qXaTio33Czhu6-JjA3NcMfEKfDTvpyURUqjXvOk-OOq_TorCiiXhI-zDuCA/exec",
+  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyp88KZInCGa68llI8C4uiy8B-IOldWRCjLWFHsiGdzkDXDgJUhfWzwtN00z9FI-mq4/exec",
   AUTH: {
     SESSION_KEY:    "auditcs_session",
     SESSION_TTL_MS: 8 * 60 * 60 * 1000, // 8 horas
