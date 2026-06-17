@@ -11,12 +11,22 @@ const go = (url, timeout = 18000) => {
 
 // POST base — sin barra de sync, sin manejo de sesión (usado por auth.js)
 async function callApiRaw(payload) {
-  const res = await fetch(CONFIG.SCRIPT_URL, {
-    method:  "POST",
-    mode:    "cors",
-    headers: {"Content-Type": "text/plain;charset=utf-8"},
-    body:    JSON.stringify(payload),
-  });
+  const ctrl  = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 18000);
+  let res;
+  try {
+    res = await fetch(CONFIG.SCRIPT_URL, {
+      method:  "POST",
+      mode:    "cors",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body:    JSON.stringify(payload),
+      signal:  ctrl.signal,
+    });
+  } catch(e) {
+    clearTimeout(timer);
+    throw new Error(e.name === "AbortError" ? "Tiempo de espera agotado (18s)" : "Sin conexión");
+  }
+  clearTimeout(timer);
   if (!res.ok) throw new Error("HTTP " + res.status);
   const data = await res.json().catch(() => null);
   if (!data || data.status !== "ok") throw new Error(data?.message || "Error desconocido");
