@@ -2,6 +2,13 @@
 // API — comunicación con Google Apps Script
 // ================================================================
 
+// Fetch con timeout (18 s) via AbortController
+const go = (url, timeout = 18000) => {
+  const ctrl  = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeout);
+  return fetch(url, { redirect: "follow", signal: ctrl.signal }).finally(() => clearTimeout(timer));
+};
+
 // POST base — sin barra de sync, sin manejo de sesión (usado por auth.js)
 async function callApiRaw(payload) {
   const res = await fetch(CONFIG.SCRIPT_URL, {
@@ -53,13 +60,20 @@ async function reloadFromSheets() {
 
   try {
     const [cfgR, audR, detR, critR] = await Promise.all([
-      fetch(base + "&action=get_config"),
-      fetch(base + "&action=get_auditorias"),
-      fetch(base + "&action=get_detalle"),
-      fetch(base + "&action=get_criterios"),
+      go(base + "&action=get_config"),
+      go(base + "&action=get_auditorias"),
+      go(base + "&action=get_detalle"),
+      go(base + "&action=get_criterios"),
     ]);
     msg.textContent = "Procesando...";
-    if (cfgR.ok)  { const d = await cfgR.json();  if (d.status === "ok" && d.config)    applyCfg(d.config); }
+    // Si el servidor rechaza la sesión, redirigir al login
+    const cfgCheck = cfgR.ok ? await cfgR.json() : null;
+    if (cfgCheck && cfgCheck.status === "error" && cfgCheck.message?.includes("Sesión")) {
+      ov.style.display = "none";
+      if (window.authLogout) authLogout(); else window.location.href = "login.html";
+      return;
+    }
+    if (cfgCheck && cfgCheck.status === "ok" && cfgCheck.config) applyCfg(cfgCheck.config);
     let auds = [];
     if (audR.ok)  { const d = await audR.json();  if (d.status === "ok")                auds = d.auditorias || []; }
     let det  = {};
