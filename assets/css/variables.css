@@ -41,6 +41,10 @@
   --info:var(--primary-soft);
   --info-mid:var(--primary-mid);
 
+  /* ── Sidebar ─────────────────────────────────────────────── */
+  --sidebar-bg:#f1f5f9;
+  --sidebar-line:#e2e8f0;
+
   /* ── Teal (proyecto-específico) ──────────────────────────── */
   --teal:#0f766e;
   --teal-bg:#f0fdfa;
