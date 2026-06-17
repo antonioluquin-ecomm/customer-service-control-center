@@ -81,7 +81,7 @@ function renderDashboard(){
     const cls=v>=U.excelente?"db-sc-green":v>=U.correcta?"db-sc-amber":"db-sc-red";
     return `<span class="db-score ${cls}">${v}%</span>`;
   };
-  const barCol=(v)=>v>=U.excelente?"#15803d":v>=U.correcta?"#1d4ed8":"#dc2626";
+  const barCol=(v)=>v>=U.excelente?"#0a7040":v>=U.correcta?"#1a3f6b":"#991b1b";
 
   document.getElementById("db-ranking-table").innerHTML=ranking.map((r,i)=>`
     <tr>
@@ -106,8 +106,8 @@ function renderDashboard(){
   new Chart(document.getElementById("chart-evolucion"),{
     type:"line",
     data:{labels:evoL,datasets:[
-      {data:evoD,borderColor:"#1d4ed8",backgroundColor:"rgba(29,78,216,.07)",
-       tension:.4,fill:true,pointRadius:3,pointBackgroundColor:"#1d4ed8",borderWidth:2},
+      {data:evoD,borderColor:"#1a3f6b",backgroundColor:"rgba(26,63,107,.07)",
+       tension:.4,fill:true,pointRadius:3,pointBackgroundColor:"#1a3f6b",borderWidth:2},
       {data:evoD.map(()=>U.correcta),borderColor:"rgba(180,83,9,.4)",
        borderDash:[4,3],borderWidth:1.5,pointRadius:0,fill:false},
     ]},
@@ -174,7 +174,7 @@ function renderDashboard(){
     ? critRows.map(({n,pct,bloque,peso})=>{
         const tagCls=bloque==="Comunicacion"?"db-tag-c":"db-tag-g";
         const tagLabel=bloque==="Comunicacion"?"Com":"Ges";
-        const fillCol=pct>=50?"#dc2626":pct>=25?"#b45309":"#15803d";
+        const fillCol=pct>=50?"#991b1b":pct>=25?"#b45309":"#0a7040";
         return `<div class="db-crit-row">
           <span class="db-crit-tag ${tagCls}">${tagLabel} ${peso}%</span>
           <span class="db-crit-name" title="${n}">${n}</span>
@@ -188,7 +188,7 @@ function renderDashboard(){
   const alerts=data.filter(a=>a.general<70).sort((a,b)=>a.general-b.general).slice(0,8);
   document.getElementById("db-alertas").innerHTML=alerts.length
     ? alerts.map(a=>{
-        const dotCol=a.general<40?"#dc2626":a.general<55?"#b45309":"#d97706";
+        const dotCol=a.general<40?"#991b1b":a.general<55?"#b45309":"#d97706";
         return `<div class="db-alert-row">
           <div class="db-alert-dot" style="background:${dotCol}"></div>
           <div class="db-alert-info">

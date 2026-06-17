@@ -74,9 +74,9 @@
 .heatmap-table td{padding:5px 8px;border:1px solid var(--border);text-align:center;font-family:"DM Mono",monospace;font-size:11px;font-weight:600;cursor:default;transition:opacity .1s}
 .heatmap-table td:hover{opacity:.8}
 .heatmap-table td.agent-name{text-align:left;font-family:"DM Sans",sans-serif;font-size:12px;font-weight:600;color:var(--ink);background:var(--surface)}
-.hm-excelente{background:#f0fdf4;color:#15803d}
-.hm-correcta{background:#eff6ff;color:#1d4ed8}
-.hm-observada{background:#fef2f2;color:#dc2626}
+.hm-excelente{background:var(--success-bg);color:var(--success)}
+.hm-correcta{background:var(--primary-soft);color:var(--primary)}
+.hm-observada{background:var(--danger-bg);color:var(--danger)}
 .hm-empty{background:var(--surface);color:var(--hint)}
 
 /* Chart */
