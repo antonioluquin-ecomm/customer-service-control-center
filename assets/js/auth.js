@@ -1,6 +1,11 @@
 // ================================================================
 // AUTH — sesión de usuario, guards y modal de contraseña
 // ================================================================
+
+window.escapeHtml = function (str) {
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+};
+
 (function () {
   function _key() {
     return (window.CONFIG && CONFIG.AUTH && CONFIG.AUTH.SESSION_KEY) || 'auditcs_session';
