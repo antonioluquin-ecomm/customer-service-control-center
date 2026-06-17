@@ -5,7 +5,7 @@
   .sidebar.open  { transform: translateX(0); box-shadow: 4px 0 24px color-mix(in srgb,var(--text) 15%,transparent); }
   .main { margin-left: 0; }
   .metrics, .db-kpi-row { grid-template-columns: repeat(2, 1fr); }
-  .grid2, .grid3 { grid-template-columns: 1fr; }
+  .grid2, .grid3, #page-dashboard .grid2 { grid-template-columns: 1fr; }
   .fg.c4 { grid-template-columns: 1fr 1fr; }
   .fg.c3 { grid-template-columns: 1fr 1fr; }
   .resumen-grid { grid-template-columns: repeat(2, 1fr); }

@@ -31,7 +31,7 @@
 
 /* Main content */
 .main{margin-left:var(--sidebar-w);overflow-y:auto}
-.page{display:none;padding:28px;max-width:1120px}
+.page{display:none;width:100%;padding:28px}
 .page.active{display:block}
 .topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px}
 .topbar-left h2{font-size:21px;font-weight:600;letter-spacing:-.5px}

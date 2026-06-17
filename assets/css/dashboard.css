@@ -6,7 +6,7 @@
 
 /* Filtros del dashboard */
 .db-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:18px}
-.db-filters select{width:auto;flex:1;min-width:110px;max-width:170px;font-size:12px;padding:5px 9px}
+.db-filters select{width:auto;flex:1;min-width:150px;max-width:240px;font-size:12px;padding:5px 9px}
 .db-filters label{font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
 .db-filter-reset{font-size:11px;color:var(--accent);cursor:pointer;white-space:nowrap;background:none;border:none;font-family:inherit;padding:0}
 .db-filter-reset:hover{text-decoration:underline}
@@ -111,3 +111,9 @@
 .dash-filters label{font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
 .filter-reset{font-size:11px;color:var(--accent);cursor:pointer;white-space:nowrap;background:none;border:none;font-family:inherit;padding:0}
 .filter-reset:hover{text-decoration:underline}
+
+/* Layout amplio del dashboard */
+#page-dashboard{max-width:none}
+#page-dashboard .grid2{grid-template-columns:minmax(360px,1fr) minmax(480px,1.1fr)}
+#page-dashboard .card{min-width:0}
+#page-dashboard .chart-wrap{height:clamp(280px,24vw,380px)}
