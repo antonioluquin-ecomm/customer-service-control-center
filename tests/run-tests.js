@@ -55,7 +55,36 @@ function testServerIds() {
   assert.strictEqual(context.getNextAuditoriaId(), 'AUD-0043');
 }
 
+
+function testDashboardAnalysis() {
+  const context = {
+    CFG: { u_excelente: 95, u_correcta: 80 },
+    document: { getElementById: () => null },
+    escapeHtml: value => String(value),
+    Chart: { getChart: () => null },
+    avg: values => values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : 0,
+    getUMB: () => ({ excelente: 95, correcta: 80 }),
+  };
+  vm.createContext(context);
+  const source = fs.readFileSync('assets/js/dashboard.js', 'utf8').replace(/\?\./g, '.');
+  vm.runInContext(source + '\nthis.analytics = { buildDashboardAnalysis };', context);
+  const records = [
+    { agente: 'Ana', semana: 10, fecha_auditoria: '2026-03-01', general: 90, calidad: 92, productividad: 88, criterios: [{ nombre: 'Escucha', cumple: 'Sí' }] },
+    { agente: 'Ana', semana: 11, fecha_auditoria: '2026-03-08', general: 68, calidad: 70, productividad: 66, criterios: [{ nombre: 'Escucha', cumple: 'No' }] },
+    { agente: 'Ana', semana: 11, fecha_auditoria: '2026-03-09', general: 65, calidad: 68, productividad: 62, criterios: [{ nombre: 'Escucha', cumple: 'No' }] },
+    { agente: 'Bruno', semana: 10, fecha_auditoria: '2026-03-01', general: 85, calidad: 86, productividad: 84, criterios: [{ nombre: 'Saludo', cumple: 'Sí' }] },
+    { agente: 'Bruno', semana: 11, fecha_auditoria: '2026-03-08', general: 88, calidad: 90, productividad: 86, criterios: [{ nombre: 'Saludo', cumple: 'Sí' }] },
+  ];
+  const analysis = context.analytics.buildDashboardAnalysis(records);
+  assert.strictEqual(analysis.currentWeek, 11);
+  assert.strictEqual(analysis.previousWeek, 10);
+  assert.strictEqual(analysis.metrics.qualityDelta, -13);
+  assert.strictEqual(analysis.priorities[0].agent, 'Ana');
+  assert.strictEqual(analysis.priorities[0].severity, 'high');
+  assert.strictEqual(analysis.rootCauses[0].name, 'Escucha');
+}
 testCalculations();
 testOfflineQueueMigration();
+testDashboardAnalysis();
 testServerIds();
 console.log('All AuditCS tests passed.');

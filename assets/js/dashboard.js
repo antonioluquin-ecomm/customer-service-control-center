@@ -1,207 +1,221 @@
 // ================================================================
-// DASHBOARD — renderizado principal y vistas de agentes
+// DASHBOARD — supervisión operativa y vistas de agentes
 // ================================================================
 
-// Retorna auditorías filtradas por agente/mes/semana
 function getDashFiltered(){
-  const ag  = document.getElementById("df-agente")?.value  || "";
-  const mes = document.getElementById("df-mes")?.value     || "";
-  const sem = document.getElementById("df-semana")?.value  || "";
+  const ag=document.getElementById("df-agente")?.value||"";
+  const auditor=document.getElementById("df-auditor")?.value||"";
+  const mes=document.getElementById("df-mes")?.value||"";
+  const sem=document.getElementById("df-semana")?.value||"";
   return DB.auditorias.filter(a=>{
-    if(ag  && a.agente !== ag)                  return false;
-    if(mes && a.mes   !== mes)                  return false;
-    if(sem && String(a.semana) !== String(sem)) return false;
+    if(ag&&a.agente!==ag) return false;
+    if(auditor&&a.auditor!==auditor) return false;
+    if(mes&&a.mes!==mes) return false;
+    if(sem&&String(a.semana)!==String(sem)) return false;
     return true;
   });
 }
 
-// Limpia los filtros del dashboard
 function resetDashFilters(){
-  ["df-agente","df-mes","df-semana"].forEach(id=>{
+  ["df-agente","df-auditor","df-mes","df-semana"].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value="";
   });
   renderDashboard();
 }
 
-// Renderiza KPIs, ranking, evolución, heatmap, criterios y alertas
-function renderDashboard(){
-  const data = getDashFiltered();
-  const total = DB.auditorias.length;
-  const U = getUMB();
-  const h = escapeHtml;
-
-  const countEl = document.getElementById("df-count");
-  if(countEl) countEl.textContent = data.length < total
-    ? `${data.length} de ${total} auditorías`
-    : `${total} auditorías`;
-
-  document.getElementById("dash-subtitle").textContent=
-    `${data.length} auditorías · Calidad ${CFG.w_calidad}% + Productividad ${CFG.w_productividad}%`;
-
-  if(!data.length){
-    document.getElementById("dbk-total").textContent="0";
-    document.getElementById("dbk-cal").textContent="—";
-    document.getElementById("dbk-prod").textContent="—";
-    document.getElementById("dbk-obs").textContent="0";
-    document.getElementById("db-ranking-table").innerHTML='';
-    document.getElementById("db-heatmap").innerHTML='';
-    document.getElementById("db-criterios").innerHTML='<p style="color:var(--hint);font-size:13px;padding:8px 0">Sin datos.</p>';
-    document.getElementById("db-alertas").innerHTML='<p style="color:var(--hint);font-size:13px;padding:8px 0">Sin alertas.</p>';
-    const ch=Chart.getChart("chart-evolucion"); if(ch) ch.destroy();
-    return;
-  }
-
-  // KPIs
-  const calProm = avg(data.map(a=>a.calidad));
-  const prodProm = avg(data.map(a=>a.productividad));
-  const obsCount = data.filter(a=>a.estado==="Observada").length;
-  const kpiColor=(v)=>v>=95?"ok":v>=80?"warn":"bad";
-  document.getElementById("dbk-total").textContent = data.length;
-  document.getElementById("dbk-total-sub").textContent = `${[...new Set(data.map(a=>a.agente))].length} agentes`;
-  const calEl=document.getElementById("dbk-cal");
-  calEl.textContent=calProm+"%"; calEl.className="db-kpi-val "+kpiColor(calProm);
-  const prodEl=document.getElementById("dbk-prod");
-  prodEl.textContent=prodProm+"%"; prodEl.className="db-kpi-val "+kpiColor(prodProm);
-  const obsEl=document.getElementById("dbk-obs");
-  obsEl.textContent=obsCount; obsEl.className="db-kpi-val "+(obsCount===0?"ok":obsCount<=10?"warn":"bad");
-  document.getElementById("dbk-obs-sub").textContent=`${Math.round(obsCount/data.length*100)}% del total`;
-
-  // Ranking
-  const agMap={};
-  data.forEach(a=>{
-    if(!agMap[a.agente]) agMap[a.agente]={cal:[],prod:[],gen:[]};
-    agMap[a.agente].cal.push(a.calidad);
-    agMap[a.agente].prod.push(a.productividad);
-    agMap[a.agente].gen.push(a.general);
-  });
-  const ranking=Object.entries(agMap).map(([n,d])=>({
-    n, cal:avg(d.cal), prod:avg(d.prod), gen:avg(d.gen), total:d.gen.length
-  })).sort((a,b)=>b.gen-a.gen);
-
-  const scTag=(v)=>{
-    const cls=v>=U.excelente?"db-sc-green":v>=U.correcta?"db-sc-amber":"db-sc-red";
-    return `<span class="db-score ${cls}">${v}%</span>`;
-  };
-  const barCol=(v)=>v>=U.excelente?"#0a7040":v>=U.correcta?"#1a3f6b":"#991b1b";
-
-  document.getElementById("db-ranking-table").innerHTML=ranking.map((r,i)=>`
-    <tr>
-      <td class="db-rank-num">${i+1}</td>
-      <td class="db-rank-name">${h(r.n.split(" ").slice(0,2).join(" "))}</td>
-      <td style="width:100%;padding:0 8px">
-        <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden">
-          <div style="width:${r.gen}%;height:100%;background:${barCol(r.gen)};border-radius:3px"></div>
-        </div>
-        <div class="db-rank-sub" style="margin-top:3px">Cal ${r.cal}% · Prod ${r.prod}%</div>
-      </td>
-      <td style="white-space:nowrap">${scTag(r.gen)}</td>
-    </tr>`).join("");
-
-  // Evolución semanal (Chart.js)
-  const semMap={};
-  data.forEach(a=>{ const s=String(a.semana); if(!semMap[s]) semMap[s]=[]; semMap[s].push(a.calidad); });
-  const semKeys=Object.keys(semMap).sort((a,b)=>Number(a)-Number(b));
-  const evoL=semKeys.map(s=>"S"+s);
-  const evoD=semKeys.map(s=>avg(semMap[s]));
-  const ch=Chart.getChart("chart-evolucion"); if(ch) ch.destroy();
-  new Chart(document.getElementById("chart-evolucion"),{
-    type:"line",
-    data:{labels:evoL,datasets:[
-      {data:evoD,borderColor:"#1a3f6b",backgroundColor:"rgba(26,63,107,.07)",
-       tension:.4,fill:true,pointRadius:3,pointBackgroundColor:"#1a3f6b",borderWidth:2},
-      {data:evoD.map(()=>U.correcta),borderColor:"rgba(180,83,9,.4)",
-       borderDash:[4,3],borderWidth:1.5,pointRadius:0,fill:false},
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${Math.round(c.parsed.y)}%`}}},
-      scales:{
-        y:{min:60,max:100,ticks:{callback:v=>v+"%",font:{size:10}},grid:{color:"rgba(0,0,0,.04)"}},
-        x:{ticks:{font:{size:10},maxRotation:0},grid:{display:false}}
-      }
-    }
-  });
-
-  // Heatmap agente × semana
-  const hmMatrix={};
-  const hmSems=new Set();
-  data.forEach(a=>{
-    const s=String(a.semana); hmSems.add(s);
-    if(!hmMatrix[a.agente]) hmMatrix[a.agente]={};
-    if(!hmMatrix[a.agente][s]) hmMatrix[a.agente][s]=[];
-    hmMatrix[a.agente][s].push(a.calidad);
-  });
-  const semList=[...hmSems].sort((a,b)=>Number(a)-Number(b));
-  const agList=Object.keys(hmMatrix).sort();
-  const hmCls=(v)=>{
-    if(v===null) return "db-hm-empty";
-    return v>=U.excelente?"db-hm-ex":v>=U.correcta?"db-hm-ok":"db-hm-obs";
-  };
-  let hmHtml=`<table class="db-hm-table"><thead><tr>
-    <th class="db-hm-ag">Agente</th>`;
-  semList.forEach(s=>{ hmHtml+=`<th>S${h(s)}</th>`; });
-  hmHtml+=`<th style="font-weight:700">Prom.</th></tr></thead><tbody>`;
-  agList.forEach(ag=>{
-    const vals=semList.map(s=>{
-      const arr=hmMatrix[ag][s];
-      return arr?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length):null;
-    });
-    const nonNull=vals.filter(v=>v!==null);
-    const prom=nonNull.length?Math.round(nonNull.reduce((a,b)=>a+b,0)/nonNull.length):null;
-    hmHtml+=`<tr><td class="db-hm-name">${h(ag.split(" ").slice(0,2).join(" "))}</td>`;
-    vals.forEach(v=>{ hmHtml+=`<td class="${hmCls(v)}">${v!==null?v+"%":"—"}</td>`; });
-    hmHtml+=`<td class="${hmCls(prom)}" style="font-weight:700">${prom!==null?prom+"%":"—"}</td>`;
-    hmHtml+=`</tr>`;
-  });
-  hmHtml+=`</tbody></table>`;
-  document.getElementById("db-heatmap").innerHTML=hmHtml;
-
-  // Criterios con mayor incumplimiento
-  const critFail={}, critTotal={}, critBloque={}, critPeso={};
-  data.forEach(a=>a.criterios?.forEach(c=>{
-    if(!critTotal[c.nombre]) critTotal[c.nombre]=0;
-    critTotal[c.nombre]++;
-    if(!critBloque[c.nombre]) critBloque[c.nombre]=c.bloque||"";
-    if(!critPeso[c.nombre]) critPeso[c.nombre]=c.peso||0;
-    if(c.cumple==="No"){
-      if(!critFail[c.nombre]) critFail[c.nombre]=0;
-      critFail[c.nombre]++;
-    }
-  }));
-  const critRows=Object.entries(critTotal)
-    .map(([n,tot])=>({n, pct:Math.round((critFail[n]||0)/tot*100), bloque:critBloque[n], peso:critPeso[n]}))
-    .sort((a,b)=>b.pct-a.pct);
-
-  document.getElementById("db-criterios").innerHTML=critRows.length
-    ? critRows.map(({n,pct,bloque,peso})=>{
-        const tagCls=bloque==="Comunicacion"?"db-tag-c":"db-tag-g";
-        const tagLabel=bloque==="Comunicacion"?"Com":"Ges";
-        const fillCol=pct>=50?"#991b1b":pct>=25?"#92400e":"#0a7040";
-        return `<div class="db-crit-row">
-          <span class="db-crit-tag ${tagCls}">${tagLabel} ${peso}%</span>
-          <span class="db-crit-name" title="${h(n)}">${h(n)}</span>
-          <div class="db-crit-bar"><div class="db-crit-fill" style="width:${pct}%;background:${fillCol}"></div></div>
-          <span class="db-crit-pct" style="color:${fillCol}">${pct}%</span>
-        </div>`;
-      }).join("")
-    : '<p style="color:var(--hint);font-size:13px;padding:8px 0">Sin datos de criterios.</p>';
-
-  // Alertas score < 70%
-  const alerts=data.filter(a=>a.general<70).sort((a,b)=>a.general-b.general).slice(0,8);
-  document.getElementById("db-alertas").innerHTML=alerts.length
-    ? alerts.map(a=>{
-        const dotCol=a.general<40?"#991b1b":a.general<55?"#92400e":"#d97706";
-        return `<div class="db-alert-row">
-          <div class="db-alert-dot" style="background:${dotCol}"></div>
-          <div class="db-alert-info">
-            <div class="db-alert-name">${h(a.agente.split(" ").slice(0,2).join(" "))}</div>
-            <div class="db-alert-meta">Ticket ${h(a.ticket||"—")} · ${h(a.fecha_auditoria)} · Sem ${h(a.semana)}</div>
-          </div>
-          <span class="db-score db-sc-red">${a.general}%</span>
-        </div>`;
-      }).join("")
-    : '<p style="color:var(--hint);font-size:13px;padding:8px 0">Sin auditorías con score &lt; 70%.</p>';
+function avgMetric(records,key){ return avg(records.map(record=>Number(record[key])||0)); }
+function getWeekNumbers(records){ return [...new Set(records.map(a=>Number(a.semana)).filter(Number.isFinite))].sort((a,b)=>a-b); }
+function formatDelta(value){
+  if(value===null||value===undefined) return {text:"Sin referencia", tone:"neutral"};
+  const sign=value>0?"+":"";
+  return {text:`${sign}${value} pp vs. semana previa`, tone:value>0?"up":value<0?"down":"neutral"};
 }
 
+function getDominantCriterion(records){
+  const counts={};
+  records.forEach(a=>(a.criterios||[]).forEach(c=>{
+    if(c.cumple!=="No") return;
+    const key=c.nombre||"Criterio sin nombre";
+    if(!counts[key]) counts[key]={name:key,fail:0,total:0};
+    counts[key].fail++;
+  }));
+  records.forEach(a=>(a.criterios||[]).forEach(c=>{
+    const key=c.nombre||"Criterio sin nombre";
+    if(counts[key]) counts[key].total++;
+  }));
+  return Object.values(counts).sort((a,b)=>(b.fail/b.total)-(a.fail/a.total)||b.fail-a.fail)[0]||null;
+}
+
+function getObservedStreak(agent,records){
+  const sorted=records.filter(a=>a.agente===agent).sort((a,b)=>String(b.fecha_auditoria).localeCompare(String(a.fecha_auditoria)));
+  let streak=0;
+  for(const audit of sorted){
+    if(Number(audit.general)<80) streak++; else break;
+  }
+  return streak;
+}
+
+function recommendationFor(priority){
+  if(priority.streak>=2) return "Programar seguimiento y revisar la reincidencia antes de la próxima muestra.";
+  if(priority.score<70) return "Revisar las últimas interacciones y realizar feedback individual hoy.";
+  if(priority.delta!==null&&priority.delta<=-5) return "Dar feedback focalizado sobre el cambio semanal y volver a medir.";
+  if(priority.criterion) return `Reforzar ${priority.criterion.name} en el próximo feedback.`;
+  return "Mantener seguimiento semanal del desempeño.";
+}
+
+function buildDashboardAnalysis(records){
+  const weeks=getWeekNumbers(records);
+  const currentWeek=weeks.length?weeks[weeks.length-1]:null;
+  const previousWeek=weeks.length>1?weeks[weeks.length-2]:null;
+  const current=currentWeek===null?[]:records.filter(a=>Number(a.semana)===currentWeek);
+  const previous=previousWeek===null?[]:records.filter(a=>Number(a.semana)===previousWeek);
+  const metrics={
+    quality:avgMetric(current,"calidad"),
+    productivity:avgMetric(current,"productividad"),
+    observed:current.length?Math.round(current.filter(a=>Number(a.general)<80).length/current.length*100):0,
+    total:current.length,
+    qualityDelta:previous.length?avgMetric(current,"calidad")-avgMetric(previous,"calidad"):null,
+    productivityDelta:previous.length?avgMetric(current,"productividad")-avgMetric(previous,"productividad"):null,
+  };
+  const byAgent={};
+  current.forEach(a=>{
+    if(!byAgent[a.agente]) byAgent[a.agente]={agent:a.agente,current:[],previous:[]};
+    byAgent[a.agente].current.push(a);
+  });
+  previous.forEach(a=>{
+    if(!byAgent[a.agente]) byAgent[a.agente]={agent:a.agente,current:[],previous:[]};
+    byAgent[a.agente].previous.push(a);
+  });
+  const team=Object.values(byAgent).map(entry=>{
+    const score=avgMetric(entry.current,"general");
+    const previousScore=entry.previous.length?avgMetric(entry.previous,"general"):null;
+    const delta=previousScore===null?null:score-previousScore;
+    const criterion=getDominantCriterion(entry.current);
+    const streak=getObservedStreak(entry.agent,records);
+    const high=score<70||(delta!==null&&delta<=-10)||streak>=2;
+    const medium=!high&&(score<80||(delta!==null&&delta<=-5)||(criterion&&criterion.fail>=2));
+    const severity=high?"high":medium?"medium":"stable";
+    const impact=(score<80?(80-score)*2:0)+(delta!==null&&delta<0?Math.abs(delta)*3:0)+streak*12+(criterion?criterion.fail*2:0);
+    const priority={...entry,score,previousScore,delta,criterion,streak,severity,impact,quality:avgMetric(entry.current,"calidad"),productivity:avgMetric(entry.current,"productividad")};
+    priority.recommendation=recommendationFor(priority);
+    return priority;
+  }).filter(entry=>entry.current.length);
+  const priorities=team.filter(entry=>entry.severity!=="stable").sort((a,b)=>b.impact-a.impact);
+  const rootMap={};
+  current.forEach(a=>(a.criterios||[]).forEach(c=>{
+    const key=c.nombre||"Criterio sin nombre";
+    if(!rootMap[key]) rootMap[key]={name:key,fail:0,total:0,agents:new Set()};
+    rootMap[key].total++;
+    if(c.cumple==="No"){ rootMap[key].fail++; rootMap[key].agents.add(a.agente); }
+  }));
+  const rootCauses=Object.values(rootMap).filter(c=>c.fail).map(c=>({...c,pct:Math.round(c.fail/c.total*100),agents:[...c.agents]})).sort((a,b)=>b.pct-a.pct||b.fail-a.fail).slice(0,5);
+  const trend=weeks.map(week=>{
+    const items=records.filter(a=>Number(a.semana)===week);
+    return {week,quality:avgMetric(items,"calidad"),productivity:avgMetric(items,"productividad")};
+  });
+  return {weeks,currentWeek,previousWeek,current,previous,metrics,team:team.sort((a,b)=>b.impact-a.impact),priorities,rootCauses,trend};
+}
+
+function setMetric(id,value,delta){
+  const valueEl=document.getElementById(id);
+  const deltaEl=document.getElementById(`${id}-delta`);
+  if(valueEl) valueEl.textContent=value;
+  if(deltaEl&&delta){ const info=formatDelta(delta); deltaEl.textContent=info.text; deltaEl.className=`${info.tone}`; }
+}
+
+function renderDashboard(){
+  const data=getDashFiltered();
+  const total=DB.auditorias.length;
+  const analysis=buildDashboardAnalysis(data);
+  const h=escapeHtml;
+  const countEl=document.getElementById("df-count");
+  if(countEl) countEl.textContent=data.length<total?`${data.length} de ${total} auditorías`:`${total} auditorías`;
+  document.getElementById("dash-subtitle").textContent=analysis.currentWeek===null?"Sin datos para analizar":`Semana ${analysis.currentWeek} · foco en riesgo y evolución del equipo`;
+  document.getElementById("db-current-week").textContent=analysis.currentWeek===null?"Sin semana disponible":`Semana ${analysis.currentWeek}`;
+  document.getElementById("db-comparison-label").textContent=analysis.previousWeek===null?"Sin semana previa comparable":`Comparada con semana ${analysis.previousWeek}`;
+  setMetric("dbk-cal",analysis.current.length?`${analysis.metrics.quality}%`:"—",analysis.metrics.qualityDelta);
+  setMetric("dbk-prod",analysis.current.length?`${analysis.metrics.productivity}%`:"—",analysis.metrics.productivityDelta);
+  document.getElementById("dbk-obs").textContent=`${analysis.metrics.observed}%`;
+  document.getElementById("dbk-obs-sub").textContent=analysis.current.length?`${analysis.current.filter(a=>Number(a.general)<80).length} observadas`:"Sin muestra";
+  document.getElementById("dbk-total").textContent=analysis.metrics.total;
+  document.getElementById("dbk-total-sub").textContent=analysis.metrics.total===1?"auditoría actual":"auditorías actuales";
+
+  renderPriorities(analysis,h);
+  renderTeamMatrix(analysis,h);
+  renderRootCauses(analysis,h);
+  renderCriticalAlerts(analysis.current,h);
+  renderTrend(analysis);
+  renderHeatmap(data,h);
+}
+
+function renderPriorities(analysis,h){
+  const cont=document.getElementById("db-priorities");
+  const count=document.getElementById("db-priority-count");
+  if(count) count.textContent=analysis.priorities.length?`${analysis.priorities.length} para atender`:"Sin riesgos";
+  if(!analysis.current.length){ cont.innerHTML='<div class="db-empty">Seleccioná un período con auditorías para ver prioridades.</div>'; return; }
+  if(!analysis.previousWeek){ cont.innerHTML='<div class="db-empty">Todavía no hay una semana previa para comparar. La lectura de riesgo usa la muestra actual.</div>'; return; }
+  if(!analysis.priorities.length){ cont.innerHTML='<div class="db-empty good">No se detectaron riesgos prioritarios esta semana. Mantené el seguimiento habitual.</div>'; return; }
+  cont.innerHTML=analysis.priorities.slice(0,5).map((p,index)=>{
+    const delta=formatDelta(p.delta);
+    const criterion=p.criterion?`${h(p.criterion.name)} · ${p.criterion.fail} incumplimiento${p.criterion.fail!==1?"s":""}`:"Sin criterio dominante";
+    return `<article class="db-priority db-priority-${p.severity}">
+      <div class="db-priority-index">${index+1}</div>
+      <div class="db-priority-person"><strong>${h(p.agent)}</strong><span>${p.score}% general · ${p.quality}% cal. · ${p.productivity}% prod.</span></div>
+      <div class="db-priority-signal ${delta.tone}"><strong>${delta.text}</strong><span>${criterion}</span></div>
+      <div class="db-priority-action"><span>Acción sugerida</span><p>${h(p.recommendation)}</p></div>
+    </article>`;
+  }).join("");
+}
+
+function renderTeamMatrix(analysis,h){
+  const cont=document.getElementById("db-team-matrix");
+  if(!analysis.team.length){ cont.innerHTML='<div class="db-empty">Sin datos para construir la matriz del equipo.</div>'; return; }
+  cont.innerHTML=`<table class="db-team-table"><thead><tr><th>Agente</th><th>General</th><th>Var.</th><th>Cal.</th><th>Prod.</th><th>Estado</th><th>Muestra</th></tr></thead><tbody>${analysis.team.map(p=>{
+    const delta=formatDelta(p.delta); const state=p.score>=95?"Excelente":p.score>=80?"Correcta":"Observada";
+    return `<tr><td><strong>${h(p.agent)}</strong></td><td>${p.score}%</td><td class="${delta.tone}">${p.delta===null?"—":`${p.delta>0?"+":""}${p.delta} pp`}</td><td>${p.quality}%</td><td>${p.productivity}%</td><td><span class="db-state ${p.severity}">${state}</span></td><td>${p.current.length}</td></tr>`;
+  }).join("")}</tbody></table>`;
+}
+
+function renderRootCauses(analysis,h){
+  const cont=document.getElementById("db-root-causes");
+  if(!analysis.rootCauses.length){ cont.innerHTML='<div class="db-empty good">No hay incumplimientos registrados en la semana actual.</div>'; return; }
+  cont.innerHTML=analysis.rootCauses.map(c=>`<div class="db-root-row"><div><strong>${h(c.name)}</strong><span>${c.fail}/${c.total} auditorías · ${h(c.agents.slice(0,3).join(", "))}</span></div><div class="db-root-meter"><i style="width:${c.pct}%"></i></div><b>${c.pct}%</b></div>`).join("");
+}
+
+function renderCriticalAlerts(current,h){
+  const cont=document.getElementById("db-alertas");
+  const alerts=current.filter(a=>Number(a.general)<70).sort((a,b)=>a.general-b.general).slice(0,5);
+  if(!current.length){ cont.innerHTML='<div class="db-empty">Sin auditorías en la semana actual.</div>'; return; }
+  if(!alerts.length){ cont.innerHTML='<div class="db-empty good">No hay auditorías críticas en la semana actual.</div>'; return; }
+  cont.innerHTML=alerts.map(a=>`<div class="db-alert-row"><div class="db-alert-dot"></div><div class="db-alert-info"><strong>${h(a.agente)}</strong><span>Ticket ${h(a.ticket||"—")} · ${h(a.fecha_auditoria)}</span></div><span class="db-score db-sc-red">${a.general}%</span></div>`).join("");
+}
+
+function renderTrend(analysis){
+  const canvas=document.getElementById("chart-evolucion");
+  const existing=Chart.getChart(canvas); if(existing) existing.destroy();
+  if(!analysis.trend.length){ return; }
+  const U=getUMB();
+  new Chart(canvas,{type:"line",data:{labels:analysis.trend.map(item=>`S${item.week}`),datasets:[
+    {label:"Calidad",data:analysis.trend.map(item=>item.quality),borderColor:"#1d4ed8",backgroundColor:"rgba(29,78,216,.08)",tension:.35,fill:true,pointRadius:3,borderWidth:2},
+    {label:"Productividad",data:analysis.trend.map(item=>item.productivity),borderColor:"#0f766e",tension:.35,fill:false,pointRadius:3,borderWidth:2},
+    {label:"Umbral",data:analysis.trend.map(()=>U.correcta),borderColor:"rgba(180,83,9,.5)",borderDash:[4,3],pointRadius:0,borderWidth:1.5},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${Math.round(c.parsed.y)}%`}}},scales:{y:{min:60,max:100,ticks:{callback:v=>v+"%",font:{size:10}},grid:{color:"rgba(0,0,0,.05)"}},x:{ticks:{font:{size:10},maxRotation:0},grid:{display:false}}}}});
+}
+
+function renderHeatmap(data,h){
+  const cont=document.getElementById("db-heatmap");
+  if(!data.length){ cont.innerHTML='<div class="db-empty">Sin historial para mostrar.</div>'; return; }
+  const U=getUMB(), weeks=getWeekNumbers(data), agents=[...new Set(data.map(a=>a.agente))].sort();
+  const cell=(value)=>value===null?"db-hm-empty":value>=U.excelente?"db-hm-ex":value>=U.correcta?"db-hm-ok":"db-hm-obs";
+  cont.innerHTML=`<table class="db-hm-table"><thead><tr><th class="db-hm-ag">Agente</th>${weeks.map(w=>`<th>S${w}</th>`).join("")}</tr></thead><tbody>${agents.map(agent=>`<tr><td class="db-hm-name">${h(agent)}</td>${weeks.map(week=>{const items=data.filter(a=>a.agente===agent&&Number(a.semana)===week);const value=items.length?avgMetric(items,"calidad"):null;return `<td class="${cell(value)}">${value===null?"—":`${value}%`}</td>`;}).join("")}</tr>`).join("")}</tbody></table>`;
+}
+
+function toggleDashboardHeatmap(){
+  const panel=document.getElementById("db-heatmap-panel");
+  const button=document.getElementById("db-heatmap-toggle");
+  const hidden=panel.classList.toggle("hidden");
+  button.textContent=hidden?"Ver matriz":"Ocultar matriz";
+}
 // Ranking de todos los agentes con sus promedios
 function renderAgentes(){
   const h=escapeHtml;

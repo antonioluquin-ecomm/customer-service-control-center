@@ -66,6 +66,7 @@ function populateSelects(){
   const ff=document.getElementById("filter-agente"); if(ff) ff.innerHTML=opts(CFG.agentes,"Todos los agentes");
   const sd=document.getElementById("sel-agente-detail"); if(sd) sd.innerHTML=opts(CFG.agentes,"— Seleccionar agente —");
   const dfa=document.getElementById("df-agente"); if(dfa) dfa.innerHTML=opts(CFG.agentes,"Todos los agentes");
+  const dfau=document.getElementById("df-auditor"); if(dfau) dfau.innerHTML=opts(CFG.auditores,"Todos los auditores");
   const ofa=document.getElementById("obs-filter-agente"); if(ofa) ofa.innerHTML=opts(CFG.agentes,"Todos los agentes");
   // Semanas dinámicas desde las auditorías cargadas
   const semanas=[...new Set(DB.auditorias.map(a=>a.semana).filter(Boolean))].sort((a,b)=>Number(a)-Number(b));

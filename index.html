@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
@@ -97,6 +97,7 @@
       <div class="db-filters">
         <label>Filtrar:</label>
         <select id="df-agente" onchange="renderDashboard()"><option value="">Todos los agentes</option></select>
+        <select id="df-auditor" onchange="renderDashboard()"><option value="">Todos los auditores</option></select>
         <select id="df-mes" onchange="renderDashboard()">
           <option value="">Todos los meses</option>
           <option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option>
@@ -104,58 +105,53 @@
           <option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option>
         </select>
         <select id="df-semana" onchange="renderDashboard()"><option value="">Todas las semanas</option></select>
-        <button class="db-filter-reset" onclick="resetDashFilters()">✕ Limpiar</button>
+        <button class="db-filter-reset" onclick="resetDashFilters()" title="Limpiar filtros">✕ Limpiar</button>
         <span class="db-filter-count" id="df-count"></span>
       </div>
 
-      <!-- FILA 1: 4 KPIs -->
-      <div class="db-kpi-row">
-        <div class="db-kpi"><div class="db-kpi-label">Auditorías</div><div class="db-kpi-val" id="dbk-total">0</div><div class="db-kpi-sub" id="dbk-total-sub">registradas</div></div>
-        <div class="db-kpi"><div class="db-kpi-label">Calidad promedio</div><div class="db-kpi-val" id="dbk-cal">—</div><div class="db-kpi-sub">% del equipo</div></div>
-        <div class="db-kpi"><div class="db-kpi-label">Productividad prom.</div><div class="db-kpi-val" id="dbk-prod">—</div><div class="db-kpi-sub">% del equipo</div></div>
-        <div class="db-kpi"><div class="db-kpi-label">Observadas</div><div class="db-kpi-val" id="dbk-obs">0</div><div class="db-kpi-sub" id="dbk-obs-sub">de total</div></div>
+      <section class="db-status" aria-label="Estado semanal">
+        <div class="db-status-context"><span class="db-eyebrow">Pulso operativo</span><strong id="db-current-week">Sin semana disponible</strong><span id="db-comparison-label">Esperando datos</span></div>
+        <div class="db-status-metrics">
+          <div class="db-status-metric"><span>Calidad</span><strong id="dbk-cal">—</strong><small id="dbk-cal-delta">Sin referencia</small></div>
+          <div class="db-status-metric"><span>Productividad</span><strong id="dbk-prod">—</strong><small id="dbk-prod-delta">Sin referencia</small></div>
+          <div class="db-status-metric"><span>Observadas</span><strong id="dbk-obs">0</strong><small id="dbk-obs-sub">Sin muestra</small></div>
+          <div class="db-status-metric"><span>Muestra</span><strong id="dbk-total">0</strong><small id="dbk-total-sub">auditorías</small></div>
+        </div>
+      </section>
+
+      <section class="db-priorities card" aria-labelledby="priorities-title">
+        <div class="card-header"><div><div class="card-title" id="priorities-title">Prioridades de la semana</div><div class="card-sub">Ordenadas por impacto, tendencia y recurrencia</div></div><span class="db-priority-count" id="db-priority-count"></span></div>
+        <div id="db-priorities"></div>
+      </section>
+
+      <div class="db-analysis-grid">
+        <section class="card db-trend-card">
+          <div class="card-header"><div><div class="card-title">Tendencia del equipo</div><div class="card-sub">Calidad y productividad por semana</div></div></div>
+          <div class="chart-wrap"><canvas id="chart-evolucion" role="img" aria-label="Tendencia semanal de calidad y productividad">Tendencia del equipo.</canvas></div>
+          <div class="db-legend"><span><span class="db-legend-dot" style="background:#1d4ed8"></span>Calidad</span><span><span class="db-legend-dot" style="background:#0f766e"></span>Productividad</span><span><span class="db-legend-dot" style="background:var(--amber-mid)"></span>Umbral</span></div>
+        </section>
+        <section class="card">
+          <div class="card-header"><div><div class="card-title">Matriz del equipo</div><div class="card-sub">Semana actual, variación y estado</div></div></div>
+          <div class="db-team-wrap"><div id="db-team-matrix"></div></div>
+        </section>
       </div>
 
-      <!-- FILA 2: Ranking + Evolución semanal -->
-      <div class="grid2" style="margin-bottom:16px">
-        <div class="card">
-          <div class="card-header"><div><div class="card-title">Ranking del equipo</div><div class="card-sub">Score general · Cal % · Prod %</div></div></div>
-          <table class="db-ranking-table" id="db-ranking-table"></table>
-        </div>
-        <div class="card">
-          <div class="card-header"><div><div class="card-title">Calidad promedio por semana</div><div class="card-sub">Línea punteada = umbral Correcta 80%</div></div></div>
-          <div class="chart-wrap"><canvas id="chart-evolucion" role="img" aria-label="Evolución de calidad promedio semanal">Evolución calidad equipo.</canvas></div>
-          <div class="db-legend">
-            <span><span class="db-legend-dot" style="background:#1d4ed8"></span>Calidad semanal</span>
-            <span><span class="db-legend-dot" style="background:var(--amber-mid)"></span>Umbral 80%</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- FILA 3: Heatmap agente × semana -->
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-header">
-          <div><div class="card-title">Calidad por agente × semana</div><div class="card-sub">Promedio de calidad por semana — color por estado</div></div>
-          <div style="display:flex;gap:12px;font-size:11px;color:var(--muted);align-items:center">
-            <span style="color:var(--green)">■ Excelente ≥95%</span>
-            <span style="color:var(--accent)">■ Correcta 80–94%</span>
-            <span style="color:var(--red)">■ Observada &lt;80%</span>
-          </div>
-        </div>
-        <div class="db-hm-wrap"><div id="db-heatmap"></div></div>
-      </div>
-
-      <!-- FILA 4: Criterios + Alertas -->
-      <div class="grid2">
-        <div class="card">
-          <div class="card-header"><div><div class="card-title">Criterios — mayor incumplimiento</div><div class="card-sub">% de auditorías donde no se cumplió · peso del criterio</div></div></div>
-          <div id="db-criterios"></div>
-        </div>
-        <div class="card">
-          <div class="card-header"><div><div class="card-title">Alertas — score &lt; 70%</div><div class="card-sub">Auditorías que requieren atención inmediata</div></div></div>
+      <div class="db-analysis-grid">
+        <section class="card">
+          <div class="card-header"><div><div class="card-title">Causas raíz</div><div class="card-sub">Criterios con mayor incumplimiento en la semana</div></div></div>
+          <div id="db-root-causes"></div>
+        </section>
+        <section class="card">
+          <div class="card-header"><div><div class="card-title">Alertas críticas</div><div class="card-sub">Auditorías con score menor a 70%</div></div></div>
           <div id="db-alertas"></div>
-        </div>
+        </section>
       </div>
+
+      <section class="card db-heatmap-section">
+        <div class="card-header"><div><div class="card-title">Historial de calidad por agente</div><div class="card-sub">Vista secundaria para explorar patrones semanales</div></div><button class="btn xs" type="button" onclick="toggleDashboardHeatmap()" id="db-heatmap-toggle">Ver matriz</button></div>
+        <div class="db-hm-wrap hidden" id="db-heatmap-panel"><div id="db-heatmap"></div></div>
+      </section>
+
     </div>
 
     <!-- FORMULARIO -->
