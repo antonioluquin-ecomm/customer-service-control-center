@@ -14,18 +14,25 @@ window.escapeHtml = function (str) {
     return (window.CONFIG && CONFIG.AUTH && CONFIG.AUTH.SESSION_TTL_MS) || 28800000;
   }
 
+  // Ruta dinámica a login.html — funciona en subdirectorios y GitHub Pages.
+  function _loginPath() {
+    const tag = document.querySelector('script[src*="config.js"]');
+    if (tag) {
+      const src = tag.getAttribute('src');
+      return src.replace('config.js', '').replace('assets/js/', '') + 'login.html';
+    }
+    const depth = window.location.pathname.split('/').filter(Boolean).length - 1;
+    return '../'.repeat(Math.max(0, depth)) + 'login.html';
+  }
+
   // ── Session ──────────────────────────────────────────────────
   window.getSession = function () {
     try {
-      const raw = sessionStorage.getItem(_key());
-      if (!raw) {
-        localStorage.removeItem(_key());
-        return null;
-      }
+      const raw = localStorage.getItem(_key());
+      if (!raw) return null;
       const s = JSON.parse(raw);
-      // Sesión inválida si expiró o no tiene user/token (sesión rota)
       if (Date.now() > s.expiresAt || !s.user || !s.sessionToken) {
-        sessionStorage.removeItem(_key());
+        localStorage.removeItem(_key());
         return null;
       }
       return s;
@@ -33,8 +40,7 @@ window.escapeHtml = function (str) {
   };
 
   window.setSession = function (user, sessionToken) {
-    localStorage.removeItem(_key());
-    sessionStorage.setItem(_key(), JSON.stringify({
+    localStorage.setItem(_key(), JSON.stringify({
       user,
       sessionToken: sessionToken || null,
       loggedInAt:   Date.now(),
@@ -53,18 +59,33 @@ window.escapeHtml = function (str) {
 
   window.authLogout = async function () {
     const token = getSessionToken();
-    sessionStorage.removeItem(_key());
     localStorage.removeItem(_key());
     if (token && window.callApiRaw) {
-      try { await callApiRaw({ _type: 'logout', sessionToken: token }); } catch (_) {}
+      try { await callApiRaw('logout', {}); } catch (_) {}
     }
-    window.location.href = 'login.html';
+    window.location.href = _loginPath();
   };
 
   // ── Guards ───────────────────────────────────────────────────
   window.requireAuth = function () {
-    if (!getSession()) { window.location.href = 'login.html'; return false; }
+    if (!getSession()) { window.location.href = _loginPath(); return false; }
     return true;
+  };
+
+  window.requireAdmin = function () {
+    const s = getSession();
+    if (!s || s.user.role !== 'admin') { window.location.href = _loginPath(); return false; }
+    return true;
+  };
+
+  // Deshabilita todos los elementos .admin-only si el usuario es Agente.
+  window.restrictWriteIfAgent = function () {
+    if (isAdmin()) return;
+    document.querySelectorAll('.admin-only').forEach(el => {
+      el.disabled = true;
+      el.title = 'Solo administradores pueden ejecutar esta acción';
+      el.classList.add('agent-disabled');
+    });
   };
 
   // ── Chip de usuario en sidebar footer ───────────────────────
@@ -146,7 +167,7 @@ window.escapeHtml = function (str) {
         const s = getSession();
         if (!s) { errEl.textContent = 'Sesión expirada. Iniciá sesión nuevamente.'; errEl.style.display = ''; return; }
         const passwordHash = await sha256(pwd1);
-        await callApiRaw({ _type: 'updateUser', passwordHash, sessionToken: s.sessionToken });
+        await callApiRaw('updateUser', { passwordHash });
         okEl.style.display = '';
         ['_authPwdNew','_authPwdConfirm'].forEach(id => document.getElementById(id).value = '');
         setTimeout(_close, 1800);

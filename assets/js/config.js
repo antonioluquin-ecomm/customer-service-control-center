@@ -3,9 +3,9 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.1.0',
-  date:   '2026-06-17',
-  notes:  'Sidebar Standard: fixed position, brand-icon, mobile collapse, tokens'
+  number: '12.1.1',
+  date:   '2026-06-22',
+  notes:  'Login: diseño canónico unificado, callApiRaw en app.js, auth.js a localStorage + _loginPath() dinámico + requireAdmin + restrictWriteIfAgent'
 };
 
 const CONFIG = {
