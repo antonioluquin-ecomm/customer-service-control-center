@@ -54,13 +54,13 @@ function populateObsFilters(){
   const ofa=document.getElementById("obs-filter-agente");
   if(ofa && ofa.options.length<=1){
     const agentes=[...new Set(DB.auditorias.map(a=>a.agente).filter(Boolean))].sort();
-    ofa.innerHTML='<option value="">Todos los agentes</option>'+agentes.map(a=>`<option>${a}</option>`).join("");
+    ofa.innerHTML='<option value="">Todos los agentes</option>'+agentes.map(a=>`<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("");
   }
 }
 
 // Rellena todos los select dinámicos de la app
 function populateSelects(){
-  const opts=(arr,empty)=>`<option value="">${empty}</option>`+arr.map(a=>`<option>${a}</option>`).join("");
+  const opts=(arr,empty)=>`<option value="">${escapeHtml(empty)}</option>`+arr.map(a=>`<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("");
   const fa=document.getElementById("f-agente"); if(fa) fa.innerHTML=opts(CFG.agentes,"— Seleccionar —");
   const fau=document.getElementById("f-auditor"); if(fau) fau.innerHTML=opts(CFG.auditores,"— Seleccionar —");
   const ff=document.getElementById("filter-agente"); if(ff) ff.innerHTML=opts(CFG.agentes,"Todos los agentes");
@@ -69,8 +69,8 @@ function populateSelects(){
   const ofa=document.getElementById("obs-filter-agente"); if(ofa) ofa.innerHTML=opts(CFG.agentes,"Todos los agentes");
   // Semanas dinámicas desde las auditorías cargadas
   const semanas=[...new Set(DB.auditorias.map(a=>a.semana).filter(Boolean))].sort((a,b)=>Number(a)-Number(b));
-  const semOpts='<option value="">Todas las semanas</option>'+semanas.map(s=>`<option value="${s}">Semana ${s}</option>`).join("");
+  const semOpts='<option value="">Todas las semanas</option>'+semanas.map(s=>`<option value="${escapeHtml(s)}">Semana ${escapeHtml(s)}</option>`).join("");
   const fsem=document.getElementById("filter-semana"); if(fsem) fsem.innerHTML=semOpts;
   const dfsem=document.getElementById("df-semana"); if(dfsem) dfsem.innerHTML=semOpts;
-  document.getElementById("sidebar-info").innerHTML=`Responsable: ${CFG.auditores[0]||"—"}<br>Epic: Servicio al Cliente<br>${CFG.muestras_semana} muestras / agente / semana`;
+  document.getElementById("sidebar-info").innerHTML=`Responsable: ${escapeHtml(CFG.auditores[0]||"—")}<br>Epic: Servicio al Cliente<br>${CFG.muestras_semana} muestras / agente / semana`;
 }

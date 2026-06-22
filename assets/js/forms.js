@@ -16,6 +16,7 @@ function goStep(n){
 
 // Paso 1: valida campos obligatorios y detecta duplicados
 function validateStep1(){
+  const h=escapeHtml;
   const req=["f-auditor","f-fecha","f-agente","f-ticket","f-canal","f-tipo","f-horas"];
   for(const id of req){
     const el=document.getElementById(id);
@@ -26,7 +27,7 @@ function validateStep1(){
   const alertEl=document.getElementById("duplicate-alert");
   if(dup){
     alertEl.classList.remove("hidden");
-    alertEl.innerHTML=`⚠ Ya existe una auditoría para <strong>${agente}</strong> con el ticket <strong>${ticket}</strong> (${dup.id_auditoria} · ${dup.fecha_auditoria}). ¿Querés continuar de todas formas? <button class="btn xs" onclick="goStep(2)" style="margin-left:10px">Continuar igual</button>`;
+    alertEl.innerHTML=`⚠ Ya existe una auditoría para <strong>${h(agente)}</strong> con el ticket <strong>${h(ticket)}</strong> (${h(dup.id_auditoria)} · ${h(dup.fecha_auditoria)}). ¿Querés continuar de todas formas? <button class="btn xs" onclick="goStep(2)" style="margin-left:10px">Continuar igual</button>`;
     return;
   }
   alertEl.classList.add("hidden");
@@ -35,12 +36,13 @@ function validateStep1(){
 
 // Paso 2: todos los criterios activos deben estar evaluados
 function validateStep2(){
+  const h=escapeHtml;
   const active=activeCriterios();
-  const faltantes=active.filter(c=>!document.querySelector(`input[name="crit-${c.cod}"]:checked`));
+  const faltantes=active.filter(c=>!document.querySelector(`input[name="crit-${cod}"]:checked`));
   const alertEl=document.getElementById("criterios-incomplete-alert");
   if(faltantes.length){
     alertEl.classList.remove("hidden");
-    alertEl.innerHTML=`⚠ Faltan evaluar ${faltantes.length} criterio${faltantes.length>1?"s":""}: <strong>${faltantes.map(c=>c.nombre).join(", ")}</strong>`;
+    alertEl.innerHTML=`⚠ Faltan evaluar ${faltantes.length} criterio${faltantes.length>1?"s":""}: <strong>${faltantes.map(c=>h(c.nombre)).join(", ")}</strong>`;
     return;
   }
   alertEl.classList.add("hidden");
@@ -79,22 +81,25 @@ function updateSemanaCount(){
   if(!count){ el.classList.add("hidden"); return; }
   el.classList.remove("hidden");
   if(count>=CFG.muestras_semana)
-    el.innerHTML=`⚠️ <strong>${ag}</strong> ya tiene <strong>${count} auditorías</strong> en la semana ${sem} (máximo: ${CFG.muestras_semana}).`;
+    el.innerHTML=`⚠️ <strong>${escapeHtml(ag)}</strong> ya tiene <strong>${count} auditorías</strong> en la semana ${escapeHtml(sem)} (máximo: ${CFG.muestras_semana}).`;
   else
-    el.innerHTML=`ℹ️ <strong>${ag}</strong> tiene ${count} de ${CFG.muestras_semana} muestras en semana ${sem}.`;
+    el.innerHTML=`ℹ️ <strong>${escapeHtml(ag)}</strong> tiene ${count} de ${CFG.muestras_semana} muestras en semana ${escapeHtml(sem)}.`;
 }
 
 // Crea una fila HTML de criterio (Sí/No radio buttons)
 function makeCriterioRow(c){
+  const cod=String(c.cod||"").replace(/[^A-Za-z0-9_-]/g,"");
+  const peso=Number(c.peso)||0;
+  c.cod=cod;
   const row=document.createElement("div"); row.className="criteria-row";
   row.innerHTML=`
-    <div class="criteria-name">${c.nombre}</div>
-    <div class="criteria-peso">${c.peso}%</div>
+    <div class="criteria-name">${escapeHtml(c.nombre)}</div>
+    <div class="criteria-peso">${peso}%</div>
     <div class="radio-group">
-      <label class="radio-btn yes" id="btn-yes-${c.cod}"><input type="radio" name="crit-${c.cod}" value="si" onchange="onCritChange('${c.cod}',${c.peso})"> Sí</label>
-      <label class="radio-btn no"  id="btn-no-${c.cod}"><input type="radio" name="crit-${c.cod}" value="no" onchange="onCritChange('${c.cod}',0)"> No</label>
+      <label class="radio-btn yes" id="btn-yes-${cod}"><input type="radio" name="crit-${cod}" value="si" onchange="onCritChange('${cod}',${peso})"> Sí</label>
+      <label class="radio-btn no"  id="btn-no-${cod}"><input type="radio" name="crit-${cod}" value="no" onchange="onCritChange('${cod}',0)"> No</label>
     </div>
-    <div class="criteria-score" id="cscore-${c.cod}" style="color:var(--hint)">—</div>`;
+    <div class="criteria-score" id="cscore-${cod}" style="color:var(--hint)">—</div>`;
   return row;
 }
 
@@ -127,7 +132,7 @@ function onCritChange(cod,peso){
   document.getElementById("btn-yes-"+cod)?.classList.toggle("selected",peso>0);
   document.getElementById("btn-no-"+cod)?.classList.toggle("selected",peso===0);
   updateCalidadTotal();
-  const faltantes=activeCriterios().filter(c=>!document.querySelector(`input[name="crit-${c.cod}"]:checked`));
+  const faltantes=activeCriterios().filter(c=>!document.querySelector(`input[name="crit-${cod}"]:checked`));
   if(!faltantes.length) document.getElementById("criterios-incomplete-alert")?.classList.add("hidden");
 }
 
@@ -135,7 +140,7 @@ function onCritChange(cod,peso){
 function updateCalidadTotal(){
   const active=activeCriterios();
   let total=0, eval_=0;
-  active.forEach(c=>{ const ch=document.querySelector(`input[name="crit-${c.cod}"]:checked`); if(ch){ eval_++; if(ch.value==="si") total+=c.peso; }});
+  active.forEach(c=>{ const ch=document.querySelector(`input[name="crit-${cod}"]:checked`); if(ch){ eval_++; if(ch.value==="si") total+=c.peso; }});
   document.getElementById("sc-puntaje").textContent=total+"%";
   document.getElementById("sc-criterios").textContent=eval_+"/"+active.length;
   document.getElementById("sc-pct").textContent=total+"%";
@@ -148,14 +153,14 @@ function updateCalidadTotal(){
 // Retorna el puntaje total de calidad (suma pesos de "Sí")
 function getCalidad(){
   let t=0;
-  activeCriterios().forEach(c=>{ const ch=document.querySelector(`input[name="crit-${c.cod}"]:checked`); if(ch&&ch.value==="si") t+=c.peso; });
+  activeCriterios().forEach(c=>{ const ch=document.querySelector(`input[name="crit-${cod}"]:checked`); if(ch&&ch.value==="si") t+=c.peso; });
   return t;
 }
 
 // Retorna array con detalle de cada criterio evaluado
 function getCriterioDetalle(){
   return activeCriterios().map(c=>{
-    const ch=document.querySelector(`input[name="crit-${c.cod}"]:checked`);
+    const ch=document.querySelector(`input[name="crit-${cod}"]:checked`);
     return { cod:c.cod, nombre:c.nombre, bloque:c.bloque, peso:c.peso,
       cumple:ch?ch.value==="si"?"Sí":"No":"No evaluado",
       obtenido:ch&&ch.value==="si"?c.peso:0 };
@@ -211,6 +216,7 @@ function getProd(){
 
 // Renderiza la vista previa de la auditoría antes del submit
 function renderResumen(){
+  const h=escapeHtml;
   const cal=getCalidad(), prod=getProd();
   const general=calcGeneral(cal,prod);
   const estado=calcEstado(general);
@@ -223,17 +229,17 @@ function renderResumen(){
       <div><div class="ss-value" style="color:var(--green)">${general}%</div><div class="ss-label">Score General</div><div class="ss-badge"><span class="score-badge ${estadoSB(estado)}">${estado}</span></div></div>
     </div>
     <div class="resumen-grid">
-      <div class="resumen-item"><div class="rl">Agente</div><div class="rv">${v("f-agente")}</div></div>
-      <div class="resumen-item"><div class="rl">Ticket</div><div class="rv">${v("f-ticket")}</div></div>
-      <div class="resumen-item"><div class="rl">Canal</div><div class="rv">${v("f-canal")}</div></div>
-      <div class="resumen-item"><div class="rl">Tipo</div><div class="rv">${v("f-tipo")}</div></div>
+      <div class="resumen-item"><div class="rl">Agente</div><div class="rv">${h(v("f-agente"))}</div></div>
+      <div class="resumen-item"><div class="rl">Ticket</div><div class="rv">${h(v("f-ticket"))}</div></div>
+      <div class="resumen-item"><div class="rl">Canal</div><div class="rv">${h(v("f-canal"))}</div></div>
+      <div class="resumen-item"><div class="rl">Tipo</div><div class="rv">${h(v("f-tipo"))}</div></div>
       <div class="resumen-item"><div class="rl">Horas / Objetivo</div><div class="rv">${hs} hs → ${obj} int.</div></div>
-      <div class="resumen-item"><div class="rl">Auditor</div><div class="rv">${v("f-auditor")}</div></div>
-      <div class="resumen-item"><div class="rl">Fecha</div><div class="rv">${v("f-fecha")}</div></div>
-      <div class="resumen-item"><div class="rl">Semana</div><div class="rv">${v("f-semana")}</div></div>
+      <div class="resumen-item"><div class="rl">Auditor</div><div class="rv">${h(v("f-auditor"))}</div></div>
+      <div class="resumen-item"><div class="rl">Fecha</div><div class="rv">${h(v("f-fecha"))}</div></div>
+      <div class="resumen-item"><div class="rl">Semana</div><div class="rv">${h(v("f-semana"))}</div></div>
     </div>
-    ${v("f-obs-general")?`<div class="alert info" style="margin-bottom:8px"><strong>Obs:</strong> ${v("f-obs-general")}</div>`:""}
-    ${v("f-obs-accion")?`<div class="alert warning"><strong>Acción:</strong> ${v("f-obs-accion")}</div>`:""}
+    ${v("f-obs-general")?`<div class="alert info" style="margin-bottom:8px"><strong>Obs:</strong> ${h(v("f-obs-general"))}</div>`:""}
+    ${v("f-obs-accion")?`<div class="alert warning"><strong>Acción:</strong> ${h(v("f-obs-accion"))}</div>`:""}
     <div style="margin-top:12px">${sheetsLine}</div>`;
 }
 

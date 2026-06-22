@@ -6,7 +6,7 @@ Backend: `apps-script/AppsScript.js` desplegado como Web App en Google Apps Scri
 
 ## Autenticación
 
-Todos los endpoints, excepto `login`, requieren un `sessionToken` vigente. El token se obtiene al iniciar sesión y debe enviarse como query param en GET o dentro del JSON en POST.
+Todos los endpoints, excepto `login`, requieren un `sessionToken` vigente. El token se obtiene al iniciar sesión, se conserva solo durante la pestaña actual y debe enviarse como query param en GET o dentro del JSON en POST.
 
 Roles: `admin`, `supervisor` y `auditor`. Todos pueden consultar y registrar auditorías. Solo `admin` puede modificar configuración y criterios o eliminar auditorías. Cada usuario autenticado solo puede cambiar su propia contraseña.
 

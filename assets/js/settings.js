@@ -23,37 +23,40 @@ function renderConfigPage(){
 
 // Lista editable de agentes
 function renderListaAgentes(){
+  const h=escapeHtml;
   const cont=document.getElementById("lista-agentes"); if(!cont) return;
   if(!CFG.agentes.length){ cont.innerHTML='<p style="color:var(--hint);font-size:12px;padding:8px 0">Sin agentes.</p>'; return; }
   cont.innerHTML=CFG.agentes.map((a,i)=>`
     <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
-      <div class="avatar" style="width:28px;height:28px;font-size:11px">${a.split(" ").map(p=>p[0]).join("").slice(0,2).toUpperCase()}</div>
-      <div style="flex:1;font-size:13px">${a}</div>
+      <div class="avatar" style="width:28px;height:28px;font-size:11px">${h(a.split(" ").map(p=>p[0]).join("").slice(0,2).toUpperCase())}</div>
+      <div style="flex:1;font-size:13px">${h(a)}</div>
       <button class="btn xs danger" onclick="removeAgente(${i})">✕</button>
     </div>`).join("");
 }
 
 // Lista editable de auditores
 function renderListaAuditores(){
+  const h=escapeHtml;
   const cont=document.getElementById("lista-auditores"); if(!cont) return;
   if(!CFG.auditores.length){ cont.innerHTML='<p style="color:var(--hint);font-size:12px;padding:8px 0">Sin auditores.</p>'; return; }
   cont.innerHTML=CFG.auditores.map((a,i)=>`
     <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
-      <div style="flex:1;font-size:13px;font-weight:500">${a}</div>
+      <div style="flex:1;font-size:13px;font-weight:500">${h(a)}</div>
       <button class="btn xs danger" onclick="removeAuditor(${i})">✕</button>
     </div>`).join("");
 }
 
 // Tabla editable de criterios de calidad
 function renderCriteriosConfig(){
+  const h=escapeHtml;
   const tbody=document.getElementById("cfg-criterios-tbody"); if(!tbody) return;
   tbody.innerHTML=CRITERIOS.map((c,i)=>{
     const tagClass=c.bloque==="Comunicacion"?"tag-com":"tag-ges";
     const tagLabel=c.bloque==="Comunicacion"?"Com.":"Gest.";
     return `<tr>
       <td><span class="bloque-tag ${tagClass}">${tagLabel}</span></td>
-      <td style="font-size:13px;font-weight:500">${c.nombre}</td>
-      <td><input type="number" min="0" max="100" value="${c.peso}" id="cpeso-${i}" oninput="updateCriteriosPeso()" style="width:72px;text-align:center"/></td>
+      <td style="font-size:13px;font-weight:500">${h(c.nombre)}</td>
+      <td><input type="number" min="0" max="100" value="${Number(c.peso)||0}" id="cpeso-${i}" oninput="updateCriteriosPeso()" style="width:72px;text-align:center"/></td>
       <td><label class="toggle"><input type="checkbox" id="cactivo-${i}" ${c.activo?"checked":""}><div class="toggle-slider"></div></label></td>
     </tr>`;
   }).join("");

@@ -28,6 +28,7 @@ function renderDashboard(){
   const data = getDashFiltered();
   const total = DB.auditorias.length;
   const U = getUMB();
+  const h = escapeHtml;
 
   const countEl = document.getElementById("df-count");
   if(countEl) countEl.textContent = data.length < total
@@ -86,7 +87,7 @@ function renderDashboard(){
   document.getElementById("db-ranking-table").innerHTML=ranking.map((r,i)=>`
     <tr>
       <td class="db-rank-num">${i+1}</td>
-      <td class="db-rank-name">${r.n.split(" ").slice(0,2).join(" ")}</td>
+      <td class="db-rank-name">${h(r.n.split(" ").slice(0,2).join(" "))}</td>
       <td style="width:100%;padding:0 8px">
         <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden">
           <div style="width:${r.gen}%;height:100%;background:${barCol(r.gen)};border-radius:3px"></div>
@@ -137,7 +138,7 @@ function renderDashboard(){
   };
   let hmHtml=`<table class="db-hm-table"><thead><tr>
     <th class="db-hm-ag">Agente</th>`;
-  semList.forEach(s=>{ hmHtml+=`<th>S${s}</th>`; });
+  semList.forEach(s=>{ hmHtml+=`<th>S${h(s)}</th>`; });
   hmHtml+=`<th style="font-weight:700">Prom.</th></tr></thead><tbody>`;
   agList.forEach(ag=>{
     const vals=semList.map(s=>{
@@ -146,7 +147,7 @@ function renderDashboard(){
     });
     const nonNull=vals.filter(v=>v!==null);
     const prom=nonNull.length?Math.round(nonNull.reduce((a,b)=>a+b,0)/nonNull.length):null;
-    hmHtml+=`<tr><td class="db-hm-name">${ag.split(" ").slice(0,2).join(" ")}</td>`;
+    hmHtml+=`<tr><td class="db-hm-name">${h(ag.split(" ").slice(0,2).join(" "))}</td>`;
     vals.forEach(v=>{ hmHtml+=`<td class="${hmCls(v)}">${v!==null?v+"%":"—"}</td>`; });
     hmHtml+=`<td class="${hmCls(prom)}" style="font-weight:700">${prom!==null?prom+"%":"—"}</td>`;
     hmHtml+=`</tr>`;
@@ -177,7 +178,7 @@ function renderDashboard(){
         const fillCol=pct>=50?"#991b1b":pct>=25?"#92400e":"#0a7040";
         return `<div class="db-crit-row">
           <span class="db-crit-tag ${tagCls}">${tagLabel} ${peso}%</span>
-          <span class="db-crit-name" title="${n}">${n}</span>
+          <span class="db-crit-name" title="${h(n)}">${h(n)}</span>
           <div class="db-crit-bar"><div class="db-crit-fill" style="width:${pct}%;background:${fillCol}"></div></div>
           <span class="db-crit-pct" style="color:${fillCol}">${pct}%</span>
         </div>`;
@@ -192,8 +193,8 @@ function renderDashboard(){
         return `<div class="db-alert-row">
           <div class="db-alert-dot" style="background:${dotCol}"></div>
           <div class="db-alert-info">
-            <div class="db-alert-name">${a.agente.split(" ").slice(0,2).join(" ")}</div>
-            <div class="db-alert-meta">Ticket ${a.ticket||"—"} · ${a.fecha_auditoria} · Sem ${a.semana}</div>
+            <div class="db-alert-name">${h(a.agente.split(" ").slice(0,2).join(" "))}</div>
+            <div class="db-alert-meta">Ticket ${h(a.ticket||"—")} · ${h(a.fecha_auditoria)} · Sem ${h(a.semana)}</div>
           </div>
           <span class="db-score db-sc-red">${a.general}%</span>
         </div>`;
@@ -203,6 +204,7 @@ function renderDashboard(){
 
 // Ranking de todos los agentes con sus promedios
 function renderAgentes(){
+  const h=escapeHtml;
   const agents={};
   DB.auditorias.forEach(a=>{
     if(!agents[a.agente]) agents[a.agente]={gen:[],cal:[],prod:[],count:0};
@@ -220,9 +222,9 @@ function renderAgentes(){
     const init=a.ag.split(" ").map(p=>p[0]).join("").slice(0,2).toUpperCase();
     return `<div class="agent-row">
       <div style="font-size:12px;font-weight:700;color:var(--hint);width:18px">${i+1}</div>
-      <div class="avatar">${init}</div>
+      <div class="avatar">${h(init)}</div>
       <div style="flex:1">
-        <div style="font-size:13px;font-weight:600">${a.ag}</div>
+        <div style="font-size:13px;font-weight:600">${h(a.ag)}</div>
         <div style="font-size:11px;color:var(--muted)">${a.count} auditoría${a.count!==1?"s":""} · Cal ${a.cal}% · Prod ${a.prod}%</div>
       </div>
       <div class="mini-bar" style="width:64px"><div class="mini-bar-fill" style="width:${a.gen}%;background:${col}"></div></div>
@@ -233,6 +235,7 @@ function renderAgentes(){
 
 // Detalle de criterios incumplidos para un agente específico
 function renderAgentDetail(){
+  const h=escapeHtml;
   const ag=document.getElementById("sel-agente-detail").value;
   const cont=document.getElementById("agent-detail-content");
   if(!ag){ cont.innerHTML='<p style="color:var(--hint);font-size:13px">Seleccioná un agente.</p>'; return; }
@@ -249,7 +252,7 @@ function renderAgentDetail(){
       const pct=d.total>0?Math.round(d.no/d.total*100):0;
       const col=pct>50?"var(--red)":pct>20?"var(--amber)":"var(--green)";
       return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
-        <div style="flex:1;font-size:11px">${n}</div>
+        <div style="flex:1;font-size:11px">${h(n)}</div>
         <div class="mini-bar" style="width:60px"><div class="mini-bar-fill" style="width:${pct}%;background:${col}"></div></div>
         <div style="font-size:11px;font-family:'DM Mono',monospace;color:${col};min-width:30px;text-align:right">${pct}%</div>
       </div>`;

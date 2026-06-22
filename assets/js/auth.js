@@ -17,12 +17,15 @@ window.escapeHtml = function (str) {
   // ── Session ──────────────────────────────────────────────────
   window.getSession = function () {
     try {
-      const raw = localStorage.getItem(_key());
-      if (!raw) return null;
+      const raw = sessionStorage.getItem(_key());
+      if (!raw) {
+        localStorage.removeItem(_key());
+        return null;
+      }
       const s = JSON.parse(raw);
       // Sesión inválida si expiró o no tiene user/token (sesión rota)
       if (Date.now() > s.expiresAt || !s.user || !s.sessionToken) {
-        localStorage.removeItem(_key());
+        sessionStorage.removeItem(_key());
         return null;
       }
       return s;
@@ -30,7 +33,8 @@ window.escapeHtml = function (str) {
   };
 
   window.setSession = function (user, sessionToken) {
-    localStorage.setItem(_key(), JSON.stringify({
+    localStorage.removeItem(_key());
+    sessionStorage.setItem(_key(), JSON.stringify({
       user,
       sessionToken: sessionToken || null,
       loggedInAt:   Date.now(),
@@ -49,6 +53,7 @@ window.escapeHtml = function (str) {
 
   window.authLogout = async function () {
     const token = getSessionToken();
+    sessionStorage.removeItem(_key());
     localStorage.removeItem(_key());
     if (token && window.callApiRaw) {
       try { await callApiRaw({ _type: 'logout', sessionToken: token }); } catch (_) {}
@@ -141,7 +146,7 @@ window.escapeHtml = function (str) {
         const s = getSession();
         if (!s) { errEl.textContent = 'Sesión expirada. Iniciá sesión nuevamente.'; errEl.style.display = ''; return; }
         const passwordHash = await sha256(pwd1);
-        await callApiRaw({ _type: 'updateUser', email: s.user.email, passwordHash, sessionToken: s.sessionToken });
+        await callApiRaw({ _type: 'updateUser', passwordHash, sessionToken: s.sessionToken });
         okEl.style.display = '';
         ['_authPwdNew','_authPwdConfirm'].forEach(id => document.getElementById(id).value = '');
         setTimeout(_close, 1800);

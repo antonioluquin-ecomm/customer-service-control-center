@@ -21,26 +21,28 @@ function renderRegistros(){
   const tbody=document.getElementById("tbody-registros");
   if(!data.length){ tbody.innerHTML='<tr><td colspan="13" style="text-align:center;color:var(--hint);padding:24px">Sin registros.</td></tr>'; return; }
   const U=getUMB();
+  const h=escapeHtml;
   const sc=(v)=>{ const c=v>=U.excelente?"sc-green":v>=U.correcta?"sc-amber":"sc-red"; return `<span class="score-cell ${c}">${v}%</span>`; };
   tbody.innerHTML=data.map(a=>`<tr>
-    <td><span style="font-family:'DM Mono',monospace;font-size:11px">${a.id_auditoria}</span></td>
-    <td>${a.fecha_auditoria}</td>
-    <td style="font-weight:600">${a.agente}</td>
-    <td style="font-family:'DM Mono',monospace;font-size:12px">${a.ticket}</td>
-    <td>${a.canal}</td>
-    <td style="font-family:'DM Mono',monospace;text-align:center">${a.semana}</td>
+    <td><span style="font-family:'DM Mono',monospace;font-size:11px">${h(a.id_auditoria)}</span></td>
+    <td>${h(a.fecha_auditoria)}</td>
+    <td style="font-weight:600">${h(a.agente)}</td>
+    <td style="font-family:'DM Mono',monospace;font-size:12px">${h(a.ticket)}</td>
+    <td>${h(a.canal)}</td>
+    <td style="font-family:'DM Mono',monospace;text-align:center">${h(a.semana)}</td>
     <td style="font-family:'DM Mono',monospace;text-align:center">${a.horas_trabajadas}hs</td>
     <td style="text-align:center">${sc(a.calidad)}</td>
     <td style="text-align:center">${sc(a.productividad)}</td>
     <td style="text-align:center">${sc(a.general)}</td>
-    <td><span class="badge ${estadoBadge(a.estado)}">${a.estado}</span></td>
+    <td><span class="badge ${estadoBadge(a.estado)}">${h(a.estado)}</span></td>
     <td>${a.sheets_enviado?'<span class="badge badge-ok">✓ Sheets</span>':'<span class="badge badge-local">Pendiente</span>'}</td>
-    <td>${isAdmin()?`<button class="btn xs danger" onclick="deleteAuditoria('${a.id_auditoria}')">✕</button>`:""}</td>
+    <td>${isAdmin()?`<button class="btn xs danger" data-auditoria-id="${h(a.id_auditoria)}" onclick="deleteAuditoria(this.dataset.auditoriaId)">✕</button>`:""}</td>
   </tr>`).join("");
 }
 
 // Tarjetas de observaciones filtradas
 function renderObservaciones(){
+  const h=escapeHtml;
   const agFilter  = document.getElementById("obs-filter-agente")?.value  || "";
   const estFilter = document.getElementById("obs-filter-estado")?.value  || "";
   const mesFilter = document.getElementById("obs-filter-mes")?.value     || "";
@@ -61,17 +63,17 @@ function renderObservaciones(){
     const scCell=v=>{const c=v>=U.excelente?"sc-green":v>=U.correcta?"sc-amber":"sc-red"; return `<span class="score-cell ${c}">${v}%</span>`;};
     return `<div class="obs-card ${scoreClass}">
       <div class="obs-meta">
-        <strong>${a.agente}</strong>
-        <span>${a.fecha_auditoria}</span>
-        ${a.ticket?`<span>Ticket: ${a.ticket}</span>`:""}
-        <span>Sem. ${a.semana} · ${a.mes}</span>
+        <strong>${h(a.agente)}</strong>
+        <span>${h(a.fecha_auditoria)}</span>
+        ${a.ticket?`<span>Ticket: ${h(a.ticket)}</span>`:""}
+        <span>Sem. ${h(a.semana)} · ${h(a.mes)}</span>
         <span style="margin-left:auto;display:flex;gap:6px;align-items:center">
           Cal: ${scCell(a.calidad)} Prod: ${scCell(a.productividad)} Gen: ${scCell(a.general)}
-          <span class="badge ${estadoBadge(a.estado)}">${a.estado}</span>
+          <span class="badge ${estadoBadge(a.estado)}">${h(a.estado)}</span>
         </span>
       </div>
-      ${a.obs_general?`<div class="obs-text">${a.obs_general}</div>`:""}
-      ${a.obs_accion?`<div style="margin-top:6px;font-size:11px;color:var(--amber);font-weight:500">→ Acción: ${a.obs_accion}</div>`:""}
+      ${a.obs_general?`<div class="obs-text">${h(a.obs_general)}</div>`:""}
+      ${a.obs_accion?`<div style="margin-top:6px;font-size:11px;color:var(--amber);font-weight:500">→ Acción: ${h(a.obs_accion)}</div>`:""}
     </div>`;
   }).join("");
 }
@@ -88,7 +90,12 @@ async function deleteAuditoria(id){
 function exportCSV(){
   if(!DB.auditorias.length){ alert("No hay datos."); return; }
   const h=["id_auditoria","fecha_auditoria","auditor","agente","ticket","canal","tipo","mes","semana","horas_trabajadas","objetivo_interacciones","interacciones_reales","dias_tarde","dias_faltas","calidad","productividad","general","estado","requiere_seguimiento","obs_general","obs_accion","sheets_enviado"];
-  const rows=DB.auditorias.map(a=>h.map(k=>{ const val=a[k]??""; return typeof val==="string"&&val.includes(",")?"\""+val.replace(/"/g,"'")+"\"":(String(val).includes(",")?"\""+val+"\"":val); }));
+  const csvCell=value=>{
+    let text=String(value??"");
+    if(/^[=+\-@]/.test(text)) text="'"+text;
+    return `"${text.replace(/"/g,'""')}"`;
+  };
+  const rows=DB.auditorias.map(a=>h.map(k=>csvCell(a[k])));
   const csv=[h,...rows].map(r=>r.join(",")).join("\n");
   const blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8;"});
   const url=URL.createObjectURL(blob);

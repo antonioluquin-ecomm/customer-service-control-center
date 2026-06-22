@@ -6,7 +6,7 @@ Ideas para versiones futuras. Nada de esto está comprometido.
 
 ## Calidad de código
 
-- **Agregar `escapeHtml()`** en todos los puntos donde se hace `innerHTML` con datos de Sheets (seguridad, actualmente datos propios del equipo pero buena práctica)
+- Completar escape de datos de Sheets y formularios en todas las vistas (Sprint 2, realizado)
 - **Event listeners** en JS en lugar de atributos `onclick/oninput` inline en HTML
 - **Exportación por rango de fechas** en el CSV (actualmente exporta todo)
 
