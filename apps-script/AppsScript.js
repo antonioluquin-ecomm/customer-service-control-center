@@ -485,10 +485,17 @@ function deleteAuditoria(id, actor) {
     const headerRow = s.getRange(1,1,1,s.getLastColumn()).getValues()[0];
     const colIdx = headerRow.indexOf(idField);
     if(colIdx === -1) return;
-    // Buscar y borrar filas desde abajo
-    for(let i=lr; i>=2; i--) {
-      const cellVal = String(s.getRange(i, colIdx+1).getValue());
-      if(cellVal === String(id)) s.deleteRow(i);
+    const values = s.getRange(2, colIdx + 1, lr - 1, 1).getValues();
+    const rows = values.reduce((matches, row, index) => {
+      if (String(row[0]) === String(id)) matches.push(index + 2);
+      return matches;
+    }, []);
+    // Borrar bloques contiguos desde abajo para minimizar llamadas a Sheets.
+    while (rows.length) {
+      const end = rows.pop();
+      let start = end;
+      while (rows.length && rows[rows.length - 1] === start - 1) start = rows.pop();
+      s.deleteRows(start, end - start + 1);
     }
   });
 }

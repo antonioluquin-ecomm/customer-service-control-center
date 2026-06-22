@@ -53,6 +53,21 @@ function pendingCreatePayloads() {
   return PENDING_QUEUE.filter(item => item.operation === "create").map(item => item.payload);
 }
 
+function recordSyncMetric(status) {
+  const key="auditcs_sync_metrics";
+  try {
+    const metrics=JSON.parse(localStorage.getItem(key)||"{}");
+    metrics[status]=(Number(metrics[status])||0)+1;
+    metrics.last_status=status;
+    metrics.last_at=new Date().toISOString();
+    localStorage.setItem(key,JSON.stringify(metrics));
+  } catch(e) {}
+}
+
+function getSyncMetrics() {
+  try { return JSON.parse(localStorage.getItem("auditcs_sync_metrics")||"{}"); } catch(e) { return {}; }
+}
+
 function updateOfflineBadge() {
   const b = document.getElementById("offline-badge");
   const btn = document.getElementById("btn-retry-sync");

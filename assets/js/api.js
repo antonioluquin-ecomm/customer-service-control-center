@@ -44,13 +44,15 @@ async function postSheets(payload) {
       headers: {"Content-Type": "text/plain;charset=utf-8"},
       body:    JSON.stringify({ ...payload, sessionToken: token }),
     });
-    if (!res.ok) { hideSync("⚠ Error HTTP " + res.status, 3000, true); return {ok:false, reason:"http_"+res.status}; }
+    if (!res.ok) { recordSyncMetric("http_error"); hideSync("⚠ Error HTTP " + res.status, 3000, true); return {ok:false, reason:"http_"+res.status}; }
     const data = await res.json().catch(() => null);
-    if (data && data.status === "ok") { hideSync("✓ Guardado en Sheets"); return {ok:true, data}; }
+    if (data && data.status === "ok") { recordSyncMetric("success"); hideSync("✓ Guardado en Sheets"); return {ok:true, data}; }
     const msg = data?.message || "Error desconocido";
+    recordSyncMetric("api_error");
     hideSync("⚠ " + msg, 3500, true);
     return {ok:false, reason:msg};
   } catch(e) {
+    recordSyncMetric("network_error");
     hideSync("⚠ Sin conexión — guardado local", 3000, true);
     return {ok:false, reason:e.message};
   }

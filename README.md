@@ -40,6 +40,10 @@ customer-service-control-center/
 
 Ver [`docs/setup.md`](docs/setup.md) para instrucciones de configuración del Apps Script y primera conexión.
 
+## Pruebas
+
+Ejecutar `node tests/run-tests.js` para validar cálculos, sincronización offline e IDs del backend.
+
 ## Versión
 
 Ver [`CHANGELOG.md`](CHANGELOG.md) para el historial de versiones.
