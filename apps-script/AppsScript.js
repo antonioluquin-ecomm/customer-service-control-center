@@ -35,7 +35,7 @@ const HEADERS = {
     "objetivo_interacciones","interacciones_reales","dias_tarde","dias_faltas",
     "pct_calidad","pct_productividad","pct_general","estado",
     "requiere_seguimiento","obs_general","obs_desvios","obs_accion",
-    "resp_seguimiento","w_calidad","w_productividad","timestamp_registro",
+    "resp_seguimiento","w_calidad","w_productividad","client_request_id","timestamp_registro",
   ],
   detalle_calidad: [
     "id_detalle","id_auditoria","bloque","criterio_codigo",
@@ -202,6 +202,7 @@ function getAuditorias() {
       requiere_seguimiento:o["requiere_seguimiento"]||"No",
       obs_general:o["obs_general"]||"", obs_desvios:o["obs_desvios"]||"",
       obs_accion:o["obs_accion"]||"", resp_seguimiento:o["resp_seguimiento"]||"",
+      client_request_id:o["client_request_id"]||"",
       sheets_enviado:true, criterios:[],
     };
   });
@@ -289,10 +290,14 @@ function doPost(e) {
             `Pesos de criterios suman ${sumPesos}% en lugar de 100%`);
         }
       }
-      if (findAuditoria(payload.id_auditoria)) {
-        result = { status:"ok", id:payload.id_auditoria, duplicate:true };
+      const clientRequestId = String(payload.client_request_id || "").trim();
+      if (!clientRequestId) throw new Error("client_request_id requerido para registrar una auditoría");
+      const existingId = findAuditoriaByClientRequestId(clientRequestId);
+      if (existingId) {
+        result = { status:"ok", id:existingId, duplicate:true };
       } else {
-        // FIX: el ID definitivo se confirma desde el backend
+        payload.id_auditoria = getNextAuditoriaId();
+        payload.id = payload.id_auditoria;
         insertAuditoria(payload);
         insertDetalleCalidad(payload);
         insertProductividad(payload);
@@ -374,9 +379,42 @@ function handleUpdateCriterios(criterios) {
   criterios.forEach(c => sheet.appendRow([c.cod,c.bloque,c.nombre,c.peso,c.activo!==false,now]));
 }
 
+function getNextAuditoriaId() {
+  const props = PropertiesService.getScriptProperties();
+  let last = Number(props.getProperty(PROP_LAST_ID)) || 0;
+  if (!last) {
+    const sheet = getSheet(SHEET_AUDITORIAS);
+    const lr = sheet.getLastRow();
+    if (lr > 1) {
+      last = sheet.getRange(2, 1, lr - 1, 1).getValues().reduce((max, row) => {
+        const value = parseInt(String(row[0]).replace("AUD-", ""), 10);
+        return Number.isFinite(value) ? Math.max(max, value) : max;
+      }, 0);
+    }
+  }
+  const next = last + 1;
+  props.setProperty(PROP_LAST_ID, String(next));
+  return "AUD-" + String(next).padStart(4, "0");
+}
+
+function findAuditoriaByClientRequestId(clientRequestId) {
+  if (!clientRequestId) return "";
+  const sheet = getSheet(SHEET_AUDITORIAS);
+  const lr = sheet.getLastRow();
+  if (lr <= 1) return "";
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const requestCol = headers.indexOf("client_request_id");
+  const idCol = headers.indexOf("id_auditoria");
+  if (requestCol === -1 || idCol === -1) return "";
+  const rows = sheet.getRange(2, 1, lr - 1, sheet.getLastColumn()).getValues();
+  const row = rows.find(values => String(values[requestCol]) === clientRequestId);
+  return row ? String(row[idCol]) : "";
+}
+
 function insertAuditoria(p) {
   const sheet = getSheet(SHEET_AUDITORIAS);
-  const row = HEADERS.auditorias.map(col => {
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const row = headers.map(col => {
     if (col === "timestamp_registro") return new Date().toISOString();
     // FIX: incluir pesos de calidad/productividad como columnas históricas
     if (col === "w_calidad")       return p.w_calidad||50;
@@ -587,7 +625,7 @@ function crearUsuarioInicial() {
       }
     }
   }
-  sheet.appendRow([email, nombre, hash, "auditor", true, new Date().toISOString()]);
+  sheet.appendRow([email, nombre, hash, "admin", true, new Date().toISOString()]);
   Logger.log("✓ Usuario creado: " + email + " — contraseña inicial: " + password);
   Logger.log("  Cambiala INMEDIATAMENTE desde la app.");
 }
@@ -597,7 +635,10 @@ function crearUsuarioInicial() {
 // En requests normales de producción no añade overhead de verificar 8 hojas
 function ensureSheetsOnce() {
   const props = PropertiesService.getScriptProperties();
-  if (props.getProperty(PROP_INITIALIZED) === "true") return;
+  if (props.getProperty(PROP_INITIALIZED) === "true") {
+    ensureAuditoriaRequestIdColumn();
+    return;
+  }
   // Primera ejecución: crear hojas y headers
   Object.entries(HEADERS).forEach(([name, headers]) => {
     const s = getSheet(name);
@@ -613,7 +654,16 @@ function ensureSheetsOnce() {
   // Sembrar criterios por defecto si la hoja está vacía
   const sc = getSheet(SHEET_CRITERIOS);
   if(sc.getLastRow() === 1) sembrarCriteriosDefault(sc);
+  ensureAuditoriaRequestIdColumn();
   props.setProperty(PROP_INITIALIZED, "true");
+}
+
+function ensureAuditoriaRequestIdColumn() {
+  const sheet = getSheet(SHEET_AUDITORIAS);
+  if (sheet.getLastRow() === 0) return;
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  if (headers.includes("client_request_id")) return;
+  sheet.getRange(1, headers.length + 1).setValue("client_request_id");
 }
 
 // Función manual para re-inicializar si es necesario (ejecutar desde editor)

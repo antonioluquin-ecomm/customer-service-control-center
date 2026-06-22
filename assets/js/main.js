@@ -5,25 +5,25 @@
 // Reintenta enviar a Sheets los registros que quedaron en la cola offline
 async function retrySyncPending(){
   if(!PENDING_QUEUE.length){ alert("No hay registros pendientes."); return; }
-  showSync(`Reintentando ${PENDING_QUEUE.length} registros...`);
+  showSync(`Reintentando ${PENDING_QUEUE.length} operaciones...`);
   const retry=[...PENDING_QUEUE];
   PENDING_QUEUE=[];
   savePendingQueue();
   let fail=0;
-  for(const payload of retry){
-    const res=await postSheets(payload);
-    if(!res.ok){ PENDING_QUEUE.push(payload); fail++; }
-    else {
-      const aud=DB.auditorias.find(a=>a.id_auditoria===payload.id_auditoria);
-      if(aud) aud.sheets_enviado=true;
+  for(const item of retry){
+    const res=await postSheets(item.payload);
+    if(!res.ok){ PENDING_QUEUE.push(item); fail++; continue; }
+    if(item.operation==="create"){
+      const aud=DB.auditorias.find(a=>a.client_request_id===item.client_request_id);
+      const serverId=res.data?.id;
+      if(aud && serverId){ aud.id=serverId; aud.id_auditoria=serverId; aud.sheets_enviado=true; }
     }
   }
   savePendingQueue();
-  renderRegistros();
+  renderRegistros(); renderDashboard();
   if(fail===0) hideSync(`✓ Todos sincronizados`);
-  else hideSync(`⚠ ${fail} registros aún pendientes`,3000,true);
+  else hideSync(`⚠ ${fail} operaciones aún pendientes`,3000,true);
 }
-
 // Inicialización de la app
 function initSidebarVersion() {
   const el = document.getElementById('brandMeta');

@@ -124,7 +124,7 @@ El cuerpo es JSON serializado como string.
 
 ```json
 {
-  "sessionToken": "SESSION_TOKEN",
++
   "id_auditoria": "AUD-0042",
   "fecha_auditoria": "2026-06-17",
   "auditor": "Gabriel Luna",
@@ -155,7 +155,7 @@ El cuerpo es JSON serializado como string.
 }
 ```
 
-**Response:** `{ "status": "ok", "id": "AUD-0042" }`  
++
 Si ya existe: `{ "status": "ok", "id": "AUD-0042", "duplicate": true }`
 
 El backend inserta en 4 hojas: `auditorias`, `detalle_calidad`, `productividad`, `observaciones` (si hay obs).
@@ -166,7 +166,7 @@ El backend inserta en 4 hojas: `auditorias`, `detalle_calidad`, `productividad`,
 
 ```json
 {
-  "sessionToken": "SESSION_TOKEN",
++
   "_type": "config_change",
   "accion": "parametros_actualizados",
   "agentes": ["Ana García", "Carlos López"],
@@ -197,7 +197,7 @@ Usa upsert por fila — no destruye datos existentes en la hoja `configuracion`.
 
 ```json
 {
-  "sessionToken": "SESSION_TOKEN",
++
   "_type": "update_criterios",
   "criterios": [
     { "cod": "COM_SALUDO", "bloque": "Comunicacion", "nombre": "Saludo inicial", "peso": 2, "activo": true }
@@ -213,7 +213,7 @@ Valida que los pesos sumen 100% (margen ±1%). Si no, devuelve error.
 
 ```json
 {
-  "sessionToken": "SESSION_TOKEN",
++
   "_type": "delete_auditoria",
   "id_auditoria": "AUD-0042"
 }

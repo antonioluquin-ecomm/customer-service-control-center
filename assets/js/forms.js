@@ -251,10 +251,10 @@ async function submitAuditoria(){
   const general=calcGeneral(cal,prod);
   const estado=calcEstado(general);
   const hs=v("f-horas"), obj=calcObjetivo(hs);
-  const id="AUD-"+String(DB.nextId).padStart(4,"0");
-  DB.nextId++; persistNextId();
+  const client_request_id=createClientRequestId();
+  const id="LOCAL-"+client_request_id.slice(-8).toUpperCase();
   const aud={
-    id, id_auditoria:id,
+    id, id_auditoria:id, client_request_id,
     fecha_registro:new Date().toISOString(),
     fecha_auditoria:v("f-fecha"),
     anio:v("f-fecha")?new Date(v("f-fecha")+"T00:00:00").getFullYear():new Date().getFullYear(),
@@ -277,17 +277,18 @@ async function submitAuditoria(){
     pct_calidad:cal, pct_productividad:prod, pct_general:general,
   };
   DB.auditorias.push(aud);
-  const res=await postSheets(aud);
+  const res=await postSheets({ ...aud, _type:"create_auditoria" });
   if(res.ok){
+    const serverId=res.data?.id;
+    if(serverId){ aud.id=serverId; aud.id_auditoria=serverId; }
     aud.sheets_enviado=true;
   } else {
-    PENDING_QUEUE.push(aud);
-    savePendingQueue();
+    queuePendingCreate(aud);
   }
   const alertEl=document.getElementById("form-alert");
   alertEl.className=res.ok?"alert success":"alert warning";
   alertEl.classList.remove("hidden");
-  alertEl.textContent=res.ok?`✓ ${id} registrada y enviada a Sheets.`:`⚠ ${id} guardada localmente. Se reintentará cuando haya conexión.`;
+  alertEl.textContent=res.ok?`✓ ${aud.id_auditoria} registrada y enviada a Sheets.`:`⚠ ${id} guardada localmente. Se reintentará cuando haya conexión.`;
   setTimeout(()=>alertEl.classList.add("hidden"),7000);
   _criteriosSnapshot=null;
   resetForm();

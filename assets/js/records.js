@@ -81,8 +81,16 @@ function renderObservaciones(){
 // Elimina una auditoría local y en Sheets
 async function deleteAuditoria(id){
   if(!confirm(`¿Eliminar ${id}? Esta acción no se puede deshacer.`)) return;
-  DB.auditorias=DB.auditorias.filter(a=>a.id_auditoria!==id);
-  await postSheets({_type:"delete_auditoria",id_auditoria:id});
+  const aud=DB.auditorias.find(a=>a.id_auditoria===id);
+  if(!aud) return;
+  if(!aud.sheets_enviado){
+    removePendingCreate(aud.client_request_id);
+    DB.auditorias=DB.auditorias.filter(a=>a!==aud);
+  } else {
+    const res=await postSheets({_type:"delete_auditoria",id_auditoria:id});
+    if(!res.ok) queuePendingDelete(id);
+    DB.auditorias=DB.auditorias.filter(a=>a!==aud);
+  }
   renderRegistros(); renderDashboard();
 }
 

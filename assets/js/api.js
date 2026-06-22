@@ -46,7 +46,7 @@ async function postSheets(payload) {
     });
     if (!res.ok) { hideSync("⚠ Error HTTP " + res.status, 3000, true); return {ok:false, reason:"http_"+res.status}; }
     const data = await res.json().catch(() => null);
-    if (data && data.status === "ok") { hideSync("✓ Guardado en Sheets"); return {ok:true}; }
+    if (data && data.status === "ok") { hideSync("✓ Guardado en Sheets"); return {ok:true, data}; }
     const msg = data?.message || "Error desconocido";
     hideSync("⚠ " + msg, 3500, true);
     return {ok:false, reason:msg};
@@ -90,10 +90,12 @@ async function reloadFromSheets() {
     if (detR.ok)  { const d = await detR.json();  if (d.status === "ok")                det  = d.detalle || {}; }
     auds.forEach(a => { a.criterios = det[a.id_auditoria] || []; });
     if (critR.ok) { const d = await critR.json(); if (d.status === "ok" && d.criterios?.length) CRITERIOS = d.criterios; }
+    pendingCreatePayloads().forEach(payload => {
+      if (!auds.some(a => a.client_request_id === payload.client_request_id)) {
+        auds.push({ ...payload, id: payload.id_auditoria, sheets_enviado:false });
+      }
+    });
     DB.auditorias = auds;
-    const maxId = auds.reduce((m, a) => Math.max(m, parseInt(String(a.id_auditoria).replace("AUD-","")) || 0), 0);
-    DB.nextId = Math.max(maxId + 1, getNextId_local());
-    persistNextId();
     updateSheetsUI("connected");
     populateSelects();
     renderDashboard();
