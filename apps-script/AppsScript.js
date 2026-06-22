@@ -7,15 +7,13 @@
 //   - handleConfigChange con upsert (no clearContent destructivo)
 //   - deleteAuditoria con log de auditoría
 //   - ensureSheets con flag de inicialización (no corre en cada request)
-//   - Validación de token secreto en todos los endpoints
+//   - Autorización por sesión y rol en todos los endpoints
 // =============================================================
 // INSTRUCCIONES DE DEPLOY:
 //   1. Pegá este código en tu proyecto de Apps Script
-//   2. En Propiedades del proyecto (⚙ → Propiedades de script), agregá:
-//      - Clave: SECRET_TOKEN  Valor: (elegí una cadena larga y aleatoria)
-//   3. Implementar como Web App → Ejecutar como: "Yo" → Acceso: "Cualquier persona"
-//   4. Copiá la URL de la Web App en la Configuración del HTML
-//   5. En el HTML, agregá tu token en CFG.secret_token o como parámetro de URL
+//   2. Implementar como Web App → Ejecutar como: "Yo" → Acceso: "Cualquier persona"
+//   3. Copiá la URL de la Web App en CONFIG.SCRIPT_URL
+//   4. Creá el primer usuario administrador con crearUsuarioInicial()
 // =============================================================
 
 const SHEET_AUDITORIAS    = "auditorias";
@@ -106,15 +104,28 @@ function jsonOut(obj) {
 }
 
 // ================================================================
-// TOKEN DE SEGURIDAD
-// FIX: validar token en todos los requests
-// El token se guarda en Script Properties (nunca en el código)
+// AUTORIZACIÓN POR SESIÓN Y ROL
+// La sesión se conserva en Script Properties; no se publica un secreto en el frontend.
 // ================================================================
-function checkToken(param_token) {
-  const stored = PropertiesService.getScriptProperties().getProperty("SECRET_TOKEN");
-  // Si no hay token configurado, omitir validación (desarrollo inicial)
-  if (!stored || stored === "") return true;
-  return param_token === stored;
+const ROLE_ADMIN = "admin";
+const ROLE_SUPERVISOR = "supervisor";
+const ROLE_AUDITOR = "auditor";
+
+function normalizeRole(role) {
+  const value = String(role || ROLE_AUDITOR).trim().toLowerCase();
+  return [ROLE_ADMIN, ROLE_SUPERVISOR, ROLE_AUDITOR].includes(value) ? value : ROLE_AUDITOR;
+}
+
+function canManageSystem(session) {
+  return session && session.role === ROLE_ADMIN;
+}
+
+function sessionError() {
+  return { status:"error", message:"Sesión requerida. Iniciá sesión nuevamente." };
+}
+
+function forbiddenError() {
+  return { status:"error", message:"No tenés permisos para realizar esta acción." };
 }
 
 // ================================================================
@@ -122,11 +133,9 @@ function checkToken(param_token) {
 // ================================================================
 function doGet(e) {
   const action       = (e && e.parameter && e.parameter.action)       || "ping";
-  const token        = (e && e.parameter && e.parameter.token)        || "";
   const sessionToken = (e && e.parameter && e.parameter.sessionToken) || "";
   try {
-    if (!checkToken(token)) return jsonOut({ status:"error", message:"Unauthorized" });
-    if (!checkSessionToken(sessionToken)) return jsonOut({ status:"error", message:"Sesión requerida. Iniciá sesión nuevamente." });
+    if (!getSessionByToken(sessionToken)) return jsonOut(sessionError());
     ensureSheetsOnce();
     if (action === "get_config")     return jsonOut(getConfig());
     if (action === "get_auditorias") return jsonOut(getAuditorias());
@@ -250,30 +259,26 @@ function doPost(e) {
   let result = { status:"error", message:"Unknown error" };
   try {
     const payload = JSON.parse(e.postData ? e.postData.contents : "{}");
-    // FIX: validar token si está configurado
-    const token = payload._token || "";
-    if (!checkToken(token)) {
-      result = { status:"error", message:"Unauthorized" };
-      return jsonOut(result);
-    }
-    // Login y logout no requieren sesión previa
-    if (payload._type === "login")  { return jsonOut(handleLogin(payload)); }
-    if (payload._type === "logout") { return jsonOut(handleLogout(payload)); }
-    // Todos los demás endpoints requieren sesión válida
-    if (!checkSessionToken(payload.sessionToken)) {
-      result = { status:"error", message:"Sesión requerida. Iniciá sesión nuevamente." };
-      return jsonOut(result);
+    // Login no requiere una sesión previa.
+    if (payload._type === "login") return jsonOut(handleLogin(payload));
+    const session = getSessionByToken(payload.sessionToken);
+    if (!session) return jsonOut(sessionError());
+    if (payload._type === "logout") return jsonOut(handleLogout(payload, session));
+    if (["config_change", "update_criterios", "delete_auditoria"].includes(payload._type) && !canManageSystem(session)) {
+      return jsonOut(forbiddenError());
     }
     ensureSheetsOnce();
-    if (payload._type === "updateUser") { return jsonOut(handleUpdateUser(payload)); }
+    if (payload._type === "updateUser") return jsonOut(handleUpdateUser(payload, session));
     if (payload._type === "config_change") {
       handleConfigChange(payload);
+      logEnvio("?", "config_change", "OK", payload.accion || "Configuración actualizada", session.email);
       result = { status:"ok", type:"config_synced" };
     } else if (payload._type === "update_criterios") {
       handleUpdateCriterios(payload.criterios || []);
+      logEnvio("?", "update_criterios", "OK", "Criterios actualizados", session.email);
       result = { status:"ok", type:"criterios_updated" };
     } else if (payload._type === "delete_auditoria") {
-      deleteAuditoria(payload.id_auditoria);
+      deleteAuditoria(payload.id_auditoria, session.email);
       result = { status:"ok", deleted:payload.id_auditoria };
     } else {
       // FIX: validar pesos de criterios server-side
@@ -292,7 +297,7 @@ function doPost(e) {
         insertDetalleCalidad(payload);
         insertProductividad(payload);
         insertObservacion(payload);
-        logEnvio(payload.id_auditoria, "insert_completo","OK","");
+        logEnvio(payload.id_auditoria, "insert_completo","OK","", session.email);
         result = { status:"ok", id:payload.id_auditoria };
       }
     }
@@ -423,10 +428,10 @@ function insertObservacion(p) {
 }
 
 // FIX: deleteAuditoria con log de auditoría y búsqueda dinámica de columna
-function deleteAuditoria(id) {
+function deleteAuditoria(id, actor) {
   if(!id) return;
   // Log primero (antes de borrar)
-  logEnvio(id, "delete_auditoria", "OK", "Eliminado por usuario desde UI");
+  logEnvio(id, "delete_auditoria", "OK", "Eliminado desde UI", actor);
   // Para cada hoja, buscar la columna correcta con el id dinámicamente
   const config = [
     {name:SHEET_AUDITORIAS,    idField:"id_auditoria"},
@@ -456,10 +461,11 @@ function findAuditoria(id) {
   return s.getRange(2,1,lr-1,1).getValues().some(r=>String(r[0])===String(id));
 }
 
-function logEnvio(id, accion, resultado, error) {
+function logEnvio(id, accion, resultado, error, actor) {
   try {
+    const message = actor ? `[${actor}] ${error || ""}`.trim() : (error || "");
     getSheet(SHEET_LOG).appendRow([
-      "LOG-"+Date.now(), new Date().toISOString(), id||"?", accion, resultado, error||""
+      "LOG-"+Date.now(), new Date().toISOString(), id||"?", accion, resultado, message
     ]);
   } catch(e){}
 }
@@ -481,7 +487,7 @@ function hashPassword(pwd) {
   return bytes.map(b => ('0' + (b & 0xff).toString(16)).slice(-2)).join('');
 }
 
-function checkSessionToken(token) {
+function getSessionByToken(token) {
   if (!token) return false;
   const raw = PropertiesService.getScriptProperties().getProperty("session_" + token);
   if (!raw) return false;
@@ -491,8 +497,17 @@ function checkSessionToken(token) {
       PropertiesService.getScriptProperties().deleteProperty("session_" + token);
       return false;
     }
-    return true;
+    return {
+      email: String(s.email || "").trim().toLowerCase(),
+      name: String(s.name || "").trim(),
+      role: normalizeRole(s.role),
+      expiresAt: s.expiresAt,
+    };
   } catch(_) { return false; }
+}
+
+function checkSessionToken(token) {
+  return Boolean(getSessionByToken(token));
 }
 
 function handleLogin(body) {
@@ -513,25 +528,26 @@ function handleLogin(body) {
     const expiresAt    = Date.now() + 8 * 60 * 60 * 1000; // 8 horas
     PropertiesService.getScriptProperties().setProperty(
       "session_" + sessionToken,
-      JSON.stringify({ email: uEmail, name: uNombre, role: uRole, expiresAt })
+      JSON.stringify({ email: uEmail, name: uNombre, role: normalizeRole(uRole), expiresAt })
     );
     return {
       status: "ok",
       sessionToken,
-      user: { email: uEmail, name: uNombre, role: uRole },
+      user: { email: uEmail, name: uNombre, role: normalizeRole(uRole) },
     };
   }
   return { status:"error", message:"Usuario no encontrado" };
 }
 
-function handleLogout(body) {
+function handleLogout(body, session) {
   const token = body.sessionToken || "";
   if (token) PropertiesService.getScriptProperties().deleteProperty("session_" + token);
+  logEnvio("?", "logout", "OK", "", session.email);
   return { status:"ok" };
 }
 
-function handleUpdateUser(body) {
-  const email        = (body.email        || "").trim().toLowerCase();
+function handleUpdateUser(body, session) {
+  const email        = session.email;
   const passwordHash = (body.passwordHash || "").trim();
   if (!email || !passwordHash) return { status:"error", message:"Datos incompletos" };
   const sheet = getSheet(SHEET_USUARIOS);

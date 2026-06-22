@@ -53,6 +53,7 @@ function initMobileSidebar() {
   initMobileSidebar();
   loadPendingQueue();
   renderUserChip();
+  applyRoleRestrictions();
   const today=new Date().toISOString().slice(0,10);
   document.getElementById("f-fecha").value=today;
   onFechaChange();

@@ -28,6 +28,10 @@ const PAGE_MAP={dashboard:0,agentes:1,observaciones:2,formulario:3,registros:4,c
 
 // Muestra la página activa y dispara su render
 function showPage(id){
+  if(id==="configuracion" && !isAdmin()){
+    alert("Solo los administradores pueden acceder a Configuración.");
+    return;
+  }
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
   document.getElementById("page-"+id).classList.add("active");
@@ -37,6 +41,12 @@ function showPage(id){
   if(id==="registros")     renderRegistros();
   if(id==="observaciones"){ populateObsFilters(); renderObservaciones(); }
   if(id==="agentes")       renderAgentes();
+}
+
+function applyRoleRestrictions(){
+  if(isAdmin()) return;
+  const configNav=document.querySelector('.nav-item[onclick*="configuracion"]');
+  if(configNav) configNav.style.display="none";
 }
 
 // Carga dinámica de agentes en el filtro de observaciones

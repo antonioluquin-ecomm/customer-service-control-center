@@ -21,15 +21,11 @@
 2. Eliminar el código de ejemplo y pegar el contenido de [`apps-script/AppsScript.js`](../apps-script/AppsScript.js)
 3. Guardar el proyecto (Ctrl+S)
 
-### Configurar el token de seguridad
+### Seguridad y roles
 
-1. En el editor de Apps Script, ir a **⚙ Configuración del proyecto → Propiedades de script**
-2. Agregar una propiedad:
-   - Clave: `SECRET_TOKEN`
-   - Valor: una cadena larga y aleatoria (ej: `AuditCS-2026-xK9mP3qR7vN2`)
-3. Guardar
+La autenticación se realiza mediante sesiones emitidas por Apps Script. No agregues un `SECRET_TOKEN` al frontend: cualquier secreto publicado en GitHub Pages puede ser inspeccionado.
 
-> Si no configurás el token, el sistema funciona igual pero sin autenticación (solo recomendado para desarrollo inicial).
+Los roles admitidos en la hoja `usuarios` son `admin`, `supervisor` y `auditor`. Todos pueden consultar y registrar auditorías; solo `admin` puede cambiar configuración, criterios o eliminar auditorías. Cada usuario solo puede cambiar su propia contraseña.
 
 ---
 

@@ -35,7 +35,7 @@ function renderRegistros(){
     <td style="text-align:center">${sc(a.general)}</td>
     <td><span class="badge ${estadoBadge(a.estado)}">${a.estado}</span></td>
     <td>${a.sheets_enviado?'<span class="badge badge-ok">✓ Sheets</span>':'<span class="badge badge-local">Pendiente</span>'}</td>
-    <td><button class="btn xs danger" onclick="deleteAuditoria('${a.id_auditoria}')">✕</button></td>
+    <td>${isAdmin()?`<button class="btn xs danger" onclick="deleteAuditoria('${a.id_auditoria}')">✕</button>`:""}</td>
   </tr>`).join("");
 }
 

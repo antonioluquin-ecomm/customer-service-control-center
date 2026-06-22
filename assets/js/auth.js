@@ -43,6 +43,10 @@ window.escapeHtml = function (str) {
     return s ? (s.sessionToken || null) : null;
   };
 
+  window.isAdmin = function () {
+    return getSession()?.user?.role === 'admin';
+  };
+
   window.authLogout = async function () {
     const token = getSessionToken();
     localStorage.removeItem(_key());

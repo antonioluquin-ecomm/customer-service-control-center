@@ -6,12 +6,9 @@ Backend: `apps-script/AppsScript.js` desplegado como Web App en Google Apps Scri
 
 ## Autenticación
 
-Todos los endpoints validan un token configurado como Script Property:
+Todos los endpoints, excepto `login`, requieren un `sessionToken` vigente. El token se obtiene al iniciar sesión y debe enviarse como query param en GET o dentro del JSON en POST.
 
-- **GET**: el token va como query param `?token=...`  
-- **POST**: el token va en el cuerpo JSON como `{ _token: "..." }`
-
-Si `SECRET_TOKEN` no está configurado en las propiedades, la validación se omite (modo desarrollo).
+Roles: `admin`, `supervisor` y `auditor`. Todos pueden consultar y registrar auditorías. Solo `admin` puede modificar configuración y criterios o eliminar auditorías. Cada usuario autenticado solo puede cambiar su propia contraseña.
 
 ---
 
@@ -127,7 +124,7 @@ El cuerpo es JSON serializado como string.
 
 ```json
 {
-  "_token": "SECRET_TOKEN",
+  "sessionToken": "SESSION_TOKEN",
   "id_auditoria": "AUD-0042",
   "fecha_auditoria": "2026-06-17",
   "auditor": "Gabriel Luna",
@@ -169,7 +166,7 @@ El backend inserta en 4 hojas: `auditorias`, `detalle_calidad`, `productividad`,
 
 ```json
 {
-  "_token": "SECRET_TOKEN",
+  "sessionToken": "SESSION_TOKEN",
   "_type": "config_change",
   "accion": "parametros_actualizados",
   "agentes": ["Ana García", "Carlos López"],
@@ -200,7 +197,7 @@ Usa upsert por fila — no destruye datos existentes en la hoja `configuracion`.
 
 ```json
 {
-  "_token": "SECRET_TOKEN",
+  "sessionToken": "SESSION_TOKEN",
   "_type": "update_criterios",
   "criterios": [
     { "cod": "COM_SALUDO", "bloque": "Comunicacion", "nombre": "Saludo inicial", "peso": 2, "activo": true }
@@ -216,7 +213,7 @@ Valida que los pesos sumen 100% (margen ±1%). Si no, devuelve error.
 
 ```json
 {
-  "_token": "SECRET_TOKEN",
+  "sessionToken": "SESSION_TOKEN",
   "_type": "delete_auditoria",
   "id_auditoria": "AUD-0042"
 }
