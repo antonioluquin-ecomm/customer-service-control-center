@@ -2,6 +2,34 @@
 // MAIN — entry point e inicialización
 // ================================================================
 
+/* ─── THEME ──────────────────────────────────────────────────── */
+
+const _THEME_KEY = 'cs_theme';
+
+function getCurrentTheme() {
+  return document.documentElement.getAttribute('data-theme') || 'light';
+}
+
+function setTheme(theme) {
+  const next = theme === 'dark' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem(_THEME_KEY, next);
+  const isLight = next === 'light';
+  document.querySelectorAll('.theme-toggle').forEach(function(btn) {
+    const icon = btn.querySelector('.th-icon');
+    if (icon) icon.textContent = isLight ? '☀️' : '🌙';
+    btn.setAttribute('title', isLight ? 'Modo claro' : 'Modo oscuro');
+  });
+}
+
+function toggleTheme() { setTheme(getCurrentTheme() === 'light' ? 'dark' : 'light'); }
+
+function initTheme() {
+  const saved = localStorage.getItem(_THEME_KEY)
+    || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  setTheme(saved);
+}
+
 // Reintenta enviar a Sheets los registros que quedaron en la cola offline
 async function retrySyncPending(){
   if(!PENDING_QUEUE.length){ alert("No hay registros pendientes."); return; }
@@ -64,6 +92,7 @@ function initMobileSidebar() {
 
 (function init(){
   if(!requireAuth()) return;
+  initTheme();
   initVersionBadge();
   initMobileSidebar();
   loadPendingQueue();

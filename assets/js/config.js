@@ -3,12 +3,13 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.1.2',
+  number: '12.1.3',
   date:   '2026-06-23',
-  notes:  'Shell: anti-flash prefers-color-scheme, version badge con popover changelog en sidebar'
+  notes:  'Shell: dark mode completo — variables CSS, toggleTheme(), botón en sidebar footer'
 };
 
 const CHANGELOG = [
+  { v: '12.1.3', date: '2026-06-23', desc: 'Shell: dark mode completo — variables CSS, toggleTheme(), botón en sidebar footer' },
   { v: '12.1.2', date: '2026-06-23', desc: 'Shell: anti-flash prefers-color-scheme, version badge con popover changelog' },
   { v: '12.1.1', date: '2026-06-22', desc: 'Login — callApiRaw, localStorage, diseño canónico; _loginPath() dinámico' },
   { v: '12.1.0', date: '2026-06-20', desc: 'Sidebar — fixed position, brand-icon, mobile collapse, design tokens' },

@@ -103,7 +103,10 @@ window.escapeHtml = function (str) {
       `<div style="display:flex;gap:6px">` +
         `<button class="btn xs" onclick="openChangePasswordModal()" style="flex:1">Clave</button>` +
         `<button class="btn xs danger" onclick="authLogout()" style="flex:1">Salir</button>` +
-      `</div>`;
+      `</div>` +
+      `<button class="theme-toggle btn xs" type="button" onclick="toggleTheme()" style="width:100%;margin-top:6px;display:flex;gap:6px;align-items:center;justify-content:center" title="Modo claro">` +
+        `<span class="th-icon">☀️</span><span>Tema</span>` +
+      `</button>`;
     footer.appendChild(chip);
   };
 
