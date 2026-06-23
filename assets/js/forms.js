@@ -38,7 +38,7 @@ function validateStep1(){
 function validateStep2(){
   const h=escapeHtml;
   const active=activeCriterios();
-  const faltantes=active.filter(c=>!document.querySelector(`input[name="crit-${cod}"]:checked`));
+  const faltantes=active.filter(c=>!document.querySelector(`input[name="crit-${c.cod}"]:checked`));
   const alertEl=document.getElementById("criterios-incomplete-alert");
   if(faltantes.length){
     alertEl.classList.remove("hidden");
@@ -132,7 +132,7 @@ function onCritChange(cod,peso){
   document.getElementById("btn-yes-"+cod)?.classList.toggle("selected",peso>0);
   document.getElementById("btn-no-"+cod)?.classList.toggle("selected",peso===0);
   updateCalidadTotal();
-  const faltantes=activeCriterios().filter(c=>!document.querySelector(`input[name="crit-${cod}"]:checked`));
+  const faltantes=activeCriterios().filter(c=>!document.querySelector(`input[name="crit-${c.cod}"]:checked`));
   if(!faltantes.length) document.getElementById("criterios-incomplete-alert")?.classList.add("hidden");
 }
 
@@ -140,7 +140,7 @@ function onCritChange(cod,peso){
 function updateCalidadTotal(){
   const active=activeCriterios();
   let total=0, eval_=0;
-  active.forEach(c=>{ const ch=document.querySelector(`input[name="crit-${cod}"]:checked`); if(ch){ eval_++; if(ch.value==="si") total+=c.peso; }});
+  active.forEach(c=>{ const ch=document.querySelector(`input[name="crit-${c.cod}"]:checked`); if(ch){ eval_++; if(ch.value==="si") total+=c.peso; }});
   document.getElementById("sc-puntaje").textContent=total+"%";
   document.getElementById("sc-criterios").textContent=eval_+"/"+active.length;
   document.getElementById("sc-pct").textContent=total+"%";
@@ -153,14 +153,14 @@ function updateCalidadTotal(){
 // Retorna el puntaje total de calidad (suma pesos de "Sí")
 function getCalidad(){
   let t=0;
-  activeCriterios().forEach(c=>{ const ch=document.querySelector(`input[name="crit-${cod}"]:checked`); if(ch&&ch.value==="si") t+=c.peso; });
+  activeCriterios().forEach(c=>{ const ch=document.querySelector(`input[name="crit-${c.cod}"]:checked`); if(ch&&ch.value==="si") t+=c.peso; });
   return t;
 }
 
 // Retorna array con detalle de cada criterio evaluado
 function getCriterioDetalle(){
   return activeCriterios().map(c=>{
-    const ch=document.querySelector(`input[name="crit-${cod}"]:checked`);
+    const ch=document.querySelector(`input[name="crit-${c.cod}"]:checked`);
     return { cod:c.cod, nombre:c.nombre, bloque:c.bloque, peso:c.peso,
       cumple:ch?ch.value==="si"?"Sí":"No":"No evaluado",
       obtenido:ch&&ch.value==="si"?c.peso:0 };
