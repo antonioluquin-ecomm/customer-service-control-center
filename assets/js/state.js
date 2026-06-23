@@ -1,7 +1,7 @@
 // ================================================================
 // STATE — variables de estado mutable en memoria
 // ================================================================
-const DB = { auditorias:[], nextId:1 };
+const DB = { auditorias:[], productividadSemanal:[], nextId:1 };
 let PENDING_QUEUE = [];
 
 // Snapshot de CRITERIOS al entrar al paso 2 del formulario

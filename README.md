@@ -47,3 +47,10 @@ Ejecutar `node tests/run-tests.js` para validar cálculos, sincronización offli
 ## Versión
 
 Ver [`CHANGELOG.md`](CHANGELOG.md) para el historial de versiones.
+
+
+## Productividad semanal
+
+- Nueva auditoria de calidad guarda una muestra de calidad (hasta cuatro por agente y semana).
+- Cargar productividad permite carga manual o importar un CSV de la plantilla. La clave agente + anio + semana actualiza un registro existente tras confirmacion, en vez de duplicarlo.
+- El dashboard muestra completitud; solo calcula score general cuando existen calidad y productividad. Los historicos de auditorias permanecen visibles en Registros.

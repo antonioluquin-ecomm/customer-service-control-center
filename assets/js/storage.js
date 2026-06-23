@@ -79,3 +79,11 @@ function updateOfflineBadge() {
 
 function getNextId_local() { return 1; }
 function persistNextId() {}
+function queuePendingProductividad(productividad) {
+  PENDING_QUEUE.push({
+    operation: "upsert_productividad",
+    client_request_id: productividad.client_request_id || createClientRequestId(),
+    payload: { ...productividad, _type: "upsert_productividad_semanal" },
+  });
+  savePendingQueue();
+}

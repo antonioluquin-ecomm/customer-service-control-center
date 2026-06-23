@@ -40,6 +40,8 @@ function testOfflineQueueMigration() {
     if (PENDING_QUEUE[0].operation !== 'create') throw new Error('legacy create was not normalized');
     queuePendingDelete('AUD-0001');
     if (PENDING_QUEUE[1].operation !== 'delete') throw new Error('delete was not queued');
+    queuePendingProductividad({ agente:'Ana', anio:2026, semana:26 });
+    if (PENDING_QUEUE[2].operation !== 'upsert_productividad') throw new Error('productividad was not queued');
   `, context);
 }
 
@@ -75,16 +77,45 @@ function testDashboardAnalysis() {
     { agente: 'Bruno', semana: 10, fecha_auditoria: '2026-03-01', general: 85, calidad: 86, productividad: 84, criterios: [{ nombre: 'Saludo', cumple: 'Sí' }] },
     { agente: 'Bruno', semana: 11, fecha_auditoria: '2026-03-08', general: 88, calidad: 90, productividad: 86, criterios: [{ nombre: 'Saludo', cumple: 'Sí' }] },
   ];
-  const analysis = context.analytics.buildDashboardAnalysis(records);
-  assert.strictEqual(analysis.currentWeek, 11);
-  assert.strictEqual(analysis.previousWeek, 10);
+  const dashboardRecords = records.map(record => ({ ...record, anio: 2026, calidadCargada: true, productividadCargada: true, completo: true }));
+  const analysis = context.analytics.buildDashboardAnalysis(dashboardRecords);
+  assert.strictEqual(analysis.currentWeek, '2026-W11');
+  assert.strictEqual(analysis.previousWeek, '2026-W10');
   assert.strictEqual(analysis.metrics.qualityDelta, -13);
   assert.strictEqual(analysis.priorities[0].agent, 'Ana');
   assert.strictEqual(analysis.priorities[0].severity, 'high');
   assert.strictEqual(analysis.rootCauses[0].name, 'Escucha');
+  const incomplete = context.analytics.buildDashboardAnalysis([{ agente: 'Carla', anio: 2026, semana: 12, fecha_auditoria: '2026-03-15', calidad: 82, productividad: null, general: null, calidadCargada: true, productividadCargada: false, completo: false, criterios: [] }]);
+  assert.strictEqual(incomplete.priorities.length, 0);
 }
 testCalculations();
 testOfflineQueueMigration();
 testDashboardAnalysis();
 testServerIds();
+testProductividadImportParsing();
+testServerMuestrasLimit();
 console.log('All AuditCS tests passed.');
+
+function testProductividadImportParsing() {
+  const context = {};
+  vm.createContext(context);
+  vm.runInContext(fs.readFileSync('assets/js/productividad.js', 'utf8').replace(/\?\./g, '.').replace(/\?\?/g, '||').replace(/files\.\[0\]/g, 'files[0]') + '\nthis.productividad = { csvRows, parseSemana };', context);
+  const rows = context.productividad.csvRows('Agente,Semana\n"Perez, Ana",2026-W26\n');
+  assert.strictEqual(rows[1][0], 'Perez, Ana');
+  assert.strictEqual(context.productividad.parseSemana('2026-W26').anio, 2026);
+  assert.strictEqual(context.productividad.parseSemana('2026-W26').semana, 26);
+}
+
+function testServerMuestrasLimit() {
+  const context = { Date, JSON, String, Number };
+  vm.createContext(context);
+  vm.runInContext(fs.readFileSync('apps-script/AppsScript.js', 'utf8'), context);
+  const headers = ['id_auditoria', 'agente', 'anio', 'semana'];
+  const rows = [
+    ['AUD-1', 'Ana', 2026, 26], ['AUD-2', 'Ana', 2026, 26],
+    ['AUD-3', 'Ana', 2026, 26], ['AUD-4', 'Ana', 2026, 26],
+    ['AUD-5', 'Ana', 2025, 26],
+  ];
+  assert.strictEqual(context.countMuestrasSemana(rows, headers, 'Ana', 2026, 26), 4);
+  assert.strictEqual(context.countMuestrasSemana(rows, headers, 'Ana', 2025, 26), 1);
+}

@@ -19,6 +19,7 @@
 const SHEET_AUDITORIAS    = "auditorias";
 const SHEET_DETALLE       = "detalle_calidad";
 const SHEET_PRODUCTIVIDAD = "productividad";
+const SHEET_PRODUCTIVIDAD_SEMANAL = "productividad_semanal";
 const SHEET_OBSERVACIONES = "observaciones";
 const SHEET_LOG           = "log_envios";
 const SHEET_CONFIG        = "configuracion";
@@ -47,6 +48,7 @@ const HEADERS = {
     "dias_tarde","dias_faltas","pct_interacciones","pct_puntualidad",
     "pct_presentismo","total_productividad","w_inter","w_puntual","w_present",
   ],
+  productividad_semanal: ["id_productividad","fecha_registro","fecha_actualizacion","anio","mes","semana","agente","horas_trabajadas","objetivo_interacciones","interacciones_reales","dias_tarde","dias_faltas","pct_interacciones","pct_puntualidad","pct_presentismo","total_productividad","w_inter","w_puntual","w_present","auditor"],
   observaciones: [
     "id_observacion","id_auditoria","fecha_registro","agente","ticket",
     "obs_general","obs_desvios","obs_accion","requiere_seguimiento",
@@ -140,6 +142,7 @@ function doGet(e) {
     if (action === "get_config")     return jsonOut(getConfig());
     if (action === "get_auditorias") return jsonOut(getAuditorias());
     if (action === "get_detalle")    return jsonOut(getDetalle());
+    if (action === "get_productividad_semanal") return jsonOut(getProductividadSemanal());
     if (action === "get_criterios")  return jsonOut(getCriteriosCalidad());
     return jsonOut({ status:"ok", service:"AuditCS v7", timestamp: new Date().toISOString() });
   } catch(err) {
@@ -278,6 +281,8 @@ function doPost(e) {
       handleUpdateCriterios(payload.criterios || []);
       logEnvio("?", "update_criterios", "OK", "Criterios actualizados", session.email);
       result = { status:"ok", type:"criterios_updated" };
+    } else if (payload._type === "upsert_productividad_semanal") {
+      result = upsertProductividadSemanal(payload, session);
     } else if (payload._type === "delete_auditoria") {
       deleteAuditoria(payload.id_auditoria, session.email);
       result = { status:"ok", deleted:payload.id_auditoria };
@@ -296,11 +301,11 @@ function doPost(e) {
       if (existingId) {
         result = { status:"ok", id:existingId, duplicate:true };
       } else {
+        validateMuestrasSemana(payload);
         payload.id_auditoria = getNextAuditoriaId();
         payload.id = payload.id_auditoria;
         insertAuditoria(payload);
         insertDetalleCalidad(payload);
-        insertProductividad(payload);
         insertObservacion(payload);
         logEnvio(payload.id_auditoria, "insert_completo","OK","", session.email);
         result = { status:"ok", id:payload.id_auditoria };
@@ -644,6 +649,7 @@ function ensureSheetsOnce() {
   const props = PropertiesService.getScriptProperties();
   if (props.getProperty(PROP_INITIALIZED) === "true") {
     ensureAuditoriaRequestIdColumn();
+    ensureProductividadSemanalSheet();
     return;
   }
   // Primera ejecución: crear hojas y headers
@@ -663,6 +669,15 @@ function ensureSheetsOnce() {
   if(sc.getLastRow() === 1) sembrarCriteriosDefault(sc);
   ensureAuditoriaRequestIdColumn();
   props.setProperty(PROP_INITIALIZED, "true");
+}
+
+function ensureProductividadSemanalSheet() {
+  const sheet=getSheet(SHEET_PRODUCTIVIDAD_SEMANAL);
+  if(sheet.getLastRow()>0) return;
+  const headers=HEADERS.productividad_semanal;
+  sheet.appendRow(headers);
+  sheet.getRange(1,1,1,headers.length).setFontWeight("bold").setBackground("#E8F0FE");
+  sheet.setFrozenRows(1);
 }
 
 function ensureAuditoriaRequestIdColumn() {
@@ -699,4 +714,33 @@ function limpiarSesionesExpiradas() {
 function setupInitial() {
   reinitializeSheets();
   Logger.log("Setup inicial completado.");
+}
+
+function getProductividadSemanal(){ const sh=getSheet(SHEET_PRODUCTIVIDAD_SEMANAL), lr=sh.getLastRow(); if(lr<=1)return {status:'ok',productividad:[]}; const h=sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0]; return {status:'ok',productividad:sh.getRange(2,1,lr-1,sh.getLastColumn()).getValues().filter(r=>r[0]).map(r=>{const o={};h.forEach((k,i)=>o[k]=r[i]);return o;})}; }
+
+function upsertProductividadSemanal(p, session){
+  const agente=String(p.agente||"").trim(), semana=Number(p.semana), anio=Number(p.anio);
+  if(!agente||!Number.isInteger(semana)||semana<1||semana>53||!Number.isInteger(anio)) throw new Error("Agente, año y semana válidos son obligatorios");
+  const sh=getSheet(SHEET_PRODUCTIVIDAD_SEMANAL), headers=sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0];
+  const now=new Date().toISOString(), id=`PROD-${agente}-${anio}-${semana}`;
+  const fields={id_productividad:id,fecha_registro:now,fecha_actualizacion:now,anio,mes:p.mes||"",semana,agente,horas_trabajadas:Number(p.horas_trabajadas)||0,objetivo_interacciones:Number(p.objetivo_interacciones)||0,interacciones_reales:Number(p.interacciones_reales)||0,dias_tarde:Number(p.dias_tarde)||0,dias_faltas:Number(p.dias_faltas)||0,pct_interacciones:Number(p.pct_interacciones)||0,pct_puntualidad:Number(p.pct_puntualidad)||0,pct_presentismo:Number(p.pct_presentismo)||0,total_productividad:Number(p.total_productividad)||0,w_inter:Number(p.w_inter)||60,w_puntual:Number(p.w_puntual)||20,w_present:Number(p.w_present)||20,auditor:session.email||""};
+  const rows=sh.getLastRow()>1?sh.getRange(2,1,sh.getLastRow()-1,headers.length).getValues():[];
+  const found=rows.findIndex(r=>String(r[headers.indexOf("agente")])===agente&&Number(r[headers.indexOf("anio")])===anio&&Number(r[headers.indexOf("semana")])===semana);
+  const row=headers.map(h=>fields[h]!==undefined?fields[h]:"");
+  if(found>=0){ const old=rows[found]; headers.forEach((h,i)=>{if(fields[h]===undefined)row[i]=old[i];}); sh.getRange(found+2,1,1,row.length).setValues([row]); return {status:"ok",id,updated:true}; }
+  sh.appendRow(row); return {status:"ok",id,created:true};
+}
+
+// Cuenta muestras de calidad sin tocar historicos ni detalle_calidad.
+function countMuestrasSemana(rows, headers, agente, anio, semana) {
+  const idxAgente=headers.indexOf("agente"), idxAnio=headers.indexOf("anio"), idxSemana=headers.indexOf("semana");
+  return rows.filter(row => String(row[idxAgente])===String(agente) && Number(row[idxAnio])===Number(anio) && Number(row[idxSemana])===Number(semana)).length;
+}
+function validateMuestrasSemana(p) {
+  const sh=getSheet(SHEET_AUDITORIAS), headers=sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0];
+  const rows=sh.getLastRow()>1 ? sh.getRange(2,1,sh.getLastRow()-1,headers.length).getValues() : [];
+  const config=getConfig().config||{};
+  const limit=Number(config.muestras_semana)||4;
+  const count=countMuestrasSemana(rows,headers,p.agente,p.anio,p.semana);
+  if(count>=limit) throw new Error(`El agente ya tiene ${count} muestras de calidad en la semana ${p.semana} (maximo ${limit}).`);
 }

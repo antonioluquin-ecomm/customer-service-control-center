@@ -45,6 +45,10 @@ async function retrySyncPending(){
       const aud=DB.auditorias.find(a=>a.client_request_id===item.client_request_id);
       const serverId=res.data?.id;
       if(aud && serverId){ aud.id=serverId; aud.id_auditoria=serverId; aud.sheets_enviado=true; }
+    } else if(item.operation==="upsert_productividad"){
+      const payload=item.payload;
+      const idx=DB.productividadSemanal.findIndex(p=>p.agente===payload.agente&&Number(p.anio)===Number(payload.anio)&&Number(p.semana)===Number(payload.semana));
+      if(idx>=0) DB.productividadSemanal[idx]={...DB.productividadSemanal[idx],sheets_enviado:true};
     }
   }
   savePendingQueue();

@@ -62,7 +62,11 @@
       <div class="nav-section">Gestión</div>
       <button class="nav-item" onclick="showPage('formulario')">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1v14M1 8h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-        Nueva Auditoría
+        Nueva auditoría de calidad
+      </button>
+      <button class="nav-item" onclick="showPage('productividad')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 13h12v2H2zM3 7h2v5H3zM7 3h2v9H7zM11 5h2v7h-2z"/></svg>
+        Productividad semanal
       </button>
       <button class="nav-item" onclick="showPage('registros')">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M1 2a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H2a1 1 0 01-1-1V2zm1 0v12h12V2H2z"/><path d="M4 5h8v1H4zM4 8h8v1H4zM4 11h5v1H4z"/></svg>
@@ -152,6 +156,7 @@
         </section>
       </div>
 
+      <section class="card"><div class="card-header"><div><div class="card-title">Completitud semanal</div><div class="card-sub">El score general se habilita solo con calidad y productividad.</div></div></div><div id="db-completeness"></div></section>
       <section class="card db-heatmap-section">
         <div class="card-header"><div><div class="card-title">Historial de calidad por agente</div><div class="card-sub">Vista secundaria para explorar patrones semanales</div></div><button class="btn xs" type="button" onclick="toggleDashboardHeatmap()" id="db-heatmap-toggle">Ver matriz</button></div>
         <div class="db-hm-wrap hidden" id="db-heatmap-panel"><div id="db-heatmap"></div></div>
@@ -159,172 +164,21 @@
 
     </div>
 
-    <!-- FORMULARIO -->
+    <!-- FORMULARIO DE CALIDAD -->
     <div id="page-formulario" class="page">
-      <div class="topbar"><div class="topbar-left"><h2>Nueva Auditoría</h2><p>Completá los 5 pasos</p></div></div>
+      <div class="topbar"><div class="topbar-left"><h2>Nueva auditoria de calidad</h2><p>Registro de una muestra de calidad; la productividad se carga por separado.</p></div></div>
       <div id="form-alert" class="alert success hidden"></div>
-      <div class="form-progress">
-        <div class="step-tab active" id="tab-1" onclick="goStep(1)"><span class="step-num">01</span>Datos</div>
-        <div class="step-tab" id="tab-2" onclick="goStep(2)"><span class="step-num">02</span>Calidad</div>
-        <div class="step-tab" id="tab-3" onclick="goStep(3)"><span class="step-num">03</span>Productividad</div>
-        <div class="step-tab" id="tab-4" onclick="goStep(4)"><span class="step-num">04</span>Observaciones</div>
-        <div class="step-tab" id="tab-5" onclick="goStep(5)"><span class="step-num">05</span>Resumen</div>
-      </div>
-
-      <!-- PASO 1 -->
-      <div class="form-step active" id="step-1">
-        <div class="card">
-          <div class="form-section">
-            <div class="section-title">Identificación</div>
-            <div class="fg c4">
-              <div class="field"><label>Auditor *</label><select id="f-auditor"><option value="">— Seleccionar —</option></select></div>
-              <!-- FIX: fecha actualiza mes y semana automáticamente -->
-              <div class="field"><label>Fecha *</label><input type="date" id="f-fecha" oninput="onFechaChange()"/></div>
-              <div class="field"><label>Mes</label><select id="f-mes" disabled style="background:var(--surface);color:var(--muted)"><option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option></select></div>
-              <div class="field"><label>Semana del año</label><input type="number" id="f-semana" placeholder="Auto" min="1" max="52" readonly style="background:var(--surface);color:var(--muted)" oninput="updateSemanaCount()"/></div>
-            </div>
-          </div>
-          <div class="form-section">
-            <div class="section-title">Datos del Agente</div>
-            <div class="fg c4">
-              <div class="field"><label>Agente *</label><select id="f-agente" onchange="updateSemanaCount()"><option value="">— Seleccionar —</option></select></div>
-              <div class="field"><label>N° Ticket / Caso *</label><input type="text" id="f-ticket" placeholder="Ej: 5093240"/></div>
-              <div class="field"><label>Canal *</label><select id="f-canal"><option value="">— Seleccionar —</option><option>WhatsApp</option><option>Mail</option><option>Teléfono</option><option>Ventas</option><option>Redes</option></select></div>
-              <div class="field"><label>Tipo de Gestión *</label><select id="f-tipo"><option value="">— Seleccionar —</option><option>Reclamo</option><option>Consulta</option><option>Solicitud</option></select></div>
-            </div>
-          </div>
-          <div class="form-section">
-            <div class="section-title">Horas trabajadas en la semana</div>
-            <div class="info-box"><p>Este dato se ingresa <strong>una vez por semana por agente</strong> y determina el objetivo de interacciones automáticamente.</p></div>
-            <div class="fg c3" style="gap:12px">
-              <div class="field">
-                <label>Horas trabajadas *</label>
-                <input type="number" id="f-horas" placeholder="Ej: 44" min="1" max="60" step="0.5" oninput="updateHorasBanner()"/>
-                <span class="helper">Horas reales en la semana</span>
-              </div>
-              <div class="field" style="grid-column:span 2">
-                <label>Objetivo calculado de interacciones</label>
-                <div id="horas-preview" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-size:13px;color:var(--muted);min-height:38px;display:flex;align-items:center">Ingresá las horas para ver el objetivo</div>
-                <span class="helper" id="horas-formula-hint">Fórmula: si 44 hs → 660 tickets · proporcional al resto</span>
-              </div>
-            </div>
-            <!-- FIX: alerta de duplicado por agente+ticket -->
-            <div id="semana-count-alert" class="hidden warn-box" style="margin-top:10px"></div>
-            <div id="duplicate-alert" class="hidden alert warning" style="margin-top:10px"></div>
-          </div>
-          <div class="step-actions"><span></span><button class="btn primary" onclick="validateStep1()">Siguiente →</button></div>
-        </div>
-      </div>
-
-      <!-- PASO 2 -->
-      <div class="form-step" id="step-2">
-        <div class="card">
-          <div class="score-summary">
-            <div><div class="ss-value" id="sc-puntaje" style="color:var(--accent)">0%</div><div class="ss-label">Puntaje calidad</div></div>
-            <div><div class="ss-value" id="sc-pct">0%</div><div class="ss-label">% obtenido</div><div class="ss-badge" id="sc-badge"></div></div>
-            <div><div class="ss-value" id="sc-criterios" style="color:var(--muted)">0/0</div><div class="ss-label">Criterios evaluados</div></div>
-          </div>
-          <!-- FIX: alert si faltan criterios sin evaluar -->
-          <div id="criterios-incomplete-alert" class="hidden alert error" style="margin-bottom:12px"></div>
-          <div id="criterios-comunicacion-wrap" class="criteria-group">
-            <div class="criteria-header">
-              <span>Comunicación</span>
-              <span class="criteria-header-right">Peso · Resultado · Puntaje</span>
-            </div>
-            <div id="criterios-comunicacion"></div>
-          </div>
-          <div id="criterios-gestion-wrap" class="criteria-group">
-            <div class="criteria-header">
-              <span>Gestión</span>
-              <span class="criteria-header-right">Peso · Resultado · Puntaje</span>
-            </div>
-            <div id="criterios-gestion"></div>
-          </div>
-          <!-- FIX: validateStep2() bloquea avance si hay criterios sin evaluar -->
-          <div class="step-actions"><button class="btn" onclick="goStep(1)">← Anterior</button><button class="btn primary" onclick="validateStep2()">Siguiente →</button></div>
-        </div>
-      </div>
-
-      <!-- PASO 3 -->
-      <div class="form-step" id="step-3">
-        <div class="card">
-          <div class="info-box" id="prod-banner" style="display:flex;align-items:center;gap:20px">
-            <div>
-              <div style="font-size:22px;font-weight:700;color:var(--accent);font-family:'DM Mono',monospace" id="prod-horas-val">— hs</div>
-              <div style="font-size:12px;color:var(--accent)">Horas del agente esta semana</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:2px" id="prod-obj-val">Objetivo: — interacciones</div>
-            </div>
-            <div style="flex:1"></div>
-            <div style="font-size:11px;color:var(--muted)">Pesos: <span id="prod-pesos-info" style="font-family:'DM Mono',monospace">60% · 20% · 20%</span></div>
-          </div>
-          <div class="criteria-group">
-            <div class="criteria-header">
-              <span>Métrica</span>
-              <span style="display:grid;grid-template-columns:90px 110px 80px;gap:10px;text-align:center;font-size:10px">Objetivo · Real ingresado · %</span>
-            </div>
-            <div class="prod-row">
-              <div class="prod-label">Interacciones atendidas<span id="prod-inter-label">Peso: 60% de productividad</span></div>
-              <div class="prod-target" id="obj-inter">—</div>
-              <input type="number" id="p-inter" placeholder="Real" min="0" oninput="calcProd()" style="text-align:center"/>
-              <div class="prod-pct" id="pct-inter">—</div>
-            </div>
-            <div class="prod-row">
-              <div class="prod-label">Días llegada tarde<span id="prod-puntual-label">Peso: 20% · Obj: máx. permitido/semana</span></div>
-              <div class="prod-target" id="obj-tarde">—</div>
-              <input type="number" id="p-tarde" placeholder="Días" min="0" max="30" oninput="calcProd()" style="text-align:center"/>
-              <div class="prod-pct" id="pct-puntual">—</div>
-            </div>
-            <div class="prod-row">
-              <div class="prod-label">Días faltados<span id="prod-present-label">Peso: 20% · Obj: máx. permitido/semana</span></div>
-              <div class="prod-target" id="obj-faltas">—</div>
-              <input type="number" id="p-faltas" placeholder="Días" min="0" max="30" oninput="calcProd()" style="text-align:center"/>
-              <div class="prod-pct" id="pct-present">—</div>
-            </div>
-          </div>
-          <div class="score-summary" style="margin-top:14px">
-            <div><div class="ss-value" id="pp-inter" style="color:var(--accent)">—</div><div class="ss-label">% Interacciones</div></div>
-            <div><div class="ss-value" id="pp-asist" style="color:var(--teal)">—</div><div class="ss-label">% Asistencia prom.</div></div>
-            <div><div class="ss-value" id="pp-total" style="color:var(--green)">—</div><div class="ss-label">Total Productividad</div></div>
-          </div>
-          <!-- FIX: validateStep3() obliga a ingresar interacciones reales -->
-          <div class="step-actions"><button class="btn" onclick="goStep(2)">← Anterior</button><button class="btn primary" onclick="validateStep3()">Siguiente →</button></div>
-        </div>
-      </div>
-
-      <!-- PASO 4 -->
-      <div class="form-step" id="step-4">
-        <div class="card">
-          <div class="form-section">
-            <div class="section-title">Observaciones del Auditor</div>
-            <div class="fg c1" style="gap:10px">
-              <div class="field"><label>Observación general</label><textarea id="f-obs-general" rows="3" placeholder="Describir el desempeño general..."></textarea></div>
-              <div class="field"><label>Desvíos detectados</label><textarea id="f-obs-desvios" rows="2" placeholder="Indicar criterios incumplidos y contexto..."></textarea></div>
-              <div class="field"><label>Acción sugerida</label><textarea id="f-obs-accion" rows="2" placeholder="Recomendaciones de mejora o capacitación..."></textarea></div>
-              <div class="fg">
-                <div class="field"><label>¿Requiere seguimiento?</label><select id="f-seguimiento"><option value="No">No</option><option value="Sí">Sí</option></select></div>
-                <div class="field"><label>Responsable de seguimiento</label><input type="text" id="f-resp-seg" placeholder="Nombre del supervisor"/></div>
-              </div>
-            </div>
-          </div>
-          <div class="step-actions"><button class="btn" onclick="goStep(3)">← Anterior</button><button class="btn primary" onclick="goStep(5)">Ver Resumen →</button></div>
-        </div>
-      </div>
-
-      <!-- PASO 5 -->
-      <div class="form-step" id="step-5">
-        <div class="card">
-          <div class="card-header"><div class="card-title">Resumen de la Auditoría</div></div>
-          <div id="resumen-content"></div>
-          <div class="step-actions">
-            <button class="btn" onclick="goStep(4)">← Editar</button>
-            <button class="btn success" id="btn-submit" onclick="submitAuditoria()">✓ Registrar y enviar a Sheets</button>
-          </div>
-        </div>
-      </div>
+      <div class="form-progress"><div class="step-tab active" id="tab-1" onclick="goStep(1)"><span class="step-num">01</span>Datos</div><div class="step-tab" id="tab-2" onclick="goStep(2)"><span class="step-num">02</span>Calidad</div><div class="step-tab" id="tab-3" onclick="goStep(3)"><span class="step-num">03</span>Observaciones</div><div class="step-tab" id="tab-4" onclick="goStep(4)"><span class="step-num">04</span>Resumen</div></div>
+      <div class="form-step active" id="step-1"><div class="card"><div class="form-section"><div class="section-title">Identificacion</div><div class="fg c4"><div class="field"><label>Auditor *</label><select id="f-auditor"><option value="">- Seleccionar -</option></select></div><div class="field"><label>Fecha *</label><input type="date" id="f-fecha" oninput="onFechaChange()"/></div><div class="field"><label>Mes</label><select id="f-mes" disabled><option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option></select></div><div class="field"><label>Semana</label><input type="number" id="f-semana" readonly/></div></div></div><div class="form-section"><div class="section-title">Muestra</div><div class="fg c4"><div class="field"><label>Agente *</label><select id="f-agente" onchange="updateSemanaCount()"><option value="">- Seleccionar -</option></select></div><div class="field"><label>Nro. Ticket / caso *</label><input id="f-ticket"/></div><div class="field"><label>Canal *</label><select id="f-canal"><option value="">- Seleccionar -</option><option>WhatsApp</option><option>Mail</option><option>Telefono</option><option>Ventas</option><option>Redes</option></select></div><div class="field"><label>Tipo *</label><select id="f-tipo"><option value="">- Seleccionar -</option><option>Reclamo</option><option>Consulta</option><option>Solicitud</option></select></div></div><div id="semana-count-alert" class="hidden warn-box" style="margin-top:10px"></div><div id="duplicate-alert" class="hidden alert warning" style="margin-top:10px"></div></div><div class="step-actions"><span></span><button class="btn primary" onclick="validateStep1()">Siguiente ?</button></div></div></div>
+      <div class="form-step" id="step-2"><div class="card"><div class="score-summary"><div><div class="ss-value" id="sc-puntaje">0%</div><div class="ss-label">Puntaje calidad</div></div><div><div class="ss-value" id="sc-pct">0%</div><div class="ss-label">Obtenido</div><div id="sc-badge"></div></div><div><div class="ss-value" id="sc-criterios">0/0</div><div class="ss-label">Criterios evaluados</div></div></div><div id="criterios-incomplete-alert" class="hidden alert error"></div><div id="criterios-comunicacion-wrap" class="criteria-group"><div class="criteria-header"><span>Comunicacion</span></div><div id="criterios-comunicacion"></div></div><div id="criterios-gestion-wrap" class="criteria-group"><div class="criteria-header"><span>Gestion</span></div><div id="criterios-gestion"></div></div><div class="step-actions"><button class="btn" onclick="goStep(1)">← Anterior</button><button class="btn primary" onclick="validateStep2()">Siguiente ?</button></div></div></div>
+      <div class="form-step" id="step-3"><div class="card"><div class="form-section"><div class="section-title">Observaciones</div><div class="fg c1"><div class="field"><label>Observacion general</label><textarea id="f-obs-general" rows="3"></textarea></div><div class="field"><label>Desvios detectados</label><textarea id="f-obs-desvios" rows="2"></textarea></div><div class="field"><label>Accion sugerida</label><textarea id="f-obs-accion" rows="2"></textarea></div><div class="fg"><div class="field"><label>¿Requiere seguimiento?</label><select id="f-seguimiento"><option>No</option><option>Sí</option></select></div><div class="field"><label>Responsable</label><input id="f-resp-seg"/></div></div></div></div><div class="step-actions"><button class="btn" onclick="goStep(2)">← Anterior</button><button class="btn primary" onclick="validateStep3()">Ver resumen →</button></div></div></div>
+      <div class="form-step" id="step-4"><div class="card"><div class="card-header"><div class="card-title">Resumen de la auditoria de calidad</div></div><div id="resumen-content"></div><div class="step-actions"><button class="btn" onclick="goStep(3)">← Editar</button><button class="btn success" id="btn-submit" onclick="submitAuditoria()">✓ Registrar y enviar a Sheets</button></div></div></div>
     </div>
 
-    <!-- REGISTROS -->
-    <div id="page-registros" class="page">
+    <!-- PRODUCTIVIDAD -->
+    <div id="page-productividad" class="page"><div class="topbar"><div class="topbar-left"><h2>Cargar productividad</h2><p>Una carga por agente y semana; los registros existentes se actualizan.</p></div></div><div class="card"><div class="filter-bar"><button class="btn primary" data-productividad-tab-btn="manual" onclick="setProductividadTab('manual')">Carga manual</button><button class="btn" data-productividad-tab-btn="excel" onclick="setProductividadTab('excel')">Importar Excel</button></div><div data-productividad-tab="manual"><div class="fg c3"><div class="field"><label>Agente *</label><select id="p-agente" oninput="productividadManualPreview()"><option value="">- Seleccionar -</option></select></div><div class="field"><label>Fecha de semana *</label><input type="date" id="p-fecha" oninput="productividadManualPreview()"/></div><div class="field"><label>Horas trabajadas *</label><input type="number" id="p-horas" min="0" step=".5" oninput="productividadManualPreview()"/></div><div class="field"><label>Interacciones reales *</label><input type="number" id="p-interacciones" min="0" oninput="productividadManualPreview()"/></div><div class="field"><label>Dias tarde *</label><input type="number" id="p-tarde" min="0" value="0" oninput="productividadManualPreview()"/></div><div class="field"><label>Dias faltas *</label><input type="number" id="p-faltas" min="0" value="0" oninput="productividadManualPreview()"/></div></div><div id="p-preview" class="info-box" style="margin-top:16px">Completa agente, fecha y horas para ver el resumen.</div><div id="p-alert" class="alert hidden"></div><div class="step-actions"><span></span><button class="btn success" onclick="submitProductividad()">Guardar productividad</button></div></div><div data-productividad-tab="excel" class="hidden"><p style="color:var(--muted)">Importa un CSV guardado desde Excel. Las filas existentes por agente+semana se actualizaran luego de la confirmacion.</p><button class="btn" onclick="downloadProductividadTemplate()">↓ Descargar plantilla</button><input type="file" accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="importProductividadFile(this)" style="margin-left:10px"/><div id="p-import-preview" style="margin-top:16px"></div></div><div class="form-section" style="margin-top:24px"><div class="section-title">Registros de productividad</div><div id="p-records" style="overflow:auto"></div></div></div></div>
+
+    <!-- REGISTROS --><div id="page-registros" class="page">
       <div class="topbar">
         <div class="topbar-left"><h2>Registros</h2><p>Historial completo de auditorías</p></div>
         <div class="topbar-right">
@@ -499,6 +353,7 @@
 <script src="assets/js/ui.js"></script>
 <script src="assets/js/forms.js"></script>
 <script src="assets/js/dashboard.js"></script>
+<script src="assets/js/productividad.js"></script>
 <script src="assets/js/records.js"></script>
 <script src="assets/js/settings.js"></script>
 <script src="assets/js/main.js"></script>

@@ -24,7 +24,7 @@ function updateSheetsUI(state){
 }
 
 // Mapa de índice de nav por id de página
-const PAGE_MAP={dashboard:0,agentes:1,observaciones:2,formulario:3,registros:4,configuracion:5};
+const PAGE_MAP={dashboard:0,agentes:1,observaciones:2,formulario:3,productividad:4,registros:5,configuracion:6};
 
 // Muestra la página activa y dispara su render
 function showPage(id){
@@ -41,6 +41,7 @@ function showPage(id){
   if(id==="registros")     renderRegistros();
   if(id==="observaciones"){ populateObsFilters(); renderObservaciones(); }
   if(id==="agentes")       renderAgentes();
+  if(id==="productividad"){ initProductividadForm(); renderProductividadRecords(); }
 }
 
 function applyRoleRestrictions(){
@@ -63,6 +64,7 @@ function populateSelects(){
   const opts=(arr,empty)=>`<option value="">${escapeHtml(empty)}</option>`+arr.map(a=>`<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("");
   const fa=document.getElementById("f-agente"); if(fa) fa.innerHTML=opts(CFG.agentes,"— Seleccionar —");
   const fau=document.getElementById("f-auditor"); if(fau) fau.innerHTML=opts(CFG.auditores,"— Seleccionar —");
+  const pa=document.getElementById("p-agente"); if(pa) pa.innerHTML=opts(CFG.agentes,"— Seleccionar —");
   const ff=document.getElementById("filter-agente"); if(ff) ff.innerHTML=opts(CFG.agentes,"Todos los agentes");
   const sd=document.getElementById("sel-agente-detail"); if(sd) sd.innerHTML=opts(CFG.agentes,"— Seleccionar agente —");
   const dfa=document.getElementById("df-agente"); if(dfa) dfa.innerHTML=opts(CFG.agentes,"Todos los agentes");

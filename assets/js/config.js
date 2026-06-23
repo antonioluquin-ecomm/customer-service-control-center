@@ -37,6 +37,8 @@ let CFG = {
   obj_puntual:1, obj_present:1,
   u_excelente:95, u_correcta:80,
   w_calidad:50, w_productividad:50,
+  // Fecha de corte: los historicos anteriores siguen visibles, pero no entran al score combinado.
+  fecha_inicio_modelo_separado:"2026-06-24",
 };
 
 let CRITERIOS = [
