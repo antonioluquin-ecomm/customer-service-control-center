@@ -25,11 +25,26 @@ async function retrySyncPending(){
   else hideSync(`⚠ ${fail} operaciones aún pendientes`,3000,true);
 }
 // Inicialización de la app
-function initSidebarVersion() {
-  const el = document.getElementById('brandMeta');
-  if (el && typeof VERSION !== 'undefined') {
-    el.textContent = `Customer Service · v${VERSION.number}`;
-  }
+function initVersionBadge() {
+  const span    = document.getElementById('sidebarVersion');
+  const btn     = document.getElementById('sidebarVersionBtn');
+  const popover = document.getElementById('versionPopover');
+  if (!span) return;
+  span.textContent = `v${VERSION.number}`;
+  if (!btn || !popover || typeof CHANGELOG === 'undefined' || !CHANGELOG.length) return;
+  popover.innerHTML = CHANGELOG.map(c =>
+    `<div style="margin-bottom:7px;">` +
+      `<span style="font-weight:600;font-size:13px;">v${c.v}</span>` +
+      `<span style="color:var(--muted);font-size:12px;margin-left:6px;">${c.date}</span>` +
+      `<div style="font-size:13px;color:var(--text);margin-top:1px;">${c.desc}</div>` +
+    `</div>`
+  ).join('');
+  btn.style.cursor = 'pointer';
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    popover.style.display = popover.style.display !== 'none' ? 'none' : 'block';
+  });
+  document.addEventListener('click', function() { popover.style.display = 'none'; });
 }
 
 function initMobileSidebar() {
@@ -49,7 +64,7 @@ function initMobileSidebar() {
 
 (function init(){
   if(!requireAuth()) return;
-  initSidebarVersion();
+  initVersionBadge();
   initMobileSidebar();
   loadPendingQueue();
   renderUserChip();

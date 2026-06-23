@@ -3,10 +3,19 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.1.1',
-  date:   '2026-06-22',
-  notes:  'Login: diseño canónico unificado, callApiRaw en app.js, auth.js a localStorage + _loginPath() dinámico + requireAdmin + restrictWriteIfAgent'
+  number: '12.1.2',
+  date:   '2026-06-23',
+  notes:  'Shell: anti-flash prefers-color-scheme, version badge con popover changelog en sidebar'
 };
+
+const CHANGELOG = [
+  { v: '12.1.2', date: '2026-06-23', desc: 'Shell: anti-flash prefers-color-scheme, version badge con popover changelog' },
+  { v: '12.1.1', date: '2026-06-22', desc: 'Login — callApiRaw, localStorage, diseño canónico; _loginPath() dinámico' },
+  { v: '12.1.0', date: '2026-06-20', desc: 'Sidebar — fixed position, brand-icon, mobile collapse, design tokens' },
+  { v: '12.0.0', date: '2026-06-17', desc: 'Dashboard supervisor — métricas de equipo, tendencias y prioridades semanales' },
+  { v: '11.0.0', date: '2026-06-14', desc: 'Observabilidad de sincronización — tests e idempotencia offline' },
+  { v: '10.0.0', date: '2026-06-10', desc: 'Autorización por rol — restricciones de escritura para auditores no admin' },
+];
 
 const CONFIG = {
   // URL del deploy de Apps Script — reemplazar con la URL real después del deploy.

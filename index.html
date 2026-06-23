@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AuditCS | Customer Service Control Center</title>
+  <script>(function(){var t=localStorage.getItem('cs_theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
   <link rel="stylesheet" href="assets/css/variables.css"/>
   <link rel="stylesheet" href="assets/css/base.css"/>
   <link rel="stylesheet" href="assets/css/layout.css"/>
@@ -37,7 +38,11 @@
       <div class="brand-icon">AC</div>
       <div>
         <div class="brand-name">AuditCS</div>
-        <div class="brand-meta" id="brandMeta">Customer Service</div>
+        <div class="brand-meta" id="sidebarVersionBtn" title="Ver historial de cambios">
+          <span id="sidebarVersion">v…</span>
+          <span>· Customer Service</span>
+        </div>
+        <div class="sidebar-version-popover" id="versionPopover" style="display:none;"></div>
       </div>
     </div>
     <nav class="nav">
