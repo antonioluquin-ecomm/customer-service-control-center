@@ -91,10 +91,26 @@ function testDashboardAnalysis() {
 testCalculations();
 testOfflineQueueMigration();
 testDashboardAnalysis();
+testSeparatedMetricsComposition();
 testServerIds();
 testProductividadImportParsing();
 testServerMuestrasLimit();
 console.log('All AuditCS tests passed.');
+
+function testSeparatedMetricsComposition() {
+  const context = {
+    DB: { productividadSemanal: [{ agente:'Luciana', anio:2026, semana:23, total_productividad:71 }] },
+    isModeloSeparado: item => item.productividad === null || item.general === null,
+    calcGeneral: (cal, prod) => Math.round((cal + prod) / 2),
+    calcEstado: score => score >= 80 ? 'Correcta' : 'Observada',
+  };
+  vm.createContext(context);
+  vm.runInContext(fs.readFileSync('assets/js/records.js', 'utf8').replace(/\?\./g, '.').replace(/\?\?/g, '||') + '\nthis.records = { getRegistroConMetricas };', context);
+  const record = context.records.getRegistroConMetricas({ agente:'Luciana', anio:2026, semana:23, calidad:0, productividad:null, general:null });
+  assert.strictEqual(record.productividad, 71);
+  assert.strictEqual(record.general, 36);
+  assert.strictEqual(record.estado, 'Observada');
+}
 
 function testProductividadImportParsing() {
   const context = {};

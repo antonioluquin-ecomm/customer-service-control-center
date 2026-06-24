@@ -3,6 +3,15 @@
 // ================================================================
 
 // Tabla filtrable de auditorías
+function getRegistroConMetricas(a){
+  if(!isModeloSeparado(a)) return a;
+  const productividad=DB.productividadSemanal.find(p=>p.agente===a.agente&&Number(p.anio)===Number(a.anio)&&Number(p.semana)===Number(a.semana));
+  if(!productividad) return {...a, productividad:null, general:null, estado:'Incompleto'};
+  const prod=Number(productividad.total_productividad);
+  const general=calcGeneral(a.calidad,prod);
+  return {...a, productividad:prod, general, estado:calcEstado(general), completo:true};
+}
+
 function renderRegistros(){
   const search=document.getElementById("filter-search").value.toLowerCase();
   const est=document.getElementById("filter-estado").value;
@@ -16,13 +25,13 @@ function renderRegistros(){
     if(mes&&a.mes!==mes) return false;
     if(sem&&String(a.semana)!==String(sem)) return false;
     return true;
-  });
+  }).map(getRegistroConMetricas);
   document.getElementById("registros-count").textContent=`Mostrando ${data.length} de ${DB.auditorias.length} registros${PENDING_QUEUE.length?` · ⚠ ${PENDING_QUEUE.length} pendiente${PENDING_QUEUE.length>1?"s":""}`:""}.`;
   const tbody=document.getElementById("tbody-registros");
   if(!data.length){ tbody.innerHTML='<tr><td colspan="13" style="text-align:center;color:var(--hint);padding:24px">Sin registros.</td></tr>'; return; }
   const U=getUMB();
   const h=escapeHtml;
-  const sc=(v)=>{ const c=v>=U.excelente?"sc-green":v>=U.correcta?"sc-amber":"sc-red"; return `<span class="score-cell ${c}">${v}%</span>`; };
+  const sc=(v)=>{ if(v===null||v===undefined||Number.isNaN(Number(v))) return '<span style="color:var(--hint)">-</span>'; const c=v>=U.excelente?"sc-green":v>=U.correcta?"sc-amber":"sc-red"; return `<span class="score-cell ${c}">${v}%</span>`; };
   tbody.innerHTML=data.map(a=>`<tr>
     <td><span style="font-family:'DM Mono',monospace;font-size:11px">${h(a.id_auditoria)}</span></td>
     <td>${h(a.fecha_auditoria)}</td>

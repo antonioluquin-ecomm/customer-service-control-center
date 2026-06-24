@@ -188,6 +188,8 @@ function getAuditorias() {
   const rows    = sheet.getRange(2,1,lastRow-1,sheet.getLastColumn()).getValues();
   const tz      = Session.getScriptTimeZone();
   const fmt = val => { if(!val) return ""; if(val instanceof Date) return Utilities.formatDate(val,tz,"yyyy-MM-dd"); return String(val); };
+  // Keep blank metrics as null: 0% is a valid measured value.
+  const numberOrNull = val => val === "" || val === null || val === undefined ? null : Number(val);
   const auditorias = rows.filter(r=>r[0]).map(r => {
     const o = {}; headers.forEach((h,i) => { o[h] = r[i] !== undefined ? r[i] : ""; });
     return {
@@ -200,8 +202,8 @@ function getAuditorias() {
       objetivo_interacciones:Number(o["objetivo_interacciones"])||0,
       interacciones_reales:Number(o["interacciones_reales"])||0,
       dias_tarde:Number(o["dias_tarde"])||0, dias_faltas:Number(o["dias_faltas"])||0,
-      calidad:Number(o["pct_calidad"])||0, productividad:Number(o["pct_productividad"])||0,
-      general:Number(o["pct_general"])||0, estado:o["estado"]||"",
+      calidad:numberOrNull(o["pct_calidad"]), productividad:numberOrNull(o["pct_productividad"]),
+      general:numberOrNull(o["pct_general"]), estado:o["estado"]||"",
       requiere_seguimiento:o["requiere_seguimiento"]||"No",
       obs_general:o["obs_general"]||"", obs_desvios:o["obs_desvios"]||"",
       obs_accion:o["obs_accion"]||"", resp_seguimiento:o["resp_seguimiento"]||"",

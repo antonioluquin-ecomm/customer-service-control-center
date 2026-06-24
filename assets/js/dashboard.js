@@ -174,7 +174,8 @@ function renderTeamMatrix(analysis,h){
   if(!analysis.team.length){ cont.innerHTML='<div class="db-empty">Sin datos para construir la matriz del equipo.</div>'; return; }
   cont.innerHTML=`<table class="db-team-table"><thead><tr><th>Agente</th><th>General</th><th>Var.</th><th>Cal.</th><th>Prod.</th><th>Estado</th><th>Muestra</th></tr></thead><tbody>${analysis.team.map(p=>{
     const delta=formatDelta(p.delta); const incomplete=p.current.some(x=>!x.completo); const state=incomplete?"Incompleto":(p.score>=95?"Excelente":p.score>=80?"Correcta":"Observada");
-    return `<tr><td><strong>${h(p.agent)}</strong></td><td>${incomplete?"-":p.score+"%"}</td><td class="${delta.tone}">${p.delta===null?"—":`${p.delta>0?"+":""}${p.delta} pp`}</td><td>${p.quality}%</td><td>${p.productivity}%</td><td><span class="db-state ${p.severity}">${state}</span></td><td>${p.current.length}</td></tr>`;
+    const metric=value=>value===null||value===undefined?"-":value+"%";
+    return `<tr><td><strong>${h(p.agent)}</strong></td><td>${incomplete?"-":p.score+"%"}</td><td class="${delta.tone}">${p.delta===null?"—":`${p.delta>0?"+":""}${p.delta} pp`}</td><td>${metric(p.quality)}</td><td>${metric(p.productivity)}</td><td><span class="db-state ${p.severity}">${state}</span></td><td>${p.current.length}</td></tr>`;
   }).join("")}</tbody></table>`;
 }
 
@@ -209,7 +210,7 @@ function renderHeatmap(data,h){
   if(!data.length){ cont.innerHTML='<div class="db-empty">Sin historial para mostrar.</div>'; return; }
   const U=getUMB(), weeks=getWeekNumbers(data), agents=[...new Set(data.map(a=>a.agente))].sort();
   const cell=(value)=>value===null?"db-hm-empty":value>=U.excelente?"db-hm-ex":value>=U.correcta?"db-hm-ok":"db-hm-obs";
-  cont.innerHTML=`<table class="db-hm-table"><thead><tr><th class="db-hm-ag">Agente</th>${weeks.map(w=>`<th>S${w}</th>`).join("")}</tr></thead><tbody>${agents.map(agent=>`<tr><td class="db-hm-name">${h(agent)}</td>${weeks.map(week=>{const items=data.filter(a=>a.agente===agent&&Number(a.semana)===week);const value=items.length?avgMetric(items,"calidad"):null;return `<td class="${cell(value)}">${value===null?"—":`${value}%`}</td>`;}).join("")}</tr>`).join("")}</tbody></table>`;
+  cont.innerHTML=`<table class="db-hm-table"><thead><tr><th class="db-hm-ag">Agente</th>${weeks.map(w=>`<th>S${w}</th>`).join("")}</tr></thead><tbody>${agents.map(agent=>`<tr><td class="db-hm-name">${h(agent)}</td>${weeks.map(week=>{const items=data.filter(a=>a.agente===agent&&Number(a.semana)===week&&a.calidadCargada);const value=items.length?avgMetric(items,"calidad"):null;return `<td class="${cell(value)}">${value===null?"—":`${value}%`}</td>`;}).join("")}</tr>`).join("")}</tbody></table>`;
 }
 
 function toggleDashboardHeatmap(){
@@ -275,9 +276,10 @@ function renderAgentDetail(){
     }).join("");
 }
 
-function renderCompleteness(analysis,h){const cont=document.getElementById('db-completeness');if(!cont)return;cont.innerHTML=analysis.current.length?analysis.current.map(r=>`<div class="db-alert-row"><div class="db-alert-info"><strong>${h(r.agente)}</strong><span>Calidad ${r.muestras||0}/${CFG.muestras_semana} · Productividad ${r.productividad?'cargada':'pendiente'}</span></div><span class="badge ${r.completo?'badge-excelente':'badge-observada'}">${r.completo?'Completo':'Incompleto'}</span></div>`).join(''):'<div class="db-empty">Sin semanas para mostrar.</div>';}
+function renderCompleteness(analysis,h){const cont=document.getElementById('db-completeness');if(!cont)return;cont.innerHTML=analysis.current.length?analysis.current.map(r=>`<div class="db-alert-row"><div class="db-alert-info"><strong>${h(r.agente)}</strong><span>Calidad ${r.muestras||0}/${CFG.muestras_semana} · Productividad ${r.productividadCargada?'cargada':'pendiente'}</span></div><span class="badge ${r.completo?'badge-excelente':'badge-observada'}">${r.completo?'Completo':'Incompleto'}</span></div>`).join(''):'<div class="db-empty">Sin semanas para mostrar.</div>';}
 
-function isModeloSeparado(item){ const cutoff=CFG.fecha_inicio_modelo_separado; if(!cutoff) return false; const date=String(item.fecha_auditoria||item.fecha_registro||"").slice(0,10); return !date || date>=cutoff; }
+// Se identifica por campos: una muestra puede cargarse hoy sobre una semana anterior.
+function isModeloSeparado(item){ return item && (item.productividad===null || item.general===null); }
 
 // Dashboard v2: a period is an ISO year + week; incomplete data never becomes a score of zero.
 function dashboardWeekKey(item){return `${Number(item.anio)||new Date(item.fecha_auditoria||Date.now()).getFullYear()}-W${String(Number(item.semana)).padStart(2,'0')}`;}
@@ -285,7 +287,7 @@ function getDashboardComposedRecords(){
   const quality=getDashFiltered().filter(isModeloSeparado), ag=document.getElementById('df-agente')?.value||'', auditor=document.getElementById('df-auditor')?.value||'', mes=document.getElementById('df-mes')?.value||'', sem=document.getElementById('df-semana')?.value||'';
   const key=x=>`${x.agente}|${x.anio||new Date(x.fecha_auditoria||Date.now()).getFullYear()}|${x.semana}`, groups={};
   quality.forEach(a=>{const k=key(a);(groups[k]||(groups[k]={agente:a.agente,anio:a.anio,mes:a.mes,semana:a.semana,items:[],productividad:null})).items.push(a);});
-  DB.productividadSemanal.filter(p=>{if(!isModeloSeparado(p))return false;if(ag&&p.agente!==ag)return false;if(mes&&p.mes!==mes)return false;if(sem&&String(p.semana)!==String(sem))return false;if(auditor){const k=key(p);return quality.some(a=>key(a)===k&&a.auditor===auditor);}return true;}).forEach(p=>{const k=key(p);(groups[k]||(groups[k]={agente:p.agente,anio:p.anio,mes:p.mes,semana:p.semana,items:[],productividad:null})).productividad=p;});
+  DB.productividadSemanal.filter(p=>{if(ag&&p.agente!==ag)return false;if(mes&&p.mes!==mes)return false;if(sem&&String(p.semana)!==String(sem))return false;if(auditor){const k=key(p);return quality.some(a=>key(a)===k&&a.auditor===auditor);}return true;}).forEach(p=>{const k=key(p);(groups[k]||(groups[k]={agente:p.agente,anio:p.anio,mes:p.mes,semana:p.semana,items:[],productividad:null})).productividad=p;});
   return Object.values(groups).map(g=>{const qualityLoaded=g.items.length>0, productivityLoaded=!!g.productividad, cal=qualityLoaded?avgMetric(g.items,'calidad'):null, prod=productivityLoaded?Number(g.productividad.total_productividad):null, complete=qualityLoaded&&productivityLoaded;return {agente:g.agente,anio:g.anio,mes:g.mes,semana:g.semana,fecha_auditoria:g.items[0]?.fecha_auditoria||'',calidad:cal,productividad:prod,general:complete?calcGeneral(cal,prod):null,estado:complete?calcEstado(calcGeneral(cal,prod)):'Incompleto',criterios:[].concat.apply([],g.items.map(a=>a.criterios||[])),muestras:g.items.length,calidadCargada:qualityLoaded,productividadCargada:productivityLoaded,completo:complete};});
 }
 function buildDashboardAnalysis(records){
