@@ -140,6 +140,7 @@ function renderDashboard(){
   document.getElementById("dbk-total").textContent=analysis.metrics.total;
   document.getElementById("dbk-total-sub").textContent=analysis.metrics.total===1?"auditoría actual":"auditorías actuales";
 
+  renderHistoricalDashboard(h);
   renderPriorities(analysis,h);
   renderTeamMatrix(analysis,h);
   renderRootCauses(analysis,h);
@@ -297,4 +298,16 @@ function buildDashboardAnalysis(records){
   const rootMap={};current.filter(a=>a.calidadCargada).forEach(a=>(a.criterios||[]).forEach(c=>{const k=c.nombre||'Criterio sin nombre';if(!rootMap[k])rootMap[k]={name:k,fail:0,total:0,agents:new Set()};rootMap[k].total++;if(c.cumple==='No'){rootMap[k].fail++;rootMap[k].agents.add(a.agente);}}));
   const trend=weeks.map(week=>{const rows=records.filter(a=>dashboardWeekKey(a)===week);return {week,quality:metric(rows,'calidad',a=>a.calidadCargada),productivity:metric(rows,'productividad',a=>a.productividadCargada)};});
   return {weeks,currentWeek:currentKey,previousWeek:previousKey,current,previous,metrics,team:team.sort((a,b)=>b.impact-a.impact),priorities:team.filter(a=>a.severity!=='stable').sort((a,b)=>b.impact-a.impact),rootCauses:Object.values(rootMap).filter(c=>c.fail).map(c=>({...c,pct:Math.round(c.fail/c.total*100),agents:[...c.agents]})).sort((a,b)=>b.pct-a.pct).slice(0,5),trend};
+}
+
+function renderHistoricalDashboard(h){
+  const cont=document.getElementById('db-historico'); if(!cont) return;
+  const records=getDashFiltered().filter(item=>!isModeloSeparado(item));
+  if(!records.length){ cont.innerHTML='<div class="db-empty">No hay auditorias historicas para los filtros seleccionados.</div>'; return; }
+  const agents=[...new Set(records.map(r=>r.agente).filter(Boolean))];
+  const weeks=[...new Set(records.map(r=>`${r.anio||new Date(r.fecha_auditoria).getFullYear()}-S${r.semana}`))];
+  const byAgent={};
+  records.forEach(r=>{const entry=byAgent[r.agente]||(byAgent[r.agente]={items:[]});entry.items.push(r);});
+  const rows=Object.entries(byAgent).map(([agent,entry])=>({agent,count:entry.items.length,quality:avgMetric(entry.items,'calidad'),last:entry.items.map(i=>String(i.fecha_auditoria||'')).sort().pop()||''})).sort((a,b)=>b.quality-a.quality||b.count-a.count);
+  cont.innerHTML=`<div class="score-summary" style="margin-bottom:14px"><div><div class="ss-value" style="color:var(--accent)">${avgMetric(records,'calidad')}%</div><div class="ss-label">Calidad promedio histórica</div></div><div><div class="ss-value" style="color:var(--teal)">${records.length}</div><div class="ss-label">Auditorías históricas</div></div><div><div class="ss-value" style="color:var(--muted)">${agents.length}</div><div class="ss-label">Agentes · ${weeks.length} semanas</div></div></div><div style="overflow:auto"><table class="db-team-table"><thead><tr><th>Agente</th><th>Calidad prom.</th><th>Muestras</th><th>Última auditoría</th></tr></thead><tbody>${rows.map(r=>`<tr><td><strong>${h(r.agent)}</strong></td><td>${r.quality}%</td><td>${r.count}</td><td>${h(r.last)}</td></tr>`).join('')}</tbody></table></div>`;
 }
