@@ -4,3 +4,6 @@ apps_script_auditoria_v7.js
 
 # Claude Code
 .claude/
+
+# Archivos generados localmente
+outputs/
