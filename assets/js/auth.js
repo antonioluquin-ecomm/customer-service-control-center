@@ -59,7 +59,7 @@ window.escapeHtml = function (str) {
 
   window.canDeleteAuditorias = function () {
     const role = getSession()?.user?.role;
-    return role === 'admin' || role === 'supervisor';
+    return role === 'admin' || role === 'supervisor' || role === 'auditor';
   };
 
   window.authLogout = async function () {

@@ -57,7 +57,7 @@ function testServerIds() {
   assert.strictEqual(context.getNextAuditoriaId(), 'AUD-0043');
   assert.strictEqual(context.canDeleteAuditorias({ role: 'admin' }), true);
   assert.strictEqual(context.canDeleteAuditorias({ role: 'supervisor' }), true);
-  assert.strictEqual(context.canDeleteAuditorias({ role: 'auditor' }), false);
+  assert.strictEqual(context.canDeleteAuditorias({ role: 'auditor' }), true);
 }
 
 

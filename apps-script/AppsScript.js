@@ -123,7 +123,7 @@ function canManageSystem(session) {
 }
 
 function canDeleteAuditorias(session) {
-  return session && [ROLE_ADMIN, ROLE_SUPERVISOR].includes(session.role);
+  return session && [ROLE_ADMIN, ROLE_SUPERVISOR, ROLE_AUDITOR].includes(session.role);
 }
 
 function sessionError() {
