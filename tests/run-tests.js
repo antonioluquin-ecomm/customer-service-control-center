@@ -55,6 +55,9 @@ function testServerIds() {
   vm.runInContext(fs.readFileSync('apps-script/AppsScript.js', 'utf8'), context);
   assert.strictEqual(context.getNextAuditoriaId(), 'AUD-0042');
   assert.strictEqual(context.getNextAuditoriaId(), 'AUD-0043');
+  assert.strictEqual(context.canDeleteAuditorias({ role: 'admin' }), true);
+  assert.strictEqual(context.canDeleteAuditorias({ role: 'supervisor' }), true);
+  assert.strictEqual(context.canDeleteAuditorias({ role: 'auditor' }), false);
 }
 
 

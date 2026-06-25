@@ -3,12 +3,13 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.1.3',
-  date:   '2026-06-23',
-  notes:  'Shell: dark mode completo — variables CSS, toggleTheme(), botón en sidebar footer'
+  number: '12.1.4',
+  date:   '2026-06-25',
+  notes:  'Registros: restaurar accion de eliminar auditorias para administradores y supervisores'
 };
 
 const CHANGELOG = [
+  { v: '12.1.4', date: '2026-06-25', desc: 'Registros: restaurar accion de eliminar auditorias para administradores y supervisores' },
   { v: '12.1.3', date: '2026-06-23', desc: 'Shell: dark mode completo — variables CSS, toggleTheme(), botón en sidebar footer' },
   { v: '12.1.2', date: '2026-06-23', desc: 'Shell: anti-flash prefers-color-scheme, version badge con popover changelog' },
   { v: '12.1.1', date: '2026-06-22', desc: 'Login — callApiRaw, localStorage, diseño canónico; _loginPath() dinámico' },

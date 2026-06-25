@@ -45,7 +45,7 @@ function renderRegistros(){
     <td style="text-align:center">${sc(a.general)}</td>
     <td><span class="badge ${estadoBadge(a.estado)}">${h(a.estado)}</span></td>
     <td>${a.sheets_enviado?'<span class="badge badge-ok">âœ“ Sheets</span>':'<span class="badge badge-local">Pendiente</span>'}</td>
-    <td>${isAdmin()?`<button class="btn xs danger" data-auditoria-id="${h(a.id_auditoria)}" onclick="deleteAuditoria(this.dataset.auditoriaId)">âœ•</button>`:""}</td>
+    <td>${canDeleteAuditorias()?`<button class="btn xs danger" data-auditoria-id="${h(a.id_auditoria)}" onclick="deleteAuditoria(this.dataset.auditoriaId)" title="Eliminar registro" aria-label="Eliminar registro ${h(a.id_auditoria)}">&times;</button>`:""}</td>
   </tr>`).join("");
 }
 
@@ -89,7 +89,8 @@ function renderObservaciones(){
 
 // Elimina una auditorÃ­a local y en Sheets
 async function deleteAuditoria(id){
-  if(!confirm(`Â¿Eliminar ${id}? Esta acciÃ³n no se puede deshacer.`)) return;
+  if(!canDeleteAuditorias()) { alert("No tenés permisos para eliminar registros."); return; }
+  if(!confirm(`¿Eliminar ${id}? Esta acción no se puede deshacer.`)) return;
   const aud=DB.auditorias.find(a=>a.id_auditoria===id);
   if(!aud) return;
   if(!aud.sheets_enviado){
@@ -97,7 +98,13 @@ async function deleteAuditoria(id){
     DB.auditorias=DB.auditorias.filter(a=>a!==aud);
   } else {
     const res=await postSheets({_type:"delete_auditoria",id_auditoria:id});
-    if(!res.ok) queuePendingDelete(id);
+    if(!res.ok){
+      if(res.retryable){
+        queuePendingDelete(id);
+        DB.auditorias=DB.auditorias.filter(a=>a!==aud);
+      }
+      return;
+    }
     DB.auditorias=DB.auditorias.filter(a=>a!==aud);
   }
   renderRegistros(); renderDashboard();

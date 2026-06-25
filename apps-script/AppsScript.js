@@ -122,6 +122,10 @@ function canManageSystem(session) {
   return session && session.role === ROLE_ADMIN;
 }
 
+function canDeleteAuditorias(session) {
+  return session && [ROLE_ADMIN, ROLE_SUPERVISOR].includes(session.role);
+}
+
 function sessionError() {
   return { status:"error", message:"Sesión requerida. Iniciá sesión nuevamente." };
 }
@@ -270,7 +274,10 @@ function doPost(e) {
     const session = getSessionByToken(payload.sessionToken);
     if (!session) return jsonOut(sessionError());
     if (payload._type === "logout") return jsonOut(handleLogout(payload, session));
-    if (["config_change", "update_criterios", "delete_auditoria"].includes(payload._type) && !canManageSystem(session)) {
+    if (["config_change", "update_criterios"].includes(payload._type) && !canManageSystem(session)) {
+      return jsonOut(forbiddenError());
+    }
+    if (payload._type === "delete_auditoria" && !canDeleteAuditorias(session)) {
       return jsonOut(forbiddenError());
     }
     ensureSheetsOnce();

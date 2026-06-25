@@ -57,6 +57,11 @@ window.escapeHtml = function (str) {
     return getSession()?.user?.role === 'admin';
   };
 
+  window.canDeleteAuditorias = function () {
+    const role = getSession()?.user?.role;
+    return role === 'admin' || role === 'supervisor';
+  };
+
   window.authLogout = async function () {
     const token = getSessionToken();
     localStorage.removeItem(_key());
