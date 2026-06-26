@@ -3,12 +3,13 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.4.0',
+  number: '12.5.0',
   date:   '2026-06-26',
-  notes:  'Estandarización Sprint 3 — tabla de Registros: sortable headers, paginación 25/50/100, export _recRows con BOM'
+  notes:  'Estandarización Sprint 4 — login canónico: anti-flash, variables.css, dark mode, hidden attr'
 };
 
 const CHANGELOG = [
+  { v: '12.5.0', date: '2026-06-26', desc: 'Estandarización Sprint 4 — login.html: anti-flash script, variables.css para dark mode, gradiente en icono, card con border/bg token, errEl.hidden, mensajes canónicos' },
   { v: '12.4.0', date: '2026-06-26', desc: 'Estandarización Sprint 3 — Registros: th[data-sortable], paginación 25/50/100, exportCSV usa vista filtrada (_recRows) con BOM UTF-8' },
   { v: '12.3.0', date: '2026-06-26', desc: 'Estandarización Sprint 2 — topbar global sticky con breadcrumb, .page-header, renderSidebarUser con badge de rol, variantes de botón secondary/ghost, modal de contraseña con clases (dark mode)' },
   { v: '12.2.0', date: '2026-06-26', desc: 'Estandarización Sprint 1 — fuentes DM Sans/DM Mono self-host local, sin red externa de Google Fonts' },
