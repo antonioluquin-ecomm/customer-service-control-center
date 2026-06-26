@@ -3,12 +3,13 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.1.5',
-  date:   '2026-06-25',
-  notes:  'Registros: habilitar eliminacion de auditorias para usuarios auditores'
+  number: '12.2.0',
+  date:   '2026-06-26',
+  notes:  'Estandarización Sprint 1 — fuentes DM Sans/DM Mono self-host (sin Google Fonts)'
 };
 
 const CHANGELOG = [
+  { v: '12.2.0', date: '2026-06-26', desc: 'Estandarización Sprint 1 — fuentes DM Sans/DM Mono self-host local, sin red externa de Google Fonts' },
   { v: '12.1.5', date: '2026-06-25', desc: 'Registros: habilitar eliminacion de auditorias para usuarios auditores' },
   { v: '12.1.4', date: '2026-06-25', desc: 'Registros: restaurar accion de eliminar auditorias para administradores y supervisores' },
   { v: '12.1.3', date: '2026-06-23', desc: 'Shell: dark mode completo — variables CSS, toggleTheme(), botón en sidebar footer' },
