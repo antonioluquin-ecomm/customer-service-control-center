@@ -3,12 +3,13 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.2.0',
+  number: '12.3.0',
   date:   '2026-06-26',
-  notes:  'Estandarización Sprint 1 — fuentes DM Sans/DM Mono self-host (sin Google Fonts)'
+  notes:  'Estandarización Sprint 2 — shell: topbar global con breadcrumb, page-header, panel de usuario con badge de rol'
 };
 
 const CHANGELOG = [
+  { v: '12.3.0', date: '2026-06-26', desc: 'Estandarización Sprint 2 — topbar global sticky con breadcrumb, .page-header, renderSidebarUser con badge de rol, variantes de botón secondary/ghost, modal de contraseña con clases (dark mode)' },
   { v: '12.2.0', date: '2026-06-26', desc: 'Estandarización Sprint 1 — fuentes DM Sans/DM Mono self-host local, sin red externa de Google Fonts' },
   { v: '12.1.5', date: '2026-06-25', desc: 'Registros: habilitar eliminacion de auditorias para usuarios auditores' },
   { v: '12.1.4', date: '2026-06-25', desc: 'Registros: restaurar accion de eliminar auditorias para administradores y supervisores' },

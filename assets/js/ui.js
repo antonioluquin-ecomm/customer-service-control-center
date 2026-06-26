@@ -26,6 +26,9 @@ function updateSheetsUI(state){
 // Mapa de índice de nav por id de página
 const PAGE_MAP={dashboard:0,agentes:1,observaciones:2,formulario:3,productividad:4,registros:5,configuracion:6};
 
+// Etiqueta del breadcrumb (topbar global) por id de página
+const PAGE_LABELS={dashboard:"Inicio",agentes:"Agentes",observaciones:"Observaciones",formulario:"Nueva auditoría",productividad:"Productividad",registros:"Registros",configuracion:"Configuración"};
+
 // Muestra la página activa y dispara su render
 function showPage(id){
   if(id==="configuracion" && !isAdmin()){
@@ -36,6 +39,8 @@ function showPage(id){
   document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
   document.getElementById("page-"+id).classList.add("active");
   document.querySelectorAll(".nav-item")[PAGE_MAP[id]].classList.add("active");
+  const crumb=document.getElementById("topbar-crumb");
+  if(crumb && PAGE_LABELS[id]) crumb.textContent=PAGE_LABELS[id];
   if(id==="configuracion") renderConfigPage();
   if(id==="dashboard")     renderDashboard();
   if(id==="registros")     renderRegistros();

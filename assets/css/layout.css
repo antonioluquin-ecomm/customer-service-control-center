@@ -20,6 +20,18 @@
 .nav-item.active .nav-icon{opacity:1}
 .sidebar-footer{padding:12px 18px;border-top:1px solid var(--sidebar-line);flex-shrink:0}
 .sidebar-footer p{font-size:11px;color:var(--hint);line-height:1.7}
+
+/* Panel de usuario en sidebar footer (renderSidebarUser) */
+#sidebar-user-info{margin-top:12px}
+.sidebar-user-name{font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sidebar-user-email{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+.sidebar-user-meta{margin-top:6px;margin-bottom:9px}
+.auth-chip-role{display:inline-block;background:var(--primary-soft);color:var(--primary);font-size:10px;font-weight:600;padding:2px 8px;border-radius:var(--radius-pill);text-transform:uppercase;letter-spacing:.04em}
+.sidebar-user-actions{display:flex;flex-direction:column;gap:6px}
+.theme-toggle,.sidebar-action-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:6px 10px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--text);transition:all .15s}
+.theme-toggle:hover,.sidebar-action-btn:hover{background:var(--surface)}
+.sidebar-action-btn.danger{color:var(--danger);border-color:var(--danger-mid)}
+.sidebar-action-btn.danger:hover{background:var(--danger-bg)}
 .sheets-btn{display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:6px;font-size:11px;font-weight:500;margin:0 10px 6px;cursor:pointer;border:none;width:calc(100% - 20px);transition:all .15s}
 .sheets-btn.connected{background:var(--success-bg);color:var(--success)}
 .sheets-btn.disconnected{background:var(--danger-bg);color:var(--danger)}
@@ -33,12 +45,21 @@
 
 /* Main content */
 .main{margin-left:var(--sidebar-w);overflow-y:auto}
+
+/* Topbar global sticky con breadcrumb (application_shell.md §6.6) */
+.topbar{height:50px;display:flex;align-items:center;gap:10px;padding:0 22px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40}
+.topbar-brand{font-size:13px;font-weight:600;color:var(--muted)}
+.topbar-sep{color:var(--muted)}
+.topbar-crumb{font-size:13px;font-weight:600;color:var(--text)}
+
 .page{display:none;width:100%;padding:28px}
 .page.active{display:block}
-.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px}
-.topbar-left h2{font-size:21px;font-weight:600;letter-spacing:-.5px}
-.topbar-left p{font-size:13px;color:var(--muted);margin-top:3px}
-.topbar-right{display:flex;gap:8px;flex-shrink:0;padding-top:2px}
+
+/* Encabezado de página (application_shell.md §6.7) */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px}
+.page-header-text h1{font-size:22px;font-weight:700;letter-spacing:-.5px;margin:0}
+.page-header-text .subtitle{font-size:13px;color:var(--muted);margin-top:4px}
+.page-header-actions{display:flex;gap:8px;flex-shrink:0;padding-top:2px;align-items:center}
 
 /* Grid helpers */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}

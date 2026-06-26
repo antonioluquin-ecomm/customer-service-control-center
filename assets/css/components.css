@@ -7,9 +7,22 @@
 .btn.success:hover{background:#085c35}
 .btn.danger{background:var(--red-bg);color:var(--red);border-color:var(--red-mid)}
 .btn.danger:hover{background:var(--red-mid)}
+.btn.secondary{background:var(--surface);color:var(--text);border-color:var(--line)}
+.btn.secondary:hover{background:color-mix(in srgb,var(--text) 6%,var(--surface))}
+.btn.ghost{background:transparent;color:var(--primary);border-color:var(--primary-mid)}
+.btn.ghost:hover{background:var(--primary-soft)}
 .btn.sm{padding:5px 10px;font-size:12px}
 .btn.xs{padding:3px 8px;font-size:11px}
 .btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* Modal genérico (usado por el modal de cambio de contraseña) */
+.modal-overlay{position:fixed;inset:0;background:color-mix(in srgb,var(--text) 45%,transparent);display:none;align-items:center;justify-content:center;z-index:9999;padding:24px}
+.modal-overlay.open{display:flex}
+.modal-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:28px 32px;width:100%;max-width:380px}
+.modal-card h3{font-size:15px;font-weight:700;margin:0 0 18px}
+.modal-field{margin-bottom:14px}
+.modal-field label{display:block;font-size:13px;font-weight:500;margin-bottom:5px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
 
 /* Cards */
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}

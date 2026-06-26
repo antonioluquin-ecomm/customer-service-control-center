@@ -93,32 +93,42 @@ window.escapeHtml = function (str) {
     });
   };
 
-  // ── Chip de usuario en sidebar footer ───────────────────────
-  window.renderUserChip = function () {
+  // Etiqueta legible del rol para el badge del sidebar.
+  function _roleLabel(role) {
+    const map = { admin: 'Administrador', supervisor: 'Supervisor', auditor: 'Auditor', agente: 'Agente' };
+    if (!role) return 'Usuario';
+    return map[String(role).toLowerCase()] || (String(role).charAt(0).toUpperCase() + String(role).slice(1));
+  }
+
+  // ── Panel de usuario en sidebar footer (application_shell.md §6.5) ──
+  window.renderSidebarUser = function () {
     const s = getSession();
     if (!s) return;
     const u = s.user;
     const footer = document.querySelector('.sidebar-footer');
     if (!footer) return;
-    const chip = document.createElement('div');
-    chip.id = 'user-chip';
-    chip.innerHTML =
-      `<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(u.name || u.email)}</div>` +
-      `<div style="font-size:11px;color:var(--muted);margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(u.email)}</div>` +
-      `<div style="display:flex;gap:6px">` +
-        `<button class="btn xs" onclick="openChangePasswordModal()" style="flex:1">Clave</button>` +
-        `<button class="btn xs danger" onclick="authLogout()" style="flex:1">Salir</button>` +
-      `</div>` +
-      `<button class="theme-toggle btn xs" type="button" onclick="toggleTheme()" style="width:100%;margin-top:6px;display:flex;gap:6px;align-items:center;justify-content:center" title="Modo claro">` +
-        `<span class="th-icon">☀️</span><span>Tema</span>` +
-      `</button>`;
-    footer.appendChild(chip);
+    if (document.getElementById('sidebar-user-info')) return; // evitar duplicados
+    const info = document.createElement('div');
+    info.id = 'sidebar-user-info';
+    info.innerHTML =
+      `<div class="sidebar-user-name">${escapeHtml(u.name || u.email)}</div>` +
+      `<div class="sidebar-user-email">${escapeHtml(u.email)}</div>` +
+      `<div class="sidebar-user-meta"><span class="auth-chip-role">${escapeHtml(_roleLabel(u.role))}</span></div>` +
+      `<div class="sidebar-user-actions">` +
+        `<button class="theme-toggle" type="button" onclick="toggleTheme()"><span class="th-icon">☾</span><span class="th-label">Modo oscuro</span></button>` +
+        `<button class="sidebar-action-btn" type="button" onclick="openChangePasswordModal()">Cambiar contraseña</button>` +
+        `<button class="sidebar-action-btn danger" type="button" onclick="authLogout()">Cerrar sesión</button>` +
+      `</div>`;
+    footer.appendChild(info);
   };
+
+  // Alias de retrocompatibilidad.
+  window.renderUserChip = window.renderSidebarUser;
 
   // ── Modal: cambiar contraseña ────────────────────────────────
   window.openChangePasswordModal = function () {
     _ensureModal();
-    document.getElementById('_authModal').style.display = 'flex';
+    document.getElementById('_authModal').classList.add('open');
     document.getElementById('_authPwdNew').focus();
   };
 
@@ -126,31 +136,29 @@ window.escapeHtml = function (str) {
     if (document.getElementById('_authModal')) return;
     const modal = document.createElement('div');
     modal.id = '_authModal';
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:9999;';
+    modal.className = 'modal-overlay';
     modal.innerHTML = `
-      <div style="background:#fff;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.18);padding:28px 32px;width:100%;max-width:380px;font-family:inherit;">
-        <h3 style="font-size:15px;font-weight:700;margin:0 0 18px">Cambiar contraseña</h3>
-        <div style="margin-bottom:14px">
-          <label style="display:block;font-size:13px;font-weight:500;margin-bottom:5px">Nueva contraseña</label>
-          <input id="_authPwdNew" type="password" placeholder="Mínimo 6 caracteres"
-            style="width:100%;padding:8px 12px;font-size:13.5px;border:1px solid #e5e7eb;border-radius:6px;box-sizing:border-box;font-family:inherit"/>
+      <div class="modal-card">
+        <h3>Cambiar contraseña</h3>
+        <div class="modal-field">
+          <label>Nueva contraseña</label>
+          <input id="_authPwdNew" type="password" placeholder="Mínimo 6 caracteres"/>
         </div>
-        <div style="margin-bottom:6px">
-          <label style="display:block;font-size:13px;font-weight:500;margin-bottom:5px">Confirmar</label>
-          <input id="_authPwdConfirm" type="password" placeholder="Repetí la contraseña"
-            style="width:100%;padding:8px 12px;font-size:13.5px;border:1px solid #e5e7eb;border-radius:6px;box-sizing:border-box;font-family:inherit"/>
+        <div class="modal-field">
+          <label>Confirmar</label>
+          <input id="_authPwdConfirm" type="password" placeholder="Repetí la contraseña"/>
         </div>
-        <div id="_authPwdErr" style="display:none;margin:10px 0;padding:9px 13px;border-radius:6px;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;font-size:13px"></div>
-        <div id="_authPwdOk"  style="display:none;margin:10px 0;padding:9px 13px;border-radius:6px;background:#ecfdf5;border:1px solid #a7f3d0;color:#0a7040;font-size:13px">Contraseña actualizada.</div>
-        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
-          <button id="_authPwdCancel" style="padding:7px 16px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:13px;font-weight:500;cursor:pointer">Cancelar</button>
-          <button id="_authPwdSave"   style="padding:7px 16px;border-radius:6px;border:0;background:var(--primary);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Guardar</button>
+        <div id="_authPwdErr" class="alert error" style="display:none;margin:10px 0"></div>
+        <div id="_authPwdOk"  class="alert success" style="display:none;margin:10px 0">Contraseña actualizada.</div>
+        <div class="modal-actions">
+          <button id="_authPwdCancel" class="btn">Cancelar</button>
+          <button id="_authPwdSave"   class="btn primary">Guardar</button>
         </div>
       </div>`;
     document.body.appendChild(modal);
 
     function _close() {
-      modal.style.display = 'none';
+      modal.classList.remove('open');
       ['_authPwdNew','_authPwdConfirm'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('_authPwdErr').style.display = 'none';
       document.getElementById('_authPwdOk').style.display  = 'none';

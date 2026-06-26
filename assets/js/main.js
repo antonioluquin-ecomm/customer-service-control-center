@@ -15,10 +15,13 @@ function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem(_THEME_KEY, next);
   const isLight = next === 'light';
+  // El botón muestra la acción a la que se cambiará al hacer clic.
   document.querySelectorAll('.theme-toggle').forEach(function(btn) {
-    const icon = btn.querySelector('.th-icon');
-    if (icon) icon.textContent = isLight ? '☀️' : '🌙';
-    btn.setAttribute('title', isLight ? 'Modo claro' : 'Modo oscuro');
+    const icon  = btn.querySelector('.th-icon');
+    const label = btn.querySelector('.th-label');
+    if (icon)  icon.textContent  = isLight ? '☾' : '☀';
+    if (label) label.textContent = isLight ? 'Modo oscuro' : 'Modo claro';
+    btn.setAttribute('title', isLight ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro');
   });
 }
 
@@ -96,11 +99,11 @@ function initMobileSidebar() {
 
 (function init(){
   if(!requireAuth()) return;
+  renderSidebarUser();
   initTheme();
   initVersionBadge();
   initMobileSidebar();
   loadPendingQueue();
-  renderUserChip();
   applyRoleRestrictions();
   const today=new Date().toISOString().slice(0,10);
   document.getElementById("f-fecha").value=today;
