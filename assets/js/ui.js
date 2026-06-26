@@ -31,8 +31,8 @@ const PAGE_LABELS={dashboard:"Inicio",agentes:"Agentes",observaciones:"Observaci
 
 // Muestra la página activa y dispara su render
 function showPage(id){
-  if(id==="configuracion" && !isAdmin()){
-    alert("Solo los administradores pueden acceder a Configuración.");
+  if(!canView(id)){
+    alert("No tenés permisos para acceder a esta sección.");
     return;
   }
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
@@ -50,9 +50,11 @@ function showPage(id){
 }
 
 function applyRoleRestrictions(){
-  if(isAdmin()) return;
-  const configNav=document.querySelector('.nav-item[onclick*="configuracion"]');
-  if(configNav) configNav.style.display="none";
+  const navItems=document.querySelectorAll('.nav-item');
+  Object.entries(PAGE_MAP).forEach(function([mod,idx]){
+    if(navItems[idx]) navItems[idx].style.display=canView(mod)?'':'none';
+  });
+  restrictWriteIfAgent();
 }
 
 // Carga dinámica de agentes en el filtro de observaciones

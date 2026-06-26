@@ -6,7 +6,7 @@
   <title>Ingresar — AuditCS</title>
   <script>
     (function() {
-      var saved = localStorage.getItem('cs_theme');
+      var saved = localStorage.getItem('acs_theme') || localStorage.getItem('cs_theme');
       var t = saved ? saved : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', t);
     })();

@@ -1,5 +1,5 @@
 // ================================================================
-// AUTH — sesión de usuario, guards y modal de contraseña
+// AUTH — sesión de usuario, RBAC flexible, guards y modal de contraseña
 // ================================================================
 
 window.escapeHtml = function (str) {
@@ -7,14 +7,31 @@ window.escapeHtml = function (str) {
 };
 
 (function () {
-  function _key() {
-    return (window.CONFIG && CONFIG.AUTH && CONFIG.AUTH.SESSION_KEY) || 'auditcs_session';
+
+  // ── Permisos por defecto (usados hasta que el backend devuelva permisos) ──
+  // Clave: id_rol — 1=admin, 2=supervisor, 3=auditor, 4=agente
+  var _PERMISOS = {
+    1: { dashboard:{ver:true,editar:true},  formulario:{ver:true,editar:true},  productividad:{ver:true,editar:true},  registros:{ver:true,editar:true},  observaciones:{ver:true,editar:true},  agentes:{ver:true,editar:true},  configuracion:{ver:true,editar:true}  },
+    2: { dashboard:{ver:true,editar:false}, formulario:{ver:true,editar:true},  productividad:{ver:true,editar:true},  registros:{ver:true,editar:true},  observaciones:{ver:true,editar:false}, agentes:{ver:true,editar:false}, configuracion:{ver:false,editar:false} },
+    3: { dashboard:{ver:true,editar:false}, formulario:{ver:true,editar:true},  productividad:{ver:false,editar:false}, registros:{ver:true,editar:true},  observaciones:{ver:true,editar:false}, agentes:{ver:true,editar:false}, configuracion:{ver:false,editar:false} },
+    4: { dashboard:{ver:true,editar:false}, formulario:{ver:true,editar:false}, productividad:{ver:false,editar:false}, registros:{ver:true,editar:false}, observaciones:{ver:true,editar:false}, agentes:{ver:true,editar:false}, configuracion:{ver:false,editar:false} },
+  };
+
+  function _getPermisos() {
+    const s = getSession();
+    if (!s) return _PERMISOS[4]; // sin sesión → acceso mínimo
+    if (s.permisos) return s.permisos;
+    return _PERMISOS[Number(s.usuario.id_rol)] || _PERMISOS[4];
   }
+
+  // ── Claves de storage ────────────────────────────────────────
+  var _SESSION_KEY = 'acs_session';
+  var _SESSION_KEY_OLD = 'auditcs_session';
+
   function _ttl() {
     return (window.CONFIG && CONFIG.AUTH && CONFIG.AUTH.SESSION_TTL_MS) || 28800000;
   }
 
-  // Ruta dinámica a login.html — funciona en subdirectorios y GitHub Pages.
   function _loginPath() {
     const tag = document.querySelector('script[src*="config.js"]');
     if (tag) {
@@ -25,50 +42,92 @@ window.escapeHtml = function (str) {
     return '../'.repeat(Math.max(0, depth)) + 'login.html';
   }
 
+  // ── Normalización de shape ───────────────────────────────────
+  // Convierte sesión vieja {user, sessionToken, expiresAt} → nuevo shape
+  function _normalize(s) {
+    if (!s) return null;
+    // Ya tiene shape nuevo
+    if (s.usuario && s.expira_en) {
+      if (new Date(s.expira_en) < new Date()) return null;
+      return s;
+    }
+    // Shape viejo: { user:{name,email,role}, sessionToken, expiresAt }
+    if (s.user && s.expiresAt) {
+      if (Date.now() > s.expiresAt) return null;
+      const roleMap = { admin:1, supervisor:2, auditor:3, agente:4 };
+      const id_rol = roleMap[String(s.user.role || '').toLowerCase()] || 4;
+      return {
+        session_token: s.sessionToken || null,
+        usuario: {
+          id: null,
+          nombre: s.user.name || s.user.email,
+          email:  s.user.email,
+          id_rol,
+          nombre_rol: _roleLabel(id_rol),
+        },
+        permisos:  null,
+        expira_en: new Date(s.expiresAt).toISOString(),
+      };
+    }
+    return null;
+  }
+
   // ── Session ──────────────────────────────────────────────────
   window.getSession = function () {
     try {
-      const raw = localStorage.getItem(_key());
+      // Intenta clave nueva; si no, fallback a clave vieja
+      let raw = localStorage.getItem(_SESSION_KEY) || localStorage.getItem(_SESSION_KEY_OLD);
       if (!raw) return null;
-      const s = JSON.parse(raw);
-      if (Date.now() > s.expiresAt || !s.user || !s.sessionToken) {
-        localStorage.removeItem(_key());
-        return null;
-      }
-      return s;
+      return _normalize(JSON.parse(raw));
     } catch { return null; }
   };
 
-  window.setSession = function (user, sessionToken) {
-    localStorage.setItem(_key(), JSON.stringify({
-      user,
-      sessionToken: sessionToken || null,
-      loggedInAt:   Date.now(),
-      expiresAt:    Date.now() + _ttl(),
-    }));
+  // Acepta los parámetros viejos (user, sessionToken) por compatibilidad con login.html actual
+  window.setSession = function (userOrObj, sessionToken) {
+    const u = userOrObj;
+    const roleMap = { admin:1, supervisor:2, auditor:3, agente:4 };
+    const id_rol = u.id_rol || roleMap[String(u.role || '').toLowerCase()] || 4;
+    const session = {
+      session_token: sessionToken || u.session_token || null,
+      usuario: {
+        id:         u.id   || null,
+        nombre:     u.nombre || u.name || u.email,
+        email:      u.email,
+        id_rol,
+        nombre_rol: u.nombre_rol || _roleLabel(id_rol),
+      },
+      permisos:  u.permisos || null,
+      expira_en: new Date(Date.now() + _ttl()).toISOString(),
+    };
+    localStorage.setItem(_SESSION_KEY, JSON.stringify(session));
+    localStorage.removeItem(_SESSION_KEY_OLD); // migración limpia
   };
 
   window.getSessionToken = function () {
     const s = getSession();
-    return s ? (s.sessionToken || null) : null;
+    return s ? (s.session_token || null) : null;
   };
 
+  // ── RBAC ─────────────────────────────────────────────────────
   window.isAdmin = function () {
-    return getSession()?.user?.role === 'admin';
+    return Number(getSession()?.usuario?.id_rol) === 1;
   };
 
+  window.canView = function (mod) {
+    if (isAdmin()) return true;
+    const p = _getPermisos();
+    return p[mod] ? p[mod].ver : true; // módulos sin definición: visible por defecto
+  };
+
+  window.canEdit = function (mod) {
+    if (isAdmin()) return true;
+    const p = _getPermisos();
+    return p[mod] ? p[mod].editar : false;
+  };
+
+  // Alias retrocompatible: antes chequeaba role string, ahora usa permisos
   window.canDeleteAuditorias = function () {
-    const role = getSession()?.user?.role;
-    return role === 'admin' || role === 'supervisor' || role === 'auditor';
-  };
-
-  window.authLogout = async function () {
-    const token = getSessionToken();
-    localStorage.removeItem(_key());
-    if (token && window.callApiRaw) {
-      try { await callApiRaw('logout', {}); } catch (_) {}
-    }
-    window.location.href = _loginPath();
+    return canEdit('registros');
   };
 
   // ── Guards ───────────────────────────────────────────────────
@@ -78,42 +137,45 @@ window.escapeHtml = function (str) {
   };
 
   window.requireAdmin = function () {
-    const s = getSession();
-    if (!s || s.user.role !== 'admin') { window.location.href = _loginPath(); return false; }
+    if (!getSession() || !isAdmin()) { window.location.href = _loginPath(); return false; }
     return true;
   };
 
-  // Deshabilita todos los elementos .admin-only si el usuario es Agente.
+  // Deshabilita .admin-only si el usuario no es admin
   window.restrictWriteIfAgent = function () {
-    if (isAdmin()) return;
-    document.querySelectorAll('.admin-only').forEach(el => {
-      el.disabled = true;
-      el.title = 'Solo administradores pueden ejecutar esta acción';
-      el.classList.add('agent-disabled');
+    const admin = isAdmin();
+    document.body.classList.toggle('no-edit', !admin);
+    document.querySelectorAll('.admin-only').forEach(function (el) {
+      el.disabled = !admin;
+      if (!admin) {
+        el.classList.add('agent-disabled');
+        el.title = 'No tenés permisos para esta acción';
+      } else {
+        el.classList.remove('agent-disabled');
+      }
     });
   };
 
-  // Etiqueta legible del rol para el badge del sidebar.
-  function _roleLabel(role) {
-    const map = { admin: 'Administrador', supervisor: 'Supervisor', auditor: 'Auditor', agente: 'Agente' };
-    if (!role) return 'Usuario';
-    return map[String(role).toLowerCase()] || (String(role).charAt(0).toUpperCase() + String(role).slice(1));
+  // ── Etiqueta de rol ──────────────────────────────────────────
+  function _roleLabel(idRol) {
+    const map = { 1:'Administrador', 2:'Supervisor', 3:'Auditor', 4:'Agente' };
+    return map[Number(idRol)] || 'Usuario';
   }
 
-  // ── Panel de usuario en sidebar footer (application_shell.md §6.5) ──
+  // ── Panel de usuario en sidebar footer ──────────────────────
   window.renderSidebarUser = function () {
     const s = getSession();
     if (!s) return;
-    const u = s.user;
+    const u      = s.usuario;
     const footer = document.querySelector('.sidebar-footer');
     if (!footer) return;
-    if (document.getElementById('sidebar-user-info')) return; // evitar duplicados
+    if (document.getElementById('sidebar-user-info')) return;
     const info = document.createElement('div');
     info.id = 'sidebar-user-info';
     info.innerHTML =
-      `<div class="sidebar-user-name">${escapeHtml(u.name || u.email)}</div>` +
+      `<div class="sidebar-user-name">${escapeHtml(u.nombre || u.email)}</div>` +
       `<div class="sidebar-user-email">${escapeHtml(u.email)}</div>` +
-      `<div class="sidebar-user-meta"><span class="auth-chip-role">${escapeHtml(_roleLabel(u.role))}</span></div>` +
+      `<div class="sidebar-user-meta"><span class="auth-chip-role">${escapeHtml(_roleLabel(u.id_rol))}</span></div>` +
       `<div class="sidebar-user-actions">` +
         `<button class="theme-toggle" type="button" onclick="toggleTheme()"><span class="th-icon">☾</span><span class="th-label">Modo oscuro</span></button>` +
         `<button class="sidebar-action-btn" type="button" onclick="openChangePasswordModal()">Cambiar contraseña</button>` +
@@ -122,8 +184,18 @@ window.escapeHtml = function (str) {
     footer.appendChild(info);
   };
 
-  // Alias de retrocompatibilidad.
-  window.renderUserChip = window.renderSidebarUser;
+  window.renderUserChip = window.renderSidebarUser; // retrocompatibilidad
+
+  // ── Logout ───────────────────────────────────────────────────
+  window.authLogout = async function () {
+    const token = getSessionToken();
+    localStorage.removeItem(_SESSION_KEY);
+    localStorage.removeItem(_SESSION_KEY_OLD);
+    if (token && window.callApiRaw) {
+      try { await callApiRaw('logout', {}); } catch (_) {}
+    }
+    window.location.href = _loginPath();
+  };
 
   // ── Modal: cambiar contraseña ────────────────────────────────
   window.openChangePasswordModal = function () {
@@ -201,4 +273,5 @@ window.escapeHtml = function (str) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
   };
+
 })();

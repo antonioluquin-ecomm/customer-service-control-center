@@ -3,12 +3,13 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.5.0',
+  number: '12.6.0',
   date:   '2026-06-26',
-  notes:  'Estandarización Sprint 4 — login canónico: anti-flash, variables.css, dark mode, hidden attr'
+  notes:  'Estandarización Sprint 5 — RBAC flexible: canView/canEdit, acs_session, acs_theme'
 };
 
 const CHANGELOG = [
+  { v: '12.6.0', date: '2026-06-26', desc: 'Estandarización Sprint 5 — RBAC flexible: isAdmin()=id_rol===1, canView(mod), canEdit(mod), DEFAULT_PERMISOS, acs_session (fallback auditcs_session), acs_theme (fallback cs_theme), nav por canView' },
   { v: '12.5.0', date: '2026-06-26', desc: 'Estandarización Sprint 4 — login.html: anti-flash script, variables.css para dark mode, gradiente en icono, card con border/bg token, errEl.hidden, mensajes canónicos' },
   { v: '12.4.0', date: '2026-06-26', desc: 'Estandarización Sprint 3 — Registros: th[data-sortable], paginación 25/50/100, exportCSV usa vista filtrada (_recRows) con BOM UTF-8' },
   { v: '12.3.0', date: '2026-06-26', desc: 'Estandarización Sprint 2 — topbar global sticky con breadcrumb, .page-header, renderSidebarUser con badge de rol, variantes de botón secondary/ghost, modal de contraseña con clases (dark mode)' },
@@ -28,7 +29,7 @@ const CONFIG = {
   // URL del deploy de Apps Script — reemplazar con la URL real después del deploy.
   SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyp88KZInCGa68llI8C4uiy8B-IOldWRCjLWFHsiGdzkDXDgJUhfWzwtN00z9FI-mq4/exec",
   AUTH: {
-    SESSION_KEY:    "auditcs_session",
+    SESSION_KEY:    "acs_session",
     SESSION_TTL_MS: 8 * 60 * 60 * 1000, // 8 horas
   }
 };
