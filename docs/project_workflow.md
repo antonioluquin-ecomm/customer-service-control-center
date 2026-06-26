@@ -131,7 +131,7 @@ No modificar:
 
 | Elemento | Convención | Ejemplo |
 |----------|-----------|---------|
-| Acceso | por URL conocida, sin login | no hay pantalla de auth |
+| Acceso | login con sesión + RBAC por rol | `login.html` → `acs_session`; permisos por módulo |
 | Gráficos | Chart.js 4.4.1 (vendor local) | `assets/js/vendor/chart.min.js` |
 | Módulos JS | orden de carga crítico en `index.html` | ver `docs/architecture.md` |
 | Sync | queue en `localStorage`, flush al GAS | no modificar estructura del queue |

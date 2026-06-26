@@ -118,6 +118,13 @@ function updateRol_(params, ses) {
 }
 
 // ── Permisos por módulo ─────────────────────────────────────────
+// Lectura de la matriz de un rol (para la pantalla admin).
+function getPermisosRol_(params) {
+  const id_rol = validateIdPositivo_(params.id_rol, "id_rol");
+  const permisos = getPermisosForRol_(id_rol);
+  return ok_({ id_rol, permisos, data: permisos });
+}
+
 // params: { id_rol, permisos: { modulo: { ver:bool, editar:bool } } }
 function updatePermisos_(params, ses) {
   const id_rol = validateIdPositivo_(params.id_rol, "id_rol");

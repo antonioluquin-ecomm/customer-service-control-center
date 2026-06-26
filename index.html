@@ -276,12 +276,21 @@
     <!-- CONFIGURACIÓN -->
     <div id="page-configuracion" class="page">
       <div class="page-header">
-        <div class="page-header-text"><h1>Configuración</h1><p class="subtitle">Parámetros, agentes, auditores y criterios</p></div>
-        <div class="page-header-actions">
+        <div class="page-header-text"><h1>Configuración</h1><p class="subtitle">Gestión de usuarios, permisos y configuración del sistema</p></div>
+        <div class="page-header-actions" id="cfg-header-actions">
           <span id="cfg-sync-badge"></span>
           <button class="btn primary sm" onclick="saveConfig()">✓ Guardar todo</button>
         </div>
       </div>
+
+      <div class="cfg-tabs" role="tablist">
+        <button class="cfg-tab active" data-cfg-tab="parametros" onclick="switchConfigTab('parametros')">Parámetros</button>
+        <button class="cfg-tab" data-cfg-tab="usuarios" onclick="switchConfigTab('usuarios')">Usuarios</button>
+        <button class="cfg-tab" data-cfg-tab="roles" onclick="switchConfigTab('roles')">Roles y permisos</button>
+        <button class="cfg-tab" data-cfg-tab="conexion" onclick="switchConfigTab('conexion')">Conexión</button>
+      </div>
+
+      <div class="cfg-panel active" data-cfg-panel="parametros">
       <div id="config-saved" class="alert success hidden">✓ Configuración guardada y sincronizada con Sheets.</div>
 
       <div class="grid2" style="margin-bottom:16px">
@@ -370,6 +379,11 @@
           <div id="criterios-save-status" style="font-size:12px;color:var(--muted)"></div>
         </div>
       </div>
+      </div><!-- /cfg-panel parametros -->
+
+      <div class="cfg-panel" data-cfg-panel="usuarios"><div id="admin-usuarios"></div></div>
+      <div class="cfg-panel" data-cfg-panel="roles"><div id="admin-roles"></div></div>
+      <div class="cfg-panel" data-cfg-panel="conexion"><div id="admin-conexion"></div></div>
     </div>
 
   </main>

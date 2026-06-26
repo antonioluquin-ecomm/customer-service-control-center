@@ -97,7 +97,7 @@ const PERMISOS_SEED = {
 const ADMIN_ACTIONS = [
   "config_change", "update_criterios",
   "getUsuarios", "createUsuario", "updateUsuario",
-  "getRoles", "createRol", "updateRol", "updatePermisos",
+  "getRoles", "createRol", "updateRol", "updatePermisos", "getPermisosRol",
 ];
 
 // ── Mapa acción de escritura → módulos que la habilitan ─────────

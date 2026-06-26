@@ -3,12 +3,13 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.7.0',
+  number: '12.8.0',
   date:   '2026-06-26',
-  notes:  'Estandarización Sprint 6 — backend GAS multi-archivo, RBAC en Sheets (USUARIOS/ROLES/PERMISOS/SESIONES), LOGS/ERRORS, dual-emit'
+  notes:  'Estandarización Sprint 7 — pantalla admin (Usuarios/Roles y permisos/Conexión), cierre de estandarización'
 };
 
 const CHANGELOG = [
+  { v: '12.8.0', date: '2026-06-26', desc: 'Estandarización Sprint 7 — Configuración con tabs: Parámetros + pantalla admin (Usuarios, Roles y permisos con matriz 3-estados, Conexión con health check). Endpoint getPermisosRol. Docs CLAUDE.md/workflow actualizados (auth por sesión + RBAC)' },
   { v: '12.7.0', date: '2026-06-26', desc: 'Estandarización Sprint 6 — backend GAS reestructurado a 9 .gs (Code/Auth/Usuarios/Auditorias/Validators/Logger/Helpers/Config/Setup), RBAC por sesión en hojas USUARIOS/ROLES/PERMISOS_MODULOS/SESIONES, observabilidad LOGS/ERRORS, respuestas dual-emit (status+ok/data), migración idempotente de usuarios legacy preservando contraseñas' },
   { v: '12.6.0', date: '2026-06-26', desc: 'Estandarización Sprint 5 — RBAC flexible: isAdmin()=id_rol===1, canView(mod), canEdit(mod), DEFAULT_PERMISOS, acs_session (fallback auditcs_session), acs_theme (fallback cs_theme), nav por canView' },
   { v: '12.5.0', date: '2026-06-26', desc: 'Estandarización Sprint 4 — login.html: anti-flash script, variables.css para dark mode, gradiente en icono, card con border/bg token, errEl.hidden, mensajes canónicos' },

@@ -92,6 +92,7 @@ function routePost_(action, body, ses) {
     case "createRol":                   return createRol_(body, ses);
     case "updateRol":                   return updateRol_(body, ses);
     case "updatePermisos":              return updatePermisos_(body, ses);
+    case "getPermisosRol":              return getPermisosRol_(body);
 
     // Default: insertar auditoría
     case "insert_auditoria":
