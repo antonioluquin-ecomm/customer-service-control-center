@@ -195,7 +195,6 @@
         <div class="page-header-actions">
           <button class="btn sm" onclick="retrySyncPending()" id="btn-retry-sync" style="display:none">↑ Reintentar pendientes</button>
           <button class="btn sm" onclick="reloadFromSheets()">↺ Actualizar</button>
-          <button class="btn sm" onclick="exportCSV()">↓ CSV</button>
         </div>
       </div>
       <div class="card">
@@ -205,16 +204,37 @@
           <select id="filter-agente" onchange="renderRegistros()"><option value="">Todos los agentes</option></select>
           <select id="filter-mes" onchange="renderRegistros()"><option value="">Todos los meses</option><option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option></select>
           <select id="filter-semana" onchange="renderRegistros()"><option value="">Todas las semanas</option></select>
+          <span id="registros-count" class="row-count"></span>
+          <button class="btn sm" onclick="exportCSV()">↓ CSV</button>
         </div>
-        <div id="registros-count" style="font-size:12px;color:var(--muted);margin-bottom:10px"></div>
         <div style="overflow-x:auto">
-          <table>
+          <table id="tabla-registros">
             <thead><tr>
-              <th>ID</th><th>Fecha</th><th>Agente</th><th>Ticket</th><th>Canal</th>
-              <th>Sem.</th><th>Horas</th><th>Calidad</th><th>Prod.</th><th>General</th><th>Estado</th><th>Sheets</th><th>Acciones</th>
+              <th>ID</th>
+              <th data-sortable data-key="fecha_auditoria">Fecha</th>
+              <th data-sortable data-key="agente">Agente</th>
+              <th data-sortable data-key="ticket">Ticket</th>
+              <th data-sortable data-key="canal">Canal</th>
+              <th data-sortable data-key="semana">Sem.</th>
+              <th>Horas</th>
+              <th data-sortable data-key="calidad">Calidad</th>
+              <th data-sortable data-key="productividad">Prod.</th>
+              <th data-sortable data-key="general">General</th>
+              <th data-sortable data-key="estado">Estado</th>
+              <th>Sheets</th><th>Acciones</th>
             </tr></thead>
             <tbody id="tbody-registros"></tbody>
           </table>
+        </div>
+        <div class="pagination" id="rec-pagination" style="display:none">
+          <span class="pagination-info" id="rec-pagination-info"></span>
+          <select id="rec-page-size" aria-label="Filas por página">
+            <option value="25" selected>25 por página</option>
+            <option value="50">50 por página</option>
+            <option value="100">100 por página</option>
+          </select>
+          <button id="rec-btn-prev" class="btn sm" disabled>← Ant.</button>
+          <button id="rec-btn-next" class="btn sm">Sig. →</button>
         </div>
       </div>
     </div>
