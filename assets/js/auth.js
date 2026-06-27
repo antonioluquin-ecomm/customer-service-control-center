@@ -191,10 +191,36 @@ window.escapeHtml = function (str) {
     const token = getSessionToken();
     localStorage.removeItem(_SESSION_KEY);
     localStorage.removeItem(_SESSION_KEY_OLD);
-    if (token && window.callApiRaw) {
-      try { await callApiRaw('logout', {}); } catch (_) {}
+    if (token && window.CONFIG) {
+      try {
+        await fetch(CONFIG.SCRIPT_URL, {
+          method: 'POST', mode: 'cors',
+          headers: {'Content-Type': 'text/plain;charset=utf-8'},
+          body: JSON.stringify({ _type: 'logout', sessionToken: token }),
+        });
+      } catch (_) {}
     }
     window.location.href = _loginPath();
+  };
+
+  // ── Refresh de permisos en background ────────────────────────
+  // Llama getPermisos al GAS y actualiza session.permisos en localStorage.
+  // No bloquea: si falla, se mantienen los permisos guardados en sesión.
+  window.refreshPermisos = async function () {
+    const s = getSession();
+    if (!s || !s.session_token || !window.CONFIG) return;
+    try {
+      const res = await fetch(CONFIG.SCRIPT_URL, {
+        method: 'POST', mode: 'cors',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({ _type: 'getPermisos', sessionToken: s.session_token }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!data || data.status !== 'ok' || !data.permisos) return;
+      s.permisos = data.permisos;
+      localStorage.setItem(_SESSION_KEY, JSON.stringify(s));
+      if (window.applyRoleRestrictions) applyRoleRestrictions();
+    } catch (_) {}
   };
 
   // ── Modal: cambiar contraseña ────────────────────────────────

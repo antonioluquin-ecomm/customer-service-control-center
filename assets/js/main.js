@@ -108,6 +108,7 @@ function initMobileSidebar() {
   initMobileSidebar();
   loadPendingQueue();
   applyRoleRestrictions();
+  refreshPermisos(); // background: sincroniza permisos con el servidor sin bloquear
   const today=new Date().toISOString().slice(0,10);
   document.getElementById("f-fecha").value=today;
   onFechaChange();
