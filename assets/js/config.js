@@ -3,12 +3,13 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.8.1',
+  number: '12.9.0',
   date:   '2026-06-27',
-  notes:  'Hotfix: anti-flash acs_theme, GAS writeLog actor, deleteAuditoria orden log, comparación requiere_seguimiento'
+  notes:  'Sprint mejoras 1 — canView default false, alert→sync bar, setSession usa expira_en del servidor'
 };
 
 const CHANGELOG = [
+  { v: '12.9.0', date: '2026-06-27', desc: 'Mejoras Sprint 1 — canView: denegado por defecto en módulos desconocidos; permisos denegados usan sync bar en lugar de alert(); setSession usa expira_en del servidor (sincroniza TTL frontend/backend)' },
   { v: '12.8.1', date: '2026-06-27', desc: 'Hotfix auditoría crítica — anti-flash lee acs_theme (migración completa), GAS: writeLog login incluye actor, deleteAuditoria loguea después del borrado, requiere_seguimiento normaliza acento' },
   { v: '12.8.0', date: '2026-06-26', desc: 'Estandarización Sprint 7 — Configuración con tabs: Parámetros + pantalla admin (Usuarios, Roles y permisos con matriz 3-estados, Conexión con health check). Endpoint getPermisosRol. Docs CLAUDE.md/workflow actualizados (auth por sesión + RBAC)' },
   { v: '12.7.0', date: '2026-06-26', desc: 'Estandarización Sprint 6 — backend GAS reestructurado a 9 .gs (Code/Auth/Usuarios/Auditorias/Validators/Logger/Helpers/Config/Setup), RBAC por sesión en hojas USUARIOS/ROLES/PERMISOS_MODULOS/SESIONES, observabilidad LOGS/ERRORS, respuestas dual-emit (status+ok/data), migración idempotente de usuarios legacy preservando contraseñas' },

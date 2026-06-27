@@ -97,7 +97,7 @@ window.escapeHtml = function (str) {
         nombre_rol: u.nombre_rol || _roleLabel(id_rol),
       },
       permisos:  u.permisos || null,
-      expira_en: new Date(Date.now() + _ttl()).toISOString(),
+      expira_en: u.expira_en || new Date(Date.now() + _ttl()).toISOString(),
     };
     localStorage.setItem(_SESSION_KEY, JSON.stringify(session));
     localStorage.removeItem(_SESSION_KEY_OLD); // migración limpia
@@ -116,7 +116,7 @@ window.escapeHtml = function (str) {
   window.canView = function (mod) {
     if (isAdmin()) return true;
     const p = _getPermisos();
-    return p[mod] ? p[mod].ver : true; // módulos sin definición: visible por defecto
+    return p[mod] ? p[mod].ver : false; // módulos sin definición: denegado por defecto
   };
 
   window.canEdit = function (mod) {

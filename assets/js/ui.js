@@ -32,7 +32,7 @@ const PAGE_LABELS={dashboard:"Inicio",agentes:"Agentes",observaciones:"Observaci
 // Muestra la página activa y dispara su render
 function showPage(id){
   if(!canView(id)){
-    alert("No tenés permisos para acceder a esta sección.");
+    hideSync("Sin permisos para acceder a esta sección",3000,true);
     return;
   }
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
