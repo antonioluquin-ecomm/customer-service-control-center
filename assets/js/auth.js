@@ -203,12 +203,10 @@ window.escapeHtml = function (str) {
     chip.setAttribute('aria-expanded', 'false');
     chip.setAttribute('title', u.nombre || u.email);
     chip.innerHTML =
-      '<div class="user-avatar">' + escapeHtml(initials) + '</div>' +
       '<div class="user-chip-info">' +
-        '<span class="user-chip-name">' + escapeHtml(u.nombre || u.email) + '</span>' +
-        '<span class="auth-chip-role">' + escapeHtml(_roleLabel(u.id_rol)) + '</span>' +
-      '</div>' +
-      '<span class="user-chip-chevron" aria-hidden="true">▾</span>';
+        '<span class="user-chip-name">' + escapeHtml(u.nombre || u.email) + ' <span class="user-chip-chevron" aria-hidden="true">▾</span></span>' +
+        '<span class="user-chip-role">' + escapeHtml(_roleLabel(u.id_rol)) + '</span>' +
+      '</div>';
     chip.addEventListener('click', function (e) {
       e.stopPropagation();
       var drop = document.getElementById('user-dropdown');
