@@ -18,8 +18,8 @@
 ## Stack específico
 
 - **Sin framework** — HTML/CSS/Vanilla JS, sin dependencias de build
-- **Sin auth de sesión** — acceso por URL conocida
-- **Backend**: Google Apps Script vía `fetch` como backend/middleware
+- **Auth por sesión + RBAC flexible** — login con SHA-256, sesión en `localStorage` (`acs_session`) y hoja `SESIONES`; permisos por módulo (`canView`/`canEdit`) según `id_rol`. Ver `login_standard.md` y `docs/apps-script-deploy.md`
+- **Backend**: Google Apps Script vía `fetch` como backend/middleware (9 archivos `.gs`, ver `docs/apps-script.md`)
 - **Base de datos**: Google Sheets
 - **Hosting**: GitHub Pages (frontend estático)
 - **Visualizaciones**: Chart.js 4.4.1

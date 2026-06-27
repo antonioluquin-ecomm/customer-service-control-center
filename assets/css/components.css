@@ -7,9 +7,22 @@
 .btn.success:hover{background:#085c35}
 .btn.danger{background:var(--red-bg);color:var(--red);border-color:var(--red-mid)}
 .btn.danger:hover{background:var(--red-mid)}
+.btn.secondary{background:var(--surface);color:var(--text);border-color:var(--line)}
+.btn.secondary:hover{background:color-mix(in srgb,var(--text) 6%,var(--surface))}
+.btn.ghost{background:transparent;color:var(--primary);border-color:var(--primary-mid)}
+.btn.ghost:hover{background:var(--primary-soft)}
 .btn.sm{padding:5px 10px;font-size:12px}
 .btn.xs{padding:3px 8px;font-size:11px}
 .btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* Modal genérico (usado por el modal de cambio de contraseña) */
+.modal-overlay{position:fixed;inset:0;background:color-mix(in srgb,var(--text) 45%,transparent);display:none;align-items:center;justify-content:center;z-index:9999;padding:24px}
+.modal-overlay.open{display:flex}
+.modal-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:28px 32px;width:100%;max-width:380px}
+.modal-card h3{font-size:15px;font-weight:700;margin:0 0 18px}
+.modal-field{margin-bottom:14px}
+.modal-field label{display:block;font-size:13px;font-weight:500;margin-bottom:5px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
 
 /* Cards */
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
@@ -31,6 +44,36 @@ th{text-align:left;padding:8px 12px;font-size:10px;font-weight:600;color:var(--m
 td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--surface)}
+
+/* Sortable headers */
+th[data-sortable]{cursor:pointer;user-select:none}
+th[data-sortable]:hover{background:var(--primary-soft)}
+th[data-sortable]::after{content:' ↕';font-size:10px;opacity:.35}
+th[data-sortable].sort-asc::after{content:' ↑';opacity:1;color:var(--primary)}
+th[data-sortable].sort-desc::after{content:' ↓';opacity:1;color:var(--primary)}
+
+/* Paginación */
+.pagination{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.pagination-info{font-size:12.5px;color:var(--muted);flex:1}
+.row-count{font-size:12px;color:var(--muted);flex-shrink:0;white-space:nowrap}
+
+/* Tabs de configuración (segmented control) */
+.cfg-tabs{display:inline-flex;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);padding:3px;margin-bottom:20px}
+.cfg-tab{appearance:none;border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:13px;font-weight:500;padding:6px 14px;border-radius:calc(var(--radius-sm) - 2px);cursor:pointer;transition:all .15s}
+.cfg-tab:hover{color:var(--text)}
+.cfg-tab.active{background:var(--card);color:var(--primary);font-weight:600;box-shadow:var(--shadow-sm)}
+.cfg-panel{display:none}
+.cfg-panel.active{display:block}
+
+/* Matriz de permisos */
+.perm-matrix td{padding:7px 12px}
+.perm-matrix select{width:auto;min-width:130px;font-size:12px;padding:5px 8px}
+.perm-mod{font-weight:500;text-transform:capitalize}
+
+/* Estado de conexión */
+.conn-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+.conn-row:last-child{border-bottom:none}
+.conn-url{font-family:var(--mono,'DM Mono',monospace);font-size:11px;color:var(--muted);word-break:break-all}
 
 /* Badges */
 .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}

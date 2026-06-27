@@ -4,7 +4,8 @@
 
 /* ─── THEME ──────────────────────────────────────────────────── */
 
-const _THEME_KEY = 'cs_theme';
+const _THEME_KEY     = 'acs_theme';
+const _THEME_KEY_OLD = 'cs_theme';
 
 function getCurrentTheme() {
   return document.documentElement.getAttribute('data-theme') || 'light';
@@ -14,18 +15,23 @@ function setTheme(theme) {
   const next = theme === 'dark' ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem(_THEME_KEY, next);
+  localStorage.removeItem(_THEME_KEY_OLD); // migración limpia
   const isLight = next === 'light';
+  // El botón muestra la acción a la que se cambiará al hacer clic.
   document.querySelectorAll('.theme-toggle').forEach(function(btn) {
-    const icon = btn.querySelector('.th-icon');
-    if (icon) icon.textContent = isLight ? '☀️' : '🌙';
-    btn.setAttribute('title', isLight ? 'Modo claro' : 'Modo oscuro');
+    const icon  = btn.querySelector('.th-icon');
+    const label = btn.querySelector('.th-label');
+    if (icon)  icon.textContent  = isLight ? '☾' : '☀';
+    if (label) label.textContent = isLight ? 'Modo oscuro' : 'Modo claro';
+    btn.setAttribute('title', isLight ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro');
   });
 }
 
 function toggleTheme() { setTheme(getCurrentTheme() === 'light' ? 'dark' : 'light'); }
 
 function initTheme() {
-  const saved = localStorage.getItem(_THEME_KEY)
+  // Fallback desde clave vieja (cs_theme) durante migración
+  const saved = localStorage.getItem(_THEME_KEY) || localStorage.getItem(_THEME_KEY_OLD)
     || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   setTheme(saved);
 }
@@ -96,11 +102,11 @@ function initMobileSidebar() {
 
 (function init(){
   if(!requireAuth()) return;
+  renderSidebarUser();
   initTheme();
   initVersionBadge();
   initMobileSidebar();
   loadPendingQueue();
-  renderUserChip();
   applyRoleRestrictions();
   const today=new Date().toISOString().slice(0,10);
   document.getElementById("f-fecha").value=today;

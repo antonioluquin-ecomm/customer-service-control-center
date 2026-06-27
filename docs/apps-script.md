@@ -1,6 +1,20 @@
 # Apps Script — Referencia de API
 
-Backend: `apps-script/AppsScript.js` desplegado como Web App en Google Apps Script.
+Backend (v8 — estándar): 9 archivos `.gs` en `apps-script/` desplegados como Web App en Google Apps Script:
+`Code.gs` (router) · `Auth.gs` · `Usuarios.gs` · `Auditorias.gs` · `Validators.gs` · `Logger.gs` · `Helpers.gs` · `Config.gs` · `Setup.gs`.
+
+Para desplegar paso a paso (incluida la migración del Sheet de producción), ver
+[`apps-script-deploy.md`](apps-script-deploy.md).
+
+> **Respuestas dual-emit:** desde v8 toda respuesta incluye las claves legacy
+> (`status`, `message`, `config`, `auditorias`, …) **y** las estándar
+> (`ok`, `data`, `error`). El frontend actual lee `status`; el código nuevo puede leer `ok`/`data`.
+> Los ejemplos de abajo muestran solo las claves legacy por compatibilidad.
+
+> **RBAC por sesión:** el acceso se controla con hojas `USUARIOS` (id_rol), `ROLES`,
+> `PERMISOS_MODULOS` y `SESIONES`. Endpoints nuevos: `getPermisos`, `getUsuarios`,
+> `createUsuario`, `updateUsuario`, `getRoles`, `createRol`, `updateRol`, `updatePermisos`.
+> Observabilidad: cada escritura genera fila en `LOGS`; los errores técnicos en `ERRORS`.
 
 ---
 

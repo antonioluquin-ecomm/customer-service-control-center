@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AuditCS | Customer Service Control Center</title>
   <script>(function(){var t=localStorage.getItem('cs_theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
+  <link rel="stylesheet" href="assets/css/fonts.css"/>
   <link rel="stylesheet" href="assets/css/variables.css"/>
   <link rel="stylesheet" href="assets/css/base.css"/>
   <link rel="stylesheet" href="assets/css/layout.css"/>
@@ -91,11 +92,17 @@
 
   <main class="main">
 
+    <header class="topbar">
+      <span class="topbar-brand">AuditCS</span>
+      <span class="topbar-sep">›</span>
+      <span class="topbar-crumb" id="topbar-crumb">Inicio</span>
+    </header>
+
     <!-- DASHBOARD -->
     <div id="page-dashboard" class="page active">
-      <div class="db-topbar">
-        <div class="db-topbar-left"><h2>Inicio</h2><p id="dash-subtitle">Métricas de desempeño del equipo</p></div>
-        <div class="db-topbar-right">
+      <div class="page-header">
+        <div class="page-header-text"><h1>Inicio</h1><p class="subtitle" id="dash-subtitle">Métricas de desempeño del equipo</p></div>
+        <div class="page-header-actions">
           <button class="btn sm" onclick="reloadFromSheets()">↺ Actualizar</button>
           <button class="btn sm" onclick="exportCSV()">↓ CSV</button>
           <button class="btn primary sm" onclick="showPage('formulario')">+ Nueva Auditoría</button>
@@ -170,7 +177,7 @@
 
     <!-- FORMULARIO DE CALIDAD -->
     <div id="page-formulario" class="page">
-      <div class="topbar"><div class="topbar-left"><h2>Nueva auditoria de calidad</h2><p>Registro de una muestra de calidad; la productividad se carga por separado.</p></div></div>
+      <div class="page-header"><div class="page-header-text"><h1>Nueva auditoria de calidad</h1><p class="subtitle">Registro de una muestra de calidad; la productividad se carga por separado.</p></div></div>
       <div id="form-alert" class="alert success hidden"></div>
       <div class="form-progress"><div class="step-tab active" id="tab-1" onclick="goStep(1)"><span class="step-num">01</span>Datos</div><div class="step-tab" id="tab-2" onclick="goStep(2)"><span class="step-num">02</span>Calidad</div><div class="step-tab" id="tab-3" onclick="goStep(3)"><span class="step-num">03</span>Observaciones</div><div class="step-tab" id="tab-4" onclick="goStep(4)"><span class="step-num">04</span>Resumen</div></div>
       <div class="form-step active" id="step-1"><div class="card"><div class="form-section"><div class="section-title">Identificacion</div><div class="fg c4"><div class="field"><label>Auditor *</label><select id="f-auditor"><option value="">- Seleccionar -</option></select></div><div class="field"><label>Fecha *</label><input type="date" id="f-fecha" oninput="onFechaChange()"/></div><div class="field"><label>Mes</label><select id="f-mes" disabled><option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option></select></div><div class="field"><label>Semana</label><input type="number" id="f-semana" readonly/></div></div></div><div class="form-section"><div class="section-title">Muestra</div><div class="fg c4"><div class="field"><label>Agente *</label><select id="f-agente" onchange="updateSemanaCount()"><option value="">- Seleccionar -</option></select></div><div class="field"><label>Nro. Ticket / caso *</label><input id="f-ticket"/></div><div class="field"><label>Canal *</label><select id="f-canal"><option value="">- Seleccionar -</option><option>WhatsApp</option><option>Mail</option><option>Telefono</option><option>Ventas</option><option>Redes</option></select></div><div class="field"><label>Tipo *</label><select id="f-tipo"><option value="">- Seleccionar -</option><option>Reclamo</option><option>Consulta</option><option>Solicitud</option></select></div></div><div id="semana-count-alert" class="hidden warn-box" style="margin-top:10px"></div><div id="duplicate-alert" class="hidden alert warning" style="margin-top:10px"></div></div><div class="step-actions"><span></span><button class="btn primary" onclick="validateStep1()">Siguiente ?</button></div></div></div>
@@ -180,15 +187,14 @@
     </div>
 
     <!-- PRODUCTIVIDAD -->
-    <div id="page-productividad" class="page"><div class="topbar"><div class="topbar-left"><h2>Cargar productividad</h2><p>Una carga por agente y semana; los registros existentes se actualizan.</p></div></div><div class="card"><div class="filter-bar"><button class="btn primary" data-productividad-tab-btn="manual" onclick="setProductividadTab('manual')">Carga manual</button><button class="btn" data-productividad-tab-btn="excel" onclick="setProductividadTab('excel')">Importar Excel</button></div><div data-productividad-tab="manual"><div class="fg c3"><div class="field"><label>Agente *</label><select id="p-agente" oninput="productividadManualPreview()"><option value="">- Seleccionar -</option></select></div><div class="field"><label>Fecha de semana *</label><input type="date" id="p-fecha" oninput="productividadManualPreview()"/></div><div class="field"><label>Horas trabajadas *</label><input type="number" id="p-horas" min="0" step=".5" oninput="productividadManualPreview()"/></div><div class="field"><label>Interacciones reales *</label><input type="number" id="p-interacciones" min="0" oninput="productividadManualPreview()"/></div><div class="field"><label>Dias tarde *</label><input type="number" id="p-tarde" min="0" value="0" oninput="productividadManualPreview()"/></div><div class="field"><label>Dias faltas *</label><input type="number" id="p-faltas" min="0" value="0" oninput="productividadManualPreview()"/></div></div><div id="p-preview" class="info-box" style="margin-top:16px">Completa agente, fecha y horas para ver el resumen.</div><div id="p-alert" class="alert hidden"></div><div class="step-actions"><span></span><button class="btn success" onclick="submitProductividad()">Guardar productividad</button></div></div><div data-productividad-tab="excel" class="hidden"><p style="color:var(--muted)">Importa un CSV guardado desde Excel. Las filas existentes por agente+semana se actualizaran luego de la confirmacion.</p><button class="btn" onclick="downloadProductividadTemplate()">↓ Descargar plantilla</button><input type="file" accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="importProductividadFile(this)" style="margin-left:10px"/><div id="p-import-preview" style="margin-top:16px"></div></div><div class="form-section" style="margin-top:24px"><div class="section-title">Registros de productividad</div><div id="p-records" style="overflow:auto"></div></div></div></div>
+    <div id="page-productividad" class="page"><div class="page-header"><div class="page-header-text"><h1>Cargar productividad</h1><p class="subtitle">Una carga por agente y semana; los registros existentes se actualizan.</p></div></div><div class="card"><div class="filter-bar"><button class="btn primary" data-productividad-tab-btn="manual" onclick="setProductividadTab('manual')">Carga manual</button><button class="btn" data-productividad-tab-btn="excel" onclick="setProductividadTab('excel')">Importar Excel</button></div><div data-productividad-tab="manual"><div class="fg c3"><div class="field"><label>Agente *</label><select id="p-agente" oninput="productividadManualPreview()"><option value="">- Seleccionar -</option></select></div><div class="field"><label>Fecha de semana *</label><input type="date" id="p-fecha" oninput="productividadManualPreview()"/></div><div class="field"><label>Horas trabajadas *</label><input type="number" id="p-horas" min="0" step=".5" oninput="productividadManualPreview()"/></div><div class="field"><label>Interacciones reales *</label><input type="number" id="p-interacciones" min="0" oninput="productividadManualPreview()"/></div><div class="field"><label>Dias tarde *</label><input type="number" id="p-tarde" min="0" value="0" oninput="productividadManualPreview()"/></div><div class="field"><label>Dias faltas *</label><input type="number" id="p-faltas" min="0" value="0" oninput="productividadManualPreview()"/></div></div><div id="p-preview" class="info-box" style="margin-top:16px">Completa agente, fecha y horas para ver el resumen.</div><div id="p-alert" class="alert hidden"></div><div class="step-actions"><span></span><button class="btn success" onclick="submitProductividad()">Guardar productividad</button></div></div><div data-productividad-tab="excel" class="hidden"><p style="color:var(--muted)">Importa un CSV guardado desde Excel. Las filas existentes por agente+semana se actualizaran luego de la confirmacion.</p><button class="btn" onclick="downloadProductividadTemplate()">↓ Descargar plantilla</button><input type="file" accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="importProductividadFile(this)" style="margin-left:10px"/><div id="p-import-preview" style="margin-top:16px"></div></div><div class="form-section" style="margin-top:24px"><div class="section-title">Registros de productividad</div><div id="p-records" style="overflow:auto"></div></div></div></div>
 
     <!-- REGISTROS --><div id="page-registros" class="page">
-      <div class="topbar">
-        <div class="topbar-left"><h2>Registros</h2><p>Historial completo de auditorías</p></div>
-        <div class="topbar-right">
+      <div class="page-header">
+        <div class="page-header-text"><h1>Registros</h1><p class="subtitle">Historial completo de auditorías</p></div>
+        <div class="page-header-actions">
           <button class="btn sm" onclick="retrySyncPending()" id="btn-retry-sync" style="display:none">↑ Reintentar pendientes</button>
           <button class="btn sm" onclick="reloadFromSheets()">↺ Actualizar</button>
-          <button class="btn sm" onclick="exportCSV()">↓ CSV</button>
         </div>
       </div>
       <div class="card">
@@ -198,25 +204,46 @@
           <select id="filter-agente" onchange="renderRegistros()"><option value="">Todos los agentes</option></select>
           <select id="filter-mes" onchange="renderRegistros()"><option value="">Todos los meses</option><option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option></select>
           <select id="filter-semana" onchange="renderRegistros()"><option value="">Todas las semanas</option></select>
+          <span id="registros-count" class="row-count"></span>
+          <button class="btn sm" onclick="exportCSV()">↓ CSV</button>
         </div>
-        <div id="registros-count" style="font-size:12px;color:var(--muted);margin-bottom:10px"></div>
         <div style="overflow-x:auto">
-          <table>
+          <table id="tabla-registros">
             <thead><tr>
-              <th>ID</th><th>Fecha</th><th>Agente</th><th>Ticket</th><th>Canal</th>
-              <th>Sem.</th><th>Horas</th><th>Calidad</th><th>Prod.</th><th>General</th><th>Estado</th><th>Sheets</th><th>Acciones</th>
+              <th>ID</th>
+              <th data-sortable data-key="fecha_auditoria">Fecha</th>
+              <th data-sortable data-key="agente">Agente</th>
+              <th data-sortable data-key="ticket">Ticket</th>
+              <th data-sortable data-key="canal">Canal</th>
+              <th data-sortable data-key="semana">Sem.</th>
+              <th>Horas</th>
+              <th data-sortable data-key="calidad">Calidad</th>
+              <th data-sortable data-key="productividad">Prod.</th>
+              <th data-sortable data-key="general">General</th>
+              <th data-sortable data-key="estado">Estado</th>
+              <th>Sheets</th><th>Acciones</th>
             </tr></thead>
             <tbody id="tbody-registros"></tbody>
           </table>
+        </div>
+        <div class="pagination" id="rec-pagination" style="display:none">
+          <span class="pagination-info" id="rec-pagination-info"></span>
+          <select id="rec-page-size" aria-label="Filas por página">
+            <option value="25" selected>25 por página</option>
+            <option value="50">50 por página</option>
+            <option value="100">100 por página</option>
+          </select>
+          <button id="rec-btn-prev" class="btn sm" disabled>← Ant.</button>
+          <button id="rec-btn-next" class="btn sm">Sig. →</button>
         </div>
       </div>
     </div>
 
     <!-- OBSERVACIONES -->
     <div id="page-observaciones" class="page">
-      <div class="topbar">
-        <div class="topbar-left"><h2>Observaciones</h2><p>Seguimiento de desvíos y acciones</p></div>
-        <div class="topbar-right">
+      <div class="page-header">
+        <div class="page-header-text"><h1>Observaciones</h1><p class="subtitle">Seguimiento de desvíos y acciones</p></div>
+        <div class="page-header-actions">
           <select id="obs-filter-agente" onchange="renderObservaciones()" style="font-size:12px;padding:5px 10px"><option value="">Todos los agentes</option></select>
           <select id="obs-filter-estado" onchange="renderObservaciones()" style="font-size:12px;padding:5px 10px">
             <option value="">Todos los estados</option><option>Excelente</option><option>Correcta</option><option>Observada</option>
@@ -235,7 +262,7 @@
 
     <!-- AGENTES -->
     <div id="page-agentes" class="page">
-      <div class="topbar"><div class="topbar-left"><h2>Desempeño por Agente</h2><p>Ranking y análisis de criterios</p></div></div>
+      <div class="page-header"><div class="page-header-text"><h1>Desempeño por Agente</h1><p class="subtitle">Ranking y análisis de criterios</p></div></div>
       <div class="grid2">
         <div class="card"><div class="card-header"><div class="card-title">Ranking del Equipo</div></div><div id="agent-ranking"></div></div>
         <div class="card">
@@ -248,13 +275,22 @@
 
     <!-- CONFIGURACIÓN -->
     <div id="page-configuracion" class="page">
-      <div class="topbar">
-        <div class="topbar-left"><h2>Configuración</h2><p>Parámetros, agentes, auditores y criterios</p></div>
-        <div class="topbar-right">
+      <div class="page-header">
+        <div class="page-header-text"><h1>Configuración</h1><p class="subtitle">Gestión de usuarios, permisos y configuración del sistema</p></div>
+        <div class="page-header-actions" id="cfg-header-actions">
           <span id="cfg-sync-badge"></span>
           <button class="btn primary sm" onclick="saveConfig()">✓ Guardar todo</button>
         </div>
       </div>
+
+      <div class="cfg-tabs" role="tablist">
+        <button class="cfg-tab active" data-cfg-tab="parametros" onclick="switchConfigTab('parametros')">Parámetros</button>
+        <button class="cfg-tab" data-cfg-tab="usuarios" onclick="switchConfigTab('usuarios')">Usuarios</button>
+        <button class="cfg-tab" data-cfg-tab="roles" onclick="switchConfigTab('roles')">Roles y permisos</button>
+        <button class="cfg-tab" data-cfg-tab="conexion" onclick="switchConfigTab('conexion')">Conexión</button>
+      </div>
+
+      <div class="cfg-panel active" data-cfg-panel="parametros">
       <div id="config-saved" class="alert success hidden">✓ Configuración guardada y sincronizada con Sheets.</div>
 
       <div class="grid2" style="margin-bottom:16px">
@@ -343,6 +379,11 @@
           <div id="criterios-save-status" style="font-size:12px;color:var(--muted)"></div>
         </div>
       </div>
+      </div><!-- /cfg-panel parametros -->
+
+      <div class="cfg-panel" data-cfg-panel="usuarios"><div id="admin-usuarios"></div></div>
+      <div class="cfg-panel" data-cfg-panel="roles"><div id="admin-roles"></div></div>
+      <div class="cfg-panel" data-cfg-panel="conexion"><div id="admin-conexion"></div></div>
     </div>
 
   </main>
