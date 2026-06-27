@@ -47,6 +47,13 @@ function showPage(id){
   if(id==="observaciones"){ populateObsFilters(); renderObservaciones(); }
   if(id==="agentes")       renderAgentes();
   if(id==="productividad"){ initProductividadForm(); renderProductividadRecords(); }
+  // Cerrar sidebar en mobile al navegar
+  if(window.innerWidth<=900){
+    var sb=document.getElementById('sidebar');
+    var ov=document.getElementById('sidebarOverlay');
+    if(sb) sb.classList.remove('open');
+    if(ov) ov.classList.remove('visible');
+  }
 }
 
 function applyRoleRestrictions(){

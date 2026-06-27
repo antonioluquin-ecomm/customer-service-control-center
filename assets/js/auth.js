@@ -167,11 +167,20 @@ window.escapeHtml = function (str) {
     var drop = document.getElementById('user-dropdown');
     var chip = document.getElementById('sidebar-user-chip');
     if (!drop || !chip) return;
-    var rect = chip.getBoundingClientRect();
-    drop.style.bottom = (window.innerHeight - rect.top + 6) + 'px';
-    drop.style.left   = rect.left + 'px';
-    drop.style.width  = rect.width + 'px';
     drop.style.display = 'block';
+    if (window.innerWidth <= 900) {
+      // Mobile: el sidebar está oculto — mostrar dropdown como panel bottom-center
+      drop.style.bottom = '12px';
+      drop.style.left   = '12px';
+      drop.style.right  = '12px';
+      drop.style.width  = 'auto';
+    } else {
+      var rect = chip.getBoundingClientRect();
+      drop.style.bottom = (window.innerHeight - rect.top + 6) + 'px';
+      drop.style.left   = rect.left + 'px';
+      drop.style.right  = 'auto';
+      drop.style.width  = rect.width + 'px';
+    }
     chip.setAttribute('aria-expanded', 'true');
     chip.classList.add('open');
   }
@@ -239,6 +248,11 @@ window.escapeHtml = function (str) {
         '<button class="user-dropdown-item danger" type="button" onclick="authLogout()">Cerrar sesión</button>';
       drop.addEventListener('click', function (e) { e.stopPropagation(); });
       document.body.appendChild(drop);
+
+      // Cerrar dropdown al ejecutar cualquier acción
+      drop.querySelectorAll('.user-dropdown-item').forEach(function (btn) {
+        btn.addEventListener('click', _closeUserDropdown);
+      });
     }
 
     document.addEventListener('click', _closeUserDropdown);

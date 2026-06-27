@@ -10,7 +10,7 @@
 .brand-name{font-size:13px;font-weight:700;letter-spacing:-.2px}
 .brand-meta{font-size:10px;color:var(--muted);font-family:"DM Mono",monospace;display:flex;align-items:center;gap:4px;margin-top:3px;cursor:pointer;transition:color .15s;user-select:none}
 .brand-meta:hover{color:var(--text)}
-.sidebar-version-popover{position:fixed;top:58px;left:232px;background:var(--surface);border:1px solid var(--border-color);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:14px 16px;min-width:280px;max-width:340px;max-height:70vh;overflow-y:auto;z-index:200;color:var(--text);line-height:1.5}
+.sidebar-version-popover{position:fixed;top:58px;left:calc(var(--sidebar-w) + 8px);background:var(--surface);border:1px solid var(--border-color);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:14px 16px;min-width:280px;max-width:340px;max-height:70vh;overflow-y:auto;z-index:200;color:var(--text);line-height:1.5}
 .nav{padding:12px 10px;flex:1;overflow-y:auto}
 .nav-section{font-size:10px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.8px;padding:10px 10px 4px}
 .nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:1px solid transparent;background:none;width:100%;text-align:left;margin-bottom:1px}
@@ -51,7 +51,11 @@
 .user-dropdown-item.danger{color:var(--danger)}
 .user-dropdown-item.danger:hover{background:var(--danger-bg)}
 
-.sheets-btn{display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:6px;font-size:11px;font-weight:500;margin:0 10px 6px;cursor:pointer;border:none;width:calc(100% - 20px);transition:all .15s}
+/* Offline badge en nav-item de Registros */
+.offline-badge{display:none;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:var(--radius-pill);margin-left:auto;line-height:1.6}
+.offline-badge.show{display:inline-block}
+
+.sheets-btn{display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:6px;font-size:11px;font-weight:500;margin:6px 10px 4px;cursor:pointer;border:none;width:calc(100% - 20px);transition:all .15s}
 .sheets-btn.connected{background:var(--success-bg);color:var(--success)}
 .sheets-btn.disconnected{background:var(--danger-bg);color:var(--danger)}
 .sheets-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;animation:pulse 2s ease-in-out infinite}
