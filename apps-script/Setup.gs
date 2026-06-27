@@ -111,6 +111,18 @@ function _legacyBool(val) {
   return s === "si" || s === "sí" || s === "true" || s === "1";
 }
 
+// ── Trigger diario para limpiar sesiones expiradas ─────────────
+// Ejecutar UNA VEZ manualmente: crea un trigger que corre a las 3 AM cada día.
+// Idempotente: no crea duplicados si ya existe uno para la misma función.
+function setupDailyCleanupTrigger() {
+  const fnName = "limpiarSesionesExpiradas";
+  const existing = ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === fnName);
+  if (existing.length) { Logger.log("Trigger ya existe para " + fnName); return; }
+  ScriptApp.newTrigger(fnName)
+    .timeBased().everyDays(1).atHour(3).create();
+  Logger.log("✓ Trigger diario creado para " + fnName + " a las 3 AM.");
+}
+
 // ── Setup de instalación fresca (sin usuarios legacy) ───────────
 // Cambiar email/nombre/password antes de ejecutar.
 function crearUsuarioInicial() {

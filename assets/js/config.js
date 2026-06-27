@@ -3,12 +3,13 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.9.0',
+  number: '12.9.1',
   date:   '2026-06-27',
-  notes:  'Sprint mejoras 1 — canView default false, alert→sync bar, setSession usa expira_en del servidor'
+  notes:  'Sprint mejoras 2 — Chart.js vendor local, trigger limpieza SESIONES'
 };
 
 const CHANGELOG = [
+  { v: '12.9.1', date: '2026-06-27', desc: 'Mejoras Sprint 2 — Chart.js 4.4.1 self-hosted (assets/js/vendor/chart.min.js, sin CDN externo); GAS: setupDailyCleanupTrigger() crea trigger diario a las 3 AM para limpiar SESIONES expiradas' },
   { v: '12.9.0', date: '2026-06-27', desc: 'Mejoras Sprint 1 — canView: denegado por defecto en módulos desconocidos; permisos denegados usan sync bar en lugar de alert(); setSession usa expira_en del servidor (sincroniza TTL frontend/backend)' },
   { v: '12.8.1', date: '2026-06-27', desc: 'Hotfix auditoría crítica — anti-flash lee acs_theme (migración completa), GAS: writeLog login incluye actor, deleteAuditoria loguea después del borrado, requiere_seguimiento normaliza acento' },
   { v: '12.8.0', date: '2026-06-26', desc: 'Estandarización Sprint 7 — Configuración con tabs: Parámetros + pantalla admin (Usuarios, Roles y permisos con matriz 3-estados, Conexión con health check). Endpoint getPermisosRol. Docs CLAUDE.md/workflow actualizados (auth por sesión + RBAC)' },
