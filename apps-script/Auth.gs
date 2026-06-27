@@ -155,7 +155,7 @@ function handleLogin_(body) {
 
   // Registrar último acceso (best-effort)
   _setUltimoAcceso(u.id);
-  writeLog_("login", "USUARIOS", u.id, "OK", email);
+  writeLog_("login", "USUARIOS", u.id, "OK", "", email);
 
   // Shape de sesión estándar (Sprint 5), con dual-emit de claves legacy.
   const user = {
@@ -201,7 +201,8 @@ function handleChangePassword_(body, ses) {
 }
 
 function handleGetPermisos_(ses) {
-  return ok_({ permisos: getPermisosForRol_(ses.id_rol), data: getPermisosForRol_(ses.id_rol) });
+  const permisos = getPermisosForRol_(ses.id_rol);
+  return ok_({ permisos, data: permisos });
 }
 
 function _setUltimoAcceso(id) {

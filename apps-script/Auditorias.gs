@@ -170,14 +170,13 @@ function _insertObservacion(p) {
     p.id_auditoria + "-OBS", p.id_auditoria, new Date().toISOString(), p.agente, p.ticket,
     p.obs_general || "", p.obs_desvios || "", p.obs_accion || "",
     p.requiere_seguimiento || "No", p.resp_seguimiento || "",
-    p.requiere_seguimiento === "Sí" ? "Pendiente" : "N/A",
+    String(p.requiere_seguimiento || "").toLowerCase().startsWith("s") ? "Pendiente" : "N/A",
   ]);
 }
 
 // ── DELETE auditoría (4 hojas + log) ────────────────────────────
 function deleteAuditoria_(id, ses) {
   if (!id) return err_("id_auditoria requerido");
-  writeLog_("delete_auditoria", "auditorias", id, "OK", "Eliminado desde UI", ses.email);
   [SHEETS.AUDITORIAS, SHEETS.DETALLE, SHEETS.PRODUCTIVIDAD, SHEETS.OBSERVACIONES].forEach(name => {
     const s = getSheet_(name);
     const lr = s.getLastRow();
@@ -194,6 +193,7 @@ function deleteAuditoria_(id, ses) {
       s.deleteRows(start, end - start + 1);
     }
   });
+  writeLog_("delete_auditoria", "auditorias", id, "OK", "Eliminado desde UI", ses.email);
   return ok_({ deleted: id });
 }
 
