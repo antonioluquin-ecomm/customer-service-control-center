@@ -18,7 +18,7 @@
 .nav-item.active{background:var(--primary-soft);color:var(--primary);font-weight:600;border-color:color-mix(in srgb,var(--primary) 20%,transparent)}
 .nav-icon{width:15px;height:15px;flex-shrink:0;opacity:.7}
 .nav-item.active .nav-icon{opacity:1}
-.sidebar-footer{padding:12px 18px;border-top:1px solid var(--sidebar-line);flex-shrink:0}
+.sidebar-footer{padding:8px 10px;border-top:1px solid var(--sidebar-line);flex-shrink:0}
 .sidebar-footer p{font-size:11px;color:var(--hint);line-height:1.7}
 
 /* Panel de usuario en sidebar footer (renderSidebarUser) */
@@ -32,6 +32,25 @@
 .theme-toggle:hover,.sidebar-action-btn:hover{background:var(--surface)}
 .sidebar-action-btn.danger{color:var(--danger);border-color:var(--danger-mid)}
 .sidebar-action-btn.danger:hover{background:var(--danger-bg)}
+/* Chip de usuario en sidebar footer */
+.user-chip{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid transparent;transition:all .15s;user-select:none;width:100%}
+.user-chip:hover{background:color-mix(in srgb,var(--text) 5%,transparent);border-color:var(--line)}
+.user-chip.open{background:var(--primary-soft);border-color:color-mix(in srgb,var(--primary) 20%,transparent)}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:var(--primary-soft);color:var(--primary);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:-.5px}
+.user-chip-info{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.user-chip-name{font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-chip-chevron{font-size:10px;color:var(--muted);flex-shrink:0;transition:transform .15s}
+.user-chip.open .user-chip-chevron{transform:rotate(180deg)}
+
+/* Dropdown del usuario */
+.user-dropdown{position:fixed;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:200;overflow:hidden;min-width:200px}
+.user-dropdown-header{padding:12px 14px}
+.user-dropdown-sep{height:1px;background:var(--line)}
+.user-dropdown-item{display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;font-size:13px;font-weight:500;color:var(--text);background:none;border:none;cursor:pointer;text-align:left;font-family:inherit;transition:background .12s}
+.user-dropdown-item:hover{background:color-mix(in srgb,var(--text) 5%,transparent)}
+.user-dropdown-item.danger{color:var(--danger)}
+.user-dropdown-item.danger:hover{background:var(--danger-bg)}
+
 .sheets-btn{display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:6px;font-size:11px;font-weight:500;margin:0 10px 6px;cursor:pointer;border:none;width:calc(100% - 20px);transition:all .15s}
 .sheets-btn.connected{background:var(--success-bg);color:var(--success)}
 .sheets-btn.disconnected{background:var(--danger-bg);color:var(--danger)}

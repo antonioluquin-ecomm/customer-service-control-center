@@ -390,7 +390,7 @@ async function renderAdminConexion(){
   const hojas=["USUARIOS","ROLES","PERMISOS_MODULOS","SESIONES","LOGS","ERRORS","CONFIG","auditorias","productividad_semanal","criterios_calidad","configuracion"];
   cont.innerHTML=`
     <div class="card">
-      <div class="card-header"><div><div class="card-title">Conexión al Google Sheet</div><div class="card-sub">Backend de Apps Script</div></div>
+      <div class="card-header"><div><div class="card-title">Integraciones</div><div class="card-sub">Backend de Apps Script · Google Sheets</div></div>
         <span id="conn-badge"><span class="badge badge-local">Verificando…</span></span></div>
       <div class="conn-row"><span>URL del Web App</span><span class="conn-url">${h(CONFIG.SCRIPT_URL)}</span></div>
       <div class="conn-row"><span>Estado</span><span id="conn-status">—</span></div>

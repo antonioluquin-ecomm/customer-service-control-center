@@ -162,26 +162,89 @@ window.escapeHtml = function (str) {
     return map[Number(idRol)] || 'Usuario';
   }
 
-  // ── Panel de usuario en sidebar footer ──────────────────────
+  // ── Helpers: dropdown de usuario en sidebar ──────────────────
+  function _openUserDropdown() {
+    var drop = document.getElementById('user-dropdown');
+    var chip = document.getElementById('sidebar-user-chip');
+    if (!drop || !chip) return;
+    var rect = chip.getBoundingClientRect();
+    drop.style.bottom = (window.innerHeight - rect.top + 6) + 'px';
+    drop.style.left   = rect.left + 'px';
+    drop.style.width  = rect.width + 'px';
+    drop.style.display = 'block';
+    chip.setAttribute('aria-expanded', 'true');
+    chip.classList.add('open');
+  }
+
+  function _closeUserDropdown() {
+    var drop = document.getElementById('user-dropdown');
+    var chip = document.getElementById('sidebar-user-chip');
+    if (drop) drop.style.display = 'none';
+    if (chip) { chip.setAttribute('aria-expanded', 'false'); chip.classList.remove('open'); }
+  }
+
+  // ── Chip de usuario en sidebar footer ────────────────────────
   window.renderSidebarUser = function () {
-    const s = getSession();
+    var s = getSession();
     if (!s) return;
-    const u      = s.usuario;
-    const footer = document.querySelector('.sidebar-footer');
+    var u      = s.usuario;
+    var footer = document.querySelector('.sidebar-footer');
     if (!footer) return;
-    if (document.getElementById('sidebar-user-info')) return;
-    const info = document.createElement('div');
-    info.id = 'sidebar-user-info';
-    info.innerHTML =
-      `<div class="sidebar-user-name">${escapeHtml(u.nombre || u.email)}</div>` +
-      `<div class="sidebar-user-email">${escapeHtml(u.email)}</div>` +
-      `<div class="sidebar-user-meta"><span class="auth-chip-role">${escapeHtml(_roleLabel(u.id_rol))}</span></div>` +
-      `<div class="sidebar-user-actions">` +
-        `<button class="theme-toggle" type="button" onclick="toggleTheme()"><span class="th-icon">☾</span><span class="th-label">Modo oscuro</span></button>` +
-        `<button class="sidebar-action-btn" type="button" onclick="openChangePasswordModal()">Cambiar contraseña</button>` +
-        `<button class="sidebar-action-btn danger" type="button" onclick="authLogout()">Cerrar sesión</button>` +
-      `</div>`;
-    footer.appendChild(info);
+    if (document.getElementById('sidebar-user-chip')) return;
+
+    var initials = (u.nombre || u.email || '?')
+      .trim().split(/\s+/).slice(0, 2).map(function(w){ return w[0] || ''; }).join('').toUpperCase().slice(0, 2) || '?';
+
+    var chip = document.createElement('div');
+    chip.id = 'sidebar-user-chip';
+    chip.className = 'user-chip';
+    chip.setAttribute('role', 'button');
+    chip.setAttribute('aria-haspopup', 'true');
+    chip.setAttribute('aria-expanded', 'false');
+    chip.setAttribute('title', u.nombre || u.email);
+    chip.innerHTML =
+      '<div class="user-avatar">' + escapeHtml(initials) + '</div>' +
+      '<div class="user-chip-info">' +
+        '<span class="user-chip-name">' + escapeHtml(u.nombre || u.email) + '</span>' +
+        '<span class="auth-chip-role">' + escapeHtml(_roleLabel(u.id_rol)) + '</span>' +
+      '</div>' +
+      '<span class="user-chip-chevron" aria-hidden="true">▾</span>';
+    chip.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var drop = document.getElementById('user-dropdown');
+      if (drop && drop.style.display !== 'none') { _closeUserDropdown(); }
+      else { _openUserDropdown(); }
+    });
+    footer.appendChild(chip);
+
+    if (!document.getElementById('user-dropdown')) {
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      var drop = document.createElement('div');
+      drop.id = 'user-dropdown';
+      drop.className = 'user-dropdown';
+      drop.setAttribute('role', 'menu');
+      drop.style.display = 'none';
+      drop.innerHTML =
+        '<div class="user-dropdown-header">' +
+          '<div class="sidebar-user-name">' + escapeHtml(u.nombre || u.email) + '</div>' +
+          '<div class="sidebar-user-email">' + escapeHtml(u.email) + '</div>' +
+          '<div class="sidebar-user-meta"><span class="auth-chip-role">' + escapeHtml(_roleLabel(u.id_rol)) + '</span></div>' +
+        '</div>' +
+        '<div class="user-dropdown-sep"></div>' +
+        '<button class="user-dropdown-item theme-toggle" type="button" onclick="toggleTheme()">' +
+          '<span class="th-icon">' + (isDark ? '☀' : '☾') + '</span>' +
+          '<span class="th-label">' + (isDark ? 'Modo claro' : 'Modo oscuro') + '</span>' +
+        '</button>' +
+        '<div class="user-dropdown-sep"></div>' +
+        '<button class="user-dropdown-item" type="button" onclick="openChangePasswordModal()">Cambiar contraseña</button>' +
+        '<div class="user-dropdown-sep"></div>' +
+        '<button class="user-dropdown-item danger" type="button" onclick="authLogout()">Cerrar sesión</button>';
+      drop.addEventListener('click', function (e) { e.stopPropagation(); });
+      document.body.appendChild(drop);
+    }
+
+    document.addEventListener('click', _closeUserDropdown);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') _closeUserDropdown(); });
   };
 
   window.renderUserChip = window.renderSidebarUser; // retrocompatibilidad

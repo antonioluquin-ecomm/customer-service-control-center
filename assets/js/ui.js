@@ -82,5 +82,5 @@ function populateSelects(){
   const semOpts='<option value="">Todas las semanas</option>'+semanas.map(s=>`<option value="${escapeHtml(s)}">Semana ${escapeHtml(s)}</option>`).join("");
   const fsem=document.getElementById("filter-semana"); if(fsem) fsem.innerHTML=semOpts;
   const dfsem=document.getElementById("df-semana"); if(dfsem) dfsem.innerHTML=semOpts;
-  document.getElementById("sidebar-info").innerHTML=`Responsable: ${escapeHtml(CFG.auditores[0]||"—")}<br>Epic: Servicio al Cliente<br>${CFG.muestras_semana} muestras / agente / semana`;
+  document.getElementById("sidebar-info").innerHTML="";
 }

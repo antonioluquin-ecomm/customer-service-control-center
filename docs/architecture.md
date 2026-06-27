@@ -2,14 +2,38 @@
 
 ## Vistas (6 páginas)
 
-| ID | Título | Descripción |
-|----|--------|-------------|
-| `dashboard` | Dashboard | KPIs del equipo, ranking, evolución semanal (Chart.js), heatmap agente×semana, criterios con mayor incumplimiento, alertas score < 70% |
-| `formulario` | Nueva Auditoría | Wizard de 5 pasos: Datos generales → Calidad (criterios) → Productividad → Observaciones → Resumen + Submit |
-| `registros` | Registros | Tabla filtrable (agente, estado, mes, semana, búsqueda libre) + exportación CSV |
-| `observaciones` | Observaciones | Tarjetas de desvíos con estado, acción correctiva y filtros |
-| `agentes` | Agentes | Ranking del equipo + detalle de criterios incumplidos por agente |
-| `configuracion` | Configuración | URL de Sheets, agentes, auditores, pesos calidad/productividad, criterios de calidad |
+### Grupos de navegación en el sidebar
+
+```
+[sin etiqueta — Overview]
+  Inicio (dashboard)
+
+[REPORTES]
+  Agentes
+  Observaciones
+
+[GESTIÓN]
+  Nueva auditoría de calidad (formulario)
+  Productividad semanal (productividad)
+  Registros (registros)
+
+[SISTEMA]  ← solo visible para Administrador
+  Configuración
+```
+
+> "Inicio" vive en su propia sección implícita sin etiqueta, siempre primero. No pertenece a Reportes. Ver `navigation_standard.md` en `project-standards/` para el estándar global.
+
+### Tabla de vistas
+
+| ID | Grupo nav | Título | Descripción |
+|----|-----------|--------|-------------|
+| `dashboard` | Overview | Inicio | KPIs del equipo, ranking, evolución semanal (Chart.js), heatmap agente×semana, criterios con mayor incumplimiento, alertas score < 70% |
+| `agentes` | Reportes | Agentes | Ranking del equipo + detalle de criterios incumplidos por agente |
+| `observaciones` | Reportes | Observaciones | Tarjetas de desvíos con estado, acción correctiva y filtros |
+| `formulario` | Gestión | Nueva Auditoría | Wizard de 5 pasos: Datos generales → Calidad (criterios) → Productividad → Observaciones → Resumen + Submit |
+| `productividad` | Gestión | Productividad semanal | Carga semanal de horas, tickets e interacciones por agente |
+| `registros` | Gestión | Registros | Tabla filtrable (agente, estado, mes, semana, búsqueda libre) + exportación CSV |
+| `configuracion` | Sistema | Configuración | Tabs: Parámetros · Usuarios · Roles y permisos · Integraciones (health check de Google Sheets) |
 
 ---
 
