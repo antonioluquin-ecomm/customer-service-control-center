@@ -16,7 +16,7 @@ const SHEETS = {
   CONFIGURACION:         "configuracion",
   CONFIG_LOG:            "log_configuracion",
   CRITERIOS:             "criterios_calidad",
-  USUARIOS_LEGACY:       "usuarios",        // fuente de la migración — NO se modifica
+  USUARIOS_LEGACY:       "usuarios_legacy", // fuente de la migración — NO se modifica
   LOG_ENVIOS:            "log_envios",       // legacy, se conserva
   // Sistema (estándar)
   USUARIOS:              "USUARIOS",
