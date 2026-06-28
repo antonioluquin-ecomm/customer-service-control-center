@@ -3,12 +3,13 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.10.0',
-  date:   '2026-06-27',
-  notes:  'Sprint mejoras 3 — refresh de permisos en background, fix logout GAS'
+  number: '12.11.0',
+  date:   '2026-06-28',
+  notes:  'Sprint nav 5 — colapso del sidebar en desktop (botón en topbar, estado persistido + anti-flash)'
 };
 
 const CHANGELOG = [
+  { v: '12.11.0', date: '2026-06-28', desc: 'Sprint nav 5 — colapso del sidebar en desktop: botón en topbar oculta/muestra el sidebar dando ancho completo al contenido; estado en localStorage (acs_sidebar) con anti-flash en el head; reglas dentro de @media(min-width:901px) para no interferir con el drawer mobile' },
   { v: '12.10.0', date: '2026-06-27', desc: 'Mejoras Sprint 3 — authLogout: fix logout real al GAS (antes enviaba string en lugar de objeto, sesion quedaba activa en backend); refreshPermisos(): background fetch de permisos en init, actualiza localStorage y re-aplica RBAC sin re-login' },
   { v: '12.9.1', date: '2026-06-27', desc: 'Mejoras Sprint 2 — Chart.js 4.4.1 self-hosted (assets/js/vendor/chart.min.js, sin CDN externo); GAS: setupDailyCleanupTrigger() crea trigger diario a las 3 AM para limpiar SESIONES expiradas' },
   { v: '12.9.0', date: '2026-06-27', desc: 'Mejoras Sprint 1 — canView: denegado por defecto en módulos desconocidos; permisos denegados usan sync bar en lugar de alert(); setSession usa expira_en del servidor (sincroniza TTL frontend/backend)' },

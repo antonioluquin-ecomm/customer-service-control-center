@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AuditCS | Customer Service Control Center</title>
-  <script>(function(){var t=localStorage.getItem('acs_theme')||localStorage.getItem('cs_theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
+  <script>(function(){var t=localStorage.getItem('acs_theme')||localStorage.getItem('cs_theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);if(localStorage.getItem('acs_sidebar')==='collapsed')document.documentElement.setAttribute('data-sidebar','collapsed');})();</script>
   <link rel="stylesheet" href="assets/css/fonts.css"/>
   <link rel="stylesheet" href="assets/css/variables.css"/>
   <link rel="stylesheet" href="assets/css/base.css"/>
@@ -93,6 +93,9 @@
   <main class="main">
 
     <header class="topbar">
+      <button class="topbar-toggle" id="sidebarCollapseBtn" type="button" aria-pressed="false" title="Ocultar menú lateral" aria-label="Mostrar u ocultar menú lateral">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2"/><line x1="6" y1="2.5" x2="6" y2="13.5"/></svg>
+      </button>
       <span class="topbar-brand">AuditCS</span>
       <span class="topbar-sep">›</span>
       <span class="topbar-crumb" id="topbar-crumb">Inicio</span>

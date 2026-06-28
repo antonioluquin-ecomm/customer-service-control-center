@@ -4,6 +4,7 @@
 .sidebar{
   width:var(--sidebar-w);background:var(--sidebar-bg);border-right:1px solid var(--sidebar-line);
   display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:60;overflow-y:auto;
+  transition:transform .2s ease;
 }
 .sidebar-brand{padding:18px 16px 14px;border-bottom:1px solid var(--sidebar-line);display:flex;align-items:center;gap:10px;flex-shrink:0}
 .brand-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--primary),var(--primary-hover));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;letter-spacing:-1px;flex-shrink:0;box-shadow:0 2px 8px color-mix(in srgb,var(--primary) 30%,transparent)}
@@ -62,7 +63,17 @@
 .sidebar-overlay.visible{display:block}
 
 /* Main content */
-.main{margin-left:var(--sidebar-w);overflow-y:auto}
+.main{margin-left:var(--sidebar-w);overflow-y:auto;transition:margin-left .2s ease}
+
+/* Colapso del sidebar en desktop (≥901px) — el botón vive en el topbar.
+   En mobile el sidebar usa su propio patrón drawer (responsive.css). */
+.topbar-toggle{display:none;width:30px;height:30px;align-items:center;justify-content:center;background:none;border:1px solid transparent;border-radius:var(--radius-sm);color:var(--muted);cursor:pointer;margin-left:-6px;flex-shrink:0;transition:all .15s}
+.topbar-toggle:hover{background:color-mix(in srgb,var(--text) 6%,transparent);color:var(--text);border-color:var(--line)}
+@media (min-width:901px){
+  .topbar-toggle{display:inline-flex}
+  [data-sidebar="collapsed"] .sidebar{transform:translateX(-100%)}
+  [data-sidebar="collapsed"] .main{margin-left:0}
+}
 
 /* Topbar global sticky con breadcrumb (application_shell.md §6.6) */
 .topbar{height:50px;display:flex;align-items:center;gap:10px;padding:0 22px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40}

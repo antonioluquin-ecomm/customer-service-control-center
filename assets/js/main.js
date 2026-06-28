@@ -85,6 +85,30 @@ function initVersionBadge() {
   document.addEventListener('click', function() { popover.style.display = 'none'; });
 }
 
+// Colapso del sidebar en desktop. El estado vive en localStorage ('acs_sidebar')
+// y se aplica con anti-flash en el <head>. Aquí solo se cablea el botón del topbar.
+function initSidebarCollapse() {
+  const btn = document.getElementById('sidebarCollapseBtn');
+  if (!btn) return;
+  const _sync = () => {
+    const collapsed = document.documentElement.getAttribute('data-sidebar') === 'collapsed';
+    btn.setAttribute('aria-pressed', collapsed ? 'true' : 'false');
+    btn.setAttribute('title', collapsed ? 'Mostrar menú lateral' : 'Ocultar menú lateral');
+  };
+  btn.addEventListener('click', () => {
+    const collapsed = document.documentElement.getAttribute('data-sidebar') === 'collapsed';
+    if (collapsed) {
+      document.documentElement.removeAttribute('data-sidebar');
+      localStorage.removeItem('acs_sidebar');
+    } else {
+      document.documentElement.setAttribute('data-sidebar', 'collapsed');
+      localStorage.setItem('acs_sidebar', 'collapsed');
+    }
+    _sync();
+  });
+  _sync();
+}
+
 function initMobileSidebar() {
   const toggle  = document.getElementById('sidebarToggle');
   const overlay = document.getElementById('sidebarOverlay');
@@ -106,6 +130,7 @@ function initMobileSidebar() {
   initTheme();
   initVersionBadge();
   initMobileSidebar();
+  initSidebarCollapse();
   loadPendingQueue();
   applyRoleRestrictions();
   refreshPermisos(); // background: sincroniza permisos con el servidor sin bloquear
