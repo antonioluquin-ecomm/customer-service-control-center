@@ -201,9 +201,6 @@ window.escapeHtml = function (str) {
     if (!footer) return;
     if (document.getElementById('sidebar-user-chip')) return;
 
-    var initials = (u.nombre || u.email || '?')
-      .trim().split(/\s+/).slice(0, 2).map(function(w){ return w[0] || ''; }).join('').toUpperCase().slice(0, 2) || '?';
-
     var chip = document.createElement('div');
     chip.id = 'sidebar-user-chip';
     chip.className = 'user-chip';

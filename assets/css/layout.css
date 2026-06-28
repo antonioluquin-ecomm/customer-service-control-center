@@ -22,17 +22,11 @@
 .sidebar-footer{padding:8px 10px;border-top:1px solid var(--sidebar-line);flex-shrink:0}
 .sidebar-footer p{font-size:11px;color:var(--hint);line-height:1.7}
 
-/* Panel de usuario en sidebar footer (renderSidebarUser) */
-#sidebar-user-info{margin-top:12px}
+/* Identidad de usuario en el header del dropdown */
 .sidebar-user-name{font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sidebar-user-email{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
 .sidebar-user-meta{margin-top:6px;margin-bottom:9px}
 .auth-chip-role{display:inline-block;background:var(--primary-soft);color:var(--primary);font-size:10px;font-weight:600;padding:2px 8px;border-radius:var(--radius-pill);text-transform:uppercase;letter-spacing:.04em}
-.sidebar-user-actions{display:flex;flex-direction:column;gap:6px}
-.theme-toggle,.sidebar-action-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:6px 10px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--text);transition:all .15s}
-.theme-toggle:hover,.sidebar-action-btn:hover{background:var(--surface)}
-.sidebar-action-btn.danger{color:var(--danger);border-color:var(--danger-mid)}
-.sidebar-action-btn.danger:hover{background:var(--danger-bg)}
 /* Chip de usuario en sidebar footer */
 .user-chip{display:flex;align-items:center;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid transparent;transition:all .15s;user-select:none;width:100%}
 .user-chip:hover{background:color-mix(in srgb,var(--text) 5%,transparent);border-color:var(--line)}
