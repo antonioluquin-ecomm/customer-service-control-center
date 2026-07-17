@@ -173,7 +173,7 @@ function renderTeamMatrix(analysis,h){
   const cont=document.getElementById("db-team-matrix");
   if(!analysis.team.length){ cont.innerHTML='<div class="db-empty">Sin datos para construir la matriz del equipo.</div>'; return; }
   cont.innerHTML=`<table class="db-team-table"><thead><tr><th>Agente</th><th>General</th><th>Var.</th><th>Cal.</th><th>Prod.</th><th>Estado</th><th>Muestra</th></tr></thead><tbody>${analysis.team.map(p=>{
-    const delta=formatDelta(p.delta); const incomplete=p.current.some(x=>!x.completo); const state=incomplete?"Incompleto":(p.score>=95?"Excelente":p.score>=80?"Correcta":"Observada");
+    const delta=formatDelta(p.delta); const incomplete=p.current.some(x=>!x.completo); const state=incomplete?"Incompleto":calcEstado(p.score);
     const metric=value=>value===null||value===undefined?"-":value+"%";
     return `<tr><td><strong>${h(p.agent)}</strong></td><td>${incomplete?"-":p.score+"%"}</td><td class="${delta.tone}">${p.delta===null?"—":`${p.delta>0?"+":""}${p.delta} pp`}</td><td>${metric(p.quality)}</td><td>${metric(p.productivity)}</td><td><span class="db-state ${p.severity}">${state}</span></td><td>${p.current.length}</td></tr>`;
   }).join("")}</tbody></table>`;

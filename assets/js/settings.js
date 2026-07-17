@@ -127,14 +127,17 @@ async function saveConfig(){
   const wc=Number(document.getElementById("cfg-w-calidad").value);
   const wprod=Number(document.getElementById("cfg-w-productividad").value);
   if(wc+wprod!==100){ alert("Calidad + Productividad deben sumar 100%."); return; }
+  const ue=Number(document.getElementById("cfg-u-excelente").value);
+  const uc=Number(document.getElementById("cfg-u-correcta").value);
+  if(!Number.isFinite(ue)||!Number.isFinite(uc)||ue<1||ue>100||uc<1||uc>100||ue<=uc){ alert("El umbral Excelente debe ser mayor que el umbral Correcta, y ambos deben estar entre 1% y 100%."); return; }
   CFG.horas_base    =Number(document.getElementById("cfg-horas-base").value)||44;
   CFG.tickets_base  =Number(document.getElementById("cfg-tickets-base").value)||660;
   CFG.muestras_semana=Number(document.getElementById("cfg-muestras").value)||4;
   CFG.w_inter=wi; CFG.w_puntual=wp; CFG.w_present=wpr;
   CFG.obj_puntual=Number(document.getElementById("cfg-obj-puntual").value)||1;
   CFG.obj_present=Number(document.getElementById("cfg-obj-present").value)||1;
-  CFG.u_excelente=Number(document.getElementById("cfg-u-excelente").value)||95;
-  CFG.u_correcta =Number(document.getElementById("cfg-u-correcta").value)||80;
+  CFG.u_excelente=ue;
+  CFG.u_correcta =uc;
   CFG.w_calidad=wc; CFG.w_productividad=wprod;
   await syncConfigToSheets("parametros_actualizados","Guardado desde UI");
   populateSelects();

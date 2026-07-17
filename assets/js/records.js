@@ -14,10 +14,11 @@ function getRegistroConMetricas(a) {
   const productividad = DB.productividadSemanal.find(p =>
     p.agente === a.agente && Number(p.anio) === Number(a.anio) && Number(p.semana) === Number(a.semana)
   );
-  if (!productividad) return { ...a, productividad: null, general: null, estado: 'Incompleto' };
+  if (!productividad) return { ...a, horas_trabajadas: null, productividad: null, general: null, estado: 'Incompleto' };
   const prod    = Number(productividad.total_productividad);
   const general = calcGeneral(a.calidad, prod);
-  return { ...a, productividad: prod, general, estado: calcEstado(general), completo: true };
+  const horas   = Number(productividad.horas_trabajadas);
+  return { ...a, horas_trabajadas: horas > 0 ? horas : null, productividad: prod, general, estado: calcEstado(general), completo: true };
 }
 
 // ── Filtrado y ordenamiento ──────────────────────────────────────
@@ -85,7 +86,7 @@ function renderRegistros() {
       <td style="font-family:'DM Mono',monospace;font-size:12px">${h(a.ticket)}</td>
       <td>${h(a.canal)}</td>
       <td style="font-family:'DM Mono',monospace;text-align:center">${h(a.semana)}</td>
-      <td style="font-family:'DM Mono',monospace;text-align:center">${a.horas_trabajadas}hs</td>
+      <td style="font-family:'DM Mono',monospace;text-align:center">${Number(a.horas_trabajadas)>0?a.horas_trabajadas+'hs':'<span style="color:var(--hint)">Pendiente</span>'}</td>
       <td style="text-align:center">${sc(a.calidad)}</td>
       <td style="text-align:center">${sc(a.productividad)}</td>
       <td style="text-align:center">${sc(a.general)}</td>

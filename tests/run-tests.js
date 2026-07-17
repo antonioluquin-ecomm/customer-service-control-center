@@ -102,7 +102,8 @@ console.log('All AuditCS tests passed.');
 
 function testSeparatedMetricsComposition() {
   const context = {
-    DB: { productividadSemanal: [{ agente:'Luciana', anio:2026, semana:23, total_productividad:71 }] },
+    DB: { productividadSemanal: [{ agente:'Luciana', anio:2026, semana:23, horas_trabajadas:44, total_productividad:71 }] },
+    document: { readyState:'loading', addEventListener:()=>{}, querySelectorAll:()=>[], getElementById:()=>null },
     isModeloSeparado: item => item.productividad === null || item.general === null,
     calcGeneral: (cal, prod) => Math.round((cal + prod) / 2),
     calcEstado: score => score >= 80 ? 'Correcta' : 'Observada',
@@ -113,6 +114,10 @@ function testSeparatedMetricsComposition() {
   assert.strictEqual(record.productividad, 71);
   assert.strictEqual(record.general, 36);
   assert.strictEqual(record.estado, 'Observada');
+  assert.strictEqual(record.horas_trabajadas, 44);
+  const pending = context.records.getRegistroConMetricas({ agente:'Otra', anio:2026, semana:23, horas_trabajadas:0, calidad:90, productividad:null, general:null });
+  assert.strictEqual(pending.horas_trabajadas, null);
+  assert.strictEqual(pending.estado, 'Incompleto');
 }
 
 function testProductividadImportParsing() {
