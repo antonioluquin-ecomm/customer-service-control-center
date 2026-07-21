@@ -261,7 +261,13 @@ function _paintUsuarios(cont){
         <div class="field"><label>Nombre *</label><input type="text" id="uf-nombre"/></div>
         <div class="field"><label>Email *</label><input type="email" id="uf-email"/></div>
         <div class="field"><label>Rol *</label><select id="uf-rol">${rolesActivos.map(r=>`<option value="${Number(r.id)}">${h(r.nombre)}</option>`).join("")}</select></div>
-        <div class="field"><label id="uf-pwd-label">Contraseña *</label><input type="password" id="uf-pwd" placeholder="Mínimo 6 caracteres"/></div>
+        <div class="field"><label id="uf-pwd-label">Contraseña *</label>
+          <div class="pw-group">
+            <input type="password" id="uf-pwd" placeholder="Mínimo 6 caracteres"/>
+            <button type="button" class="btn sm" id="uf-pwd-toggle" onclick="_toggleUfPwdVisibility()">Ver</button>
+            <button type="button" class="btn sm" onclick="_generateUfPwd()">Generar</button>
+          </div>
+        </div>
       </div>
       <div id="uf-alert" class="alert error hidden" style="margin-top:10px"></div>
       <div style="margin-top:14px;display:flex;gap:8px">
@@ -281,9 +287,35 @@ function showUsuarioForm(id){
   document.getElementById("uf-email").disabled=!!u;
   document.getElementById("uf-rol").value=u?u.id_rol:(_adminRoles.find(r=>r.activo)?.id||"");
   document.getElementById("uf-pwd").value="";
+  document.getElementById("uf-pwd").type="password";
+  document.getElementById("uf-pwd-toggle").textContent="Ver";
   document.getElementById("uf-pwd-label").textContent=u?"Nueva contraseña (opcional)":"Contraseña *";
   document.getElementById("uf-alert").classList.add("hidden");
   card.style.display="block";
+}
+
+function _toggleUfPwdVisibility(){
+  const inp=document.getElementById("uf-pwd");
+  const btn=document.getElementById("uf-pwd-toggle");
+  if(!inp||!btn)return;
+  const showing=inp.type==="text";
+  inp.type=showing?"password":"text";
+  btn.textContent=showing?"Ver":"Ocultar";
+}
+
+function _generateUfPwd(){
+  const inp=document.getElementById("uf-pwd");
+  if(!inp)return;
+  // Sin caracteres ambiguos (0/O, 1/l/I) — el admin suele tener que dictarla o pasarla a mano.
+  const chars="ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+  const bytes=new Uint32Array(12);
+  crypto.getRandomValues(bytes);
+  let pw="";
+  for(let i=0;i<bytes.length;i++)pw+=chars[bytes[i]%chars.length];
+  inp.value=pw;
+  inp.type="text";
+  const btn=document.getElementById("uf-pwd-toggle");
+  if(btn)btn.textContent="Ocultar";
 }
 
 async function submitUsuario(){
