@@ -8,29 +8,19 @@ const VERSION = {
   notes:  'Agrega mostrar/generar contraseña al modal de usuario'
 };
 
+/* Máximo 10 entradas (project-standards/application_shell.md §8.5) — descripción breve,
+ * de una línea. Al agregar una versión nueva, quitar la más antigua del final. */
 const CHANGELOG = [
-  { v: '12.11.1', date: '2026-07-21', desc: 'El modal de alta/edición de usuario (Configuración > Usuarios) suma mostrar/ocultar contraseña y un botón "Generar" (12 caracteres, sin ambiguos 0/O/1/l/I), igual que marketplace-portal. Reduce la fricción de que el admin invente una contraseña débil a mano. Estándar documentado en project-standards/login_standard.md §17.' },
-  { v: '12.11.0', date: '2026-06-28', desc: 'Sprint nav 5 — colapso del sidebar en desktop: botón en topbar oculta/muestra el sidebar dando ancho completo al contenido; estado en localStorage (acs_sidebar) con anti-flash en el head; reglas dentro de @media(min-width:901px) para no interferir con el drawer mobile' },
-  { v: '12.10.0', date: '2026-06-27', desc: 'Mejoras Sprint 3 — authLogout: fix logout real al GAS (antes enviaba string en lugar de objeto, sesion quedaba activa en backend); refreshPermisos(): background fetch de permisos en init, actualiza localStorage y re-aplica RBAC sin re-login' },
-  { v: '12.9.1', date: '2026-06-27', desc: 'Mejoras Sprint 2 — Chart.js 4.4.1 self-hosted (assets/js/vendor/chart.min.js, sin CDN externo); GAS: setupDailyCleanupTrigger() crea trigger diario a las 3 AM para limpiar SESIONES expiradas' },
-  { v: '12.9.0', date: '2026-06-27', desc: 'Mejoras Sprint 1 — canView: denegado por defecto en módulos desconocidos; permisos denegados usan sync bar en lugar de alert(); setSession usa expira_en del servidor (sincroniza TTL frontend/backend)' },
-  { v: '12.8.1', date: '2026-06-27', desc: 'Hotfix auditoría crítica — anti-flash lee acs_theme (migración completa), GAS: writeLog login incluye actor, deleteAuditoria loguea después del borrado, requiere_seguimiento normaliza acento' },
-  { v: '12.8.0', date: '2026-06-26', desc: 'Estandarización Sprint 7 — Configuración con tabs: Parámetros + pantalla admin (Usuarios, Roles y permisos con matriz 3-estados, Conexión con health check). Endpoint getPermisosRol. Docs CLAUDE.md/workflow actualizados (auth por sesión + RBAC)' },
-  { v: '12.7.0', date: '2026-06-26', desc: 'Estandarización Sprint 6 — backend GAS reestructurado a 9 .gs (Code/Auth/Usuarios/Auditorias/Validators/Logger/Helpers/Config/Setup), RBAC por sesión en hojas USUARIOS/ROLES/PERMISOS_MODULOS/SESIONES, observabilidad LOGS/ERRORS, respuestas dual-emit (status+ok/data), migración idempotente de usuarios legacy preservando contraseñas' },
-  { v: '12.6.0', date: '2026-06-26', desc: 'Estandarización Sprint 5 — RBAC flexible: isAdmin()=id_rol===1, canView(mod), canEdit(mod), DEFAULT_PERMISOS, acs_session (fallback auditcs_session), acs_theme (fallback cs_theme), nav por canView' },
-  { v: '12.5.0', date: '2026-06-26', desc: 'Estandarización Sprint 4 — login.html: anti-flash script, variables.css para dark mode, gradiente en icono, card con border/bg token, errEl.hidden, mensajes canónicos' },
-  { v: '12.4.0', date: '2026-06-26', desc: 'Estandarización Sprint 3 — Registros: th[data-sortable], paginación 25/50/100, exportCSV usa vista filtrada (_recRows) con BOM UTF-8' },
-  { v: '12.3.0', date: '2026-06-26', desc: 'Estandarización Sprint 2 — topbar global sticky con breadcrumb, .page-header, renderSidebarUser con badge de rol, variantes de botón secondary/ghost, modal de contraseña con clases (dark mode)' },
-  { v: '12.2.0', date: '2026-06-26', desc: 'Estandarización Sprint 1 — fuentes DM Sans/DM Mono self-host local, sin red externa de Google Fonts' },
-  { v: '12.1.5', date: '2026-06-25', desc: 'Registros: habilitar eliminacion de auditorias para usuarios auditores' },
-  { v: '12.1.4', date: '2026-06-25', desc: 'Registros: restaurar accion de eliminar auditorias para administradores y supervisores' },
-  { v: '12.1.3', date: '2026-06-23', desc: 'Shell: dark mode completo — variables CSS, toggleTheme(), botón en sidebar footer' },
-  { v: '12.1.2', date: '2026-06-23', desc: 'Shell: anti-flash prefers-color-scheme, version badge con popover changelog' },
-  { v: '12.1.1', date: '2026-06-22', desc: 'Login — callApiRaw, localStorage, diseño canónico; _loginPath() dinámico' },
-  { v: '12.1.0', date: '2026-06-20', desc: 'Sidebar — fixed position, brand-icon, mobile collapse, design tokens' },
-  { v: '12.0.0', date: '2026-06-17', desc: 'Dashboard supervisor — métricas de equipo, tendencias y prioridades semanales' },
-  { v: '11.0.0', date: '2026-06-14', desc: 'Observabilidad de sincronización — tests e idempotencia offline' },
-  { v: '10.0.0', date: '2026-06-10', desc: 'Autorización por rol — restricciones de escritura para auditores no admin' },
+  { v: '12.11.1', date: '2026-07-21', desc: 'Modal de usuario: mostrar/ocultar contraseña y botón "Generar".' },
+  { v: '12.11.0', date: '2026-06-28', desc: 'Colapso del sidebar en desktop, con estado persistido y anti-flash.' },
+  { v: '12.10.0', date: '2026-06-27', desc: 'Fix de logout real al backend y refresco de permisos sin re-login.' },
+  { v: '12.9.1', date: '2026-06-27', desc: 'Chart.js self-hosted y limpieza diaria de sesiones expiradas.' },
+  { v: '12.9.0', date: '2026-06-27', desc: 'RBAC: denegado por defecto en módulos desconocidos y sync de TTL de sesión.' },
+  { v: '12.8.1', date: '2026-06-27', desc: 'Hotfix de auditoría crítica: migración de tema y logging de acciones.' },
+  { v: '12.8.0', date: '2026-06-26', desc: 'Configuración con tabs: Usuarios, Roles y permisos con matriz, Conexión.' },
+  { v: '12.7.0', date: '2026-06-26', desc: 'Backend GAS reestructurado con RBAC por sesión y observabilidad de logs.' },
+  { v: '12.6.0', date: '2026-06-26', desc: 'RBAC flexible: canView/canEdit por módulo y permisos por defecto.' },
+  { v: '12.5.0', date: '2026-06-26', desc: 'Login estandarizado: anti-flash, dark mode y mensajes canónicos.' },
 ];
 
 const CONFIG = {
