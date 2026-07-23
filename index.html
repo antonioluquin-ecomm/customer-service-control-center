@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AuditCS | Customer Service Control Center</title>
   <script>(function(){var t=localStorage.getItem('acs_theme')||localStorage.getItem('cs_theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);if(localStorage.getItem('acs_sidebar')==='collapsed')document.documentElement.setAttribute('data-sidebar','collapsed');})();</script>
+  <link rel="icon" type="image/svg+xml" href="assets/brand-mark.svg"/>
   <link rel="stylesheet" href="assets/css/fonts.css"/>
   <link rel="stylesheet" href="assets/css/variables.css"/>
   <link rel="stylesheet" href="assets/css/base.css"/>
@@ -36,7 +37,12 @@
 <div class="shell">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-      <div class="brand-icon">AC</div>
+      <div class="brand-icon">
+        <svg viewBox="0 0 44 44" width="60%" height="60%" aria-hidden="true">
+          <path d="M8 12a4 4 0 0 1 4-4h16a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4H17.5L11 33v-5.4A4 4 0 0 1 8 23.6z" fill="#fff" opacity=".9"/>
+          <path d="M14.5 17.7l3.6 3.6 7.4-7.6" fill="none" stroke="var(--primary)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
       <div>
         <div class="brand-name">AuditCS</div>
         <div class="brand-meta" id="sidebarVersionBtn" title="Ver historial de cambios">

@@ -3,14 +3,15 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.11.1',
-  date:   '2026-07-21',
-  notes:  'Agrega mostrar/generar contraseña al modal de usuario'
+  number: '12.11.2',
+  date:   '2026-07-23',
+  notes:  'Nuevo logo de marca (chat con check) en sidebar, login y favicon'
 };
 
 /* Máximo 10 entradas (project-standards/application_shell.md §8.5) — descripción breve,
  * de una línea. Al agregar una versión nueva, quitar la más antigua del final. */
 const CHANGELOG = [
+  { v: '12.11.2', date: '2026-07-23', desc: 'Nuevo logo de marca (chat con check) en sidebar, login y favicon.' },
   { v: '12.11.1', date: '2026-07-21', desc: 'Modal de usuario: mostrar/ocultar contraseña y botón "Generar".' },
   { v: '12.11.0', date: '2026-06-28', desc: 'Colapso del sidebar en desktop, con estado persistido y anti-flash.' },
   { v: '12.10.0', date: '2026-06-27', desc: 'Fix de logout real al backend y refresco de permisos sin re-login.' },
@@ -20,7 +21,6 @@ const CHANGELOG = [
   { v: '12.8.0', date: '2026-06-26', desc: 'Configuración con tabs: Usuarios, Roles y permisos con matriz, Conexión.' },
   { v: '12.7.0', date: '2026-06-26', desc: 'Backend GAS reestructurado con RBAC por sesión y observabilidad de logs.' },
   { v: '12.6.0', date: '2026-06-26', desc: 'RBAC flexible: canView/canEdit por módulo y permisos por defecto.' },
-  { v: '12.5.0', date: '2026-06-26', desc: 'Login estandarizado: anti-flash, dark mode y mensajes canónicos.' },
 ];
 
 const CONFIG = {
