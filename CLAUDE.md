@@ -56,6 +56,7 @@ La documentación estándar compartida se encuentra en `../project-standards/`:
 - [`../project-standards/google_sheets_standards.md`](../project-standards/google_sheets_standards.md) — estructura de Sheets
 - [`../project-standards/login_standard.md`](../project-standards/login_standard.md) — patrón de autenticación
 - [`../project-standards/application_shell.md`](../project-standards/application_shell.md) — shell de aplicación
+- [`../project-standards/pcc_task_format.md`](../project-standards/pcc_task_format.md) — formato de tareas para cargar en PCC
 
 ### Entorno de trabajo
 
