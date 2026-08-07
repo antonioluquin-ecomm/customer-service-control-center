@@ -178,7 +178,7 @@ function removeAuditor(i){
 }
 
 // ================================================================
-// ADMIN — pantalla de configuración (3 tabs: Usuarios/Roles/Conexión)
+// ADMIN — pantalla de configuración (4 tabs: Parámetros/Usuarios/Roles/Integraciones)
 // application_shell.md §6.4 — backend Sprint 6 (RBAC en Sheets)
 // ================================================================
 
@@ -363,17 +363,69 @@ function _paintRoles(cont){
     <td style="font-weight:600">${h(r.nombre)}</td>
     <td>${r.es_sistema?'<span class="badge badge-local">Sistema</span>':'<span class="badge">Personalizado</span>'}</td>
     <td>${r.activo?'<span class="badge badge-ok">Activo</span>':'<span class="badge badge-local">Inactivo</span>'}</td>
-    <td><button class="btn xs" onclick="selectRolPermisos(${Number(r.id)})">Ver permisos</button></td>
+    <td style="display:flex;gap:6px">
+      <button class="btn xs" onclick="selectRolPermisos(${Number(r.id)})">Ver permisos</button>
+      ${r.es_sistema?"":`<button class="btn xs" onclick="showRolForm(${Number(r.id)})">Editar</button>
+      <button class="btn xs ${r.activo?'danger':''}" onclick="toggleRolActivo(${Number(r.id)},${r.activo?'false':'true'})">${r.activo?'Desactivar':'Activar'}</button>`}
+    </td>
   </tr>`).join("");
   cont.innerHTML=`
     <div class="card">
-      <div class="card-header"><div><div class="card-title">Roles</div><div class="card-sub">El rol de sistema no se puede modificar</div></div></div>
+      <div class="card-header"><div><div class="card-title">Roles</div><div class="card-sub">El rol de sistema no se puede modificar</div></div>
+        <button class="btn sm primary" onclick="showRolForm()">+ Nuevo rol</button></div>
       <div style="overflow-x:auto"><table>
-        <thead><tr><th>Rol</th><th>Tipo</th><th>Estado</th><th>Permisos</th></tr></thead>
+        <thead><tr><th>Rol</th><th>Tipo</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody>${rows}</tbody>
       </table></div>
     </div>
+    <div class="card" id="rol-form-card" style="display:none;margin-top:16px">
+      <div class="card-header"><div class="card-title" id="rol-form-title">Nuevo rol</div></div>
+      <input type="hidden" id="rf-id"/>
+      <div class="fg c2" style="gap:12px">
+        <div class="field"><label>Nombre *</label><input type="text" id="rf-nombre" placeholder="Ej: Coordinador"/></div>
+        <div class="field"><label>Descripción</label><input type="text" id="rf-descripcion" placeholder="Opcional"/></div>
+      </div>
+      <div id="rf-alert" class="alert error hidden" style="margin-top:10px"></div>
+      <div style="margin-top:14px;display:flex;gap:8px">
+        <button class="btn primary sm" onclick="submitRol()">Guardar</button>
+        <button class="btn sm" onclick="document.getElementById('rol-form-card').style.display='none'">Cancelar</button>
+      </div>
+    </div>
     <div class="card" id="perm-matrix-card" style="display:none;margin-top:16px"></div>`;
+}
+
+function showRolForm(id){
+  const card=document.getElementById("rol-form-card");
+  const r=id?_adminRoles.find(x=>Number(x.id)===Number(id)):null;
+  document.getElementById("rol-form-title").textContent=r?"Editar rol":"Nuevo rol";
+  document.getElementById("rf-id").value=r?r.id:"";
+  document.getElementById("rf-nombre").value=r?r.nombre:"";
+  document.getElementById("rf-descripcion").value=r?(r.descripcion||""):"";
+  document.getElementById("rf-alert").classList.add("hidden");
+  document.getElementById("perm-matrix-card").style.display="none";
+  card.style.display="block";
+}
+
+async function submitRol(){
+  const id=document.getElementById("rf-id").value;
+  const nombre=document.getElementById("rf-nombre").value.trim();
+  const descripcion=document.getElementById("rf-descripcion").value.trim();
+  const alert=document.getElementById("rf-alert");
+  const fail=m=>{ alert.textContent=m; alert.classList.remove("hidden"); };
+  if(!nombre) return fail("El nombre es obligatorio.");
+  try{
+    if(id) await adminCall("updateRol",{ id:Number(id), nombre, descripcion });
+    else   await adminCall("createRol",{ nombre, descripcion });
+    document.getElementById("rol-form-card").style.display="none";
+    renderAdminRoles();
+  }catch(err){ fail(err.message); }
+}
+
+async function toggleRolActivo(id, activo){
+  const r=_adminRoles.find(x=>Number(x.id)===Number(id));
+  if(!confirm(`¿${activo?'Activar':'Desactivar'} el rol ${r?r.nombre:id}?`)) return;
+  try{ await adminCall("updateRol", { id:Number(id), activo: activo===true||activo==="true" }); renderAdminRoles(); }
+  catch(err){ alert(err.message); }
 }
 
 async function selectRolPermisos(id_rol){

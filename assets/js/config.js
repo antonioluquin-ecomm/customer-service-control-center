@@ -3,14 +3,15 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.14.0',
+  number: '12.14.1',
   date:   '2026-08-07',
-  notes:  'Link "Volver al Hub" en el sidebar (navigation_standard.md §6)'
+  notes:  'Configuración · Roles y permisos: alta y edición de roles personalizados (alineado al estándar de application_shell.md §6.4)'
 };
 
 /* Máximo 10 entradas (project-standards/application_shell.md §8.5) — descripción breve,
  * de una línea. Al agregar una versión nueva, quitar la más antigua del final. */
 const CHANGELOG = [
+  { v: '12.14.1', date: '2026-08-07', desc: 'Configuración · Roles y permisos: se agrega botón "+ Nuevo rol", edición de nombre/descripción y Activar/Desactivar — antes solo se podían ver los permisos.' },
   { v: '12.14.0', date: '2026-08-07', desc: 'Link "Volver al Hub" en el sidebar, apunta a eCommerce Hub (navigation_standard.md §6).' },
   { v: '12.13.3', date: '2026-08-07', desc: 'Fix: el tooltip de ayuda de Volumen diario había dejado de mostrarse (::after directamente sobre <svg> no es confiable).' },
   { v: '12.13.2', date: '2026-08-07', desc: 'Íconos de ayuda de Volumen diario pasan de glifo unicode (ⓘ) a SVG propio, más consistente entre fuentes/SO.' },
@@ -20,7 +21,6 @@ const CHANGELOG = [
   { v: '12.11.2', date: '2026-07-23', desc: 'Nuevo logo de marca (chat con check) en sidebar, login y favicon.' },
   { v: '12.11.1', date: '2026-07-21', desc: 'Modal de usuario: mostrar/ocultar contraseña y botón "Generar".' },
   { v: '12.11.0', date: '2026-06-28', desc: 'Colapso del sidebar en desktop, con estado persistido y anti-flash.' },
-  { v: '12.10.0', date: '2026-06-27', desc: 'Fix de logout real al backend y refresco de permisos sin re-login.' },
 ];
 
 const CONFIG = {
