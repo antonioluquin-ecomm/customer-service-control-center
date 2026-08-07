@@ -98,6 +98,22 @@ async function submitVolumen() {
   }
   loadVolumenDia();
   renderVolumenHistorial();
+  updateVolumenMissingBadge();
+}
+
+/* ─── Aviso de días sin cargar (badge en el sidebar) ────────────── */
+
+function volumenDiasFaltantes(n) {
+  const hoy = volumenHoyLocal();
+  return volumenUltimosDias(n).filter(f => f !== hoy && !findVolumen(f));
+}
+
+function updateVolumenMissingBadge() {
+  const b = document.getElementById("vc-missing-badge");
+  if (!b) return;
+  const faltan = volumenDiasFaltantes(7).length;
+  b.textContent = faltan;
+  b.classList.toggle("show", faltan > 0);
 }
 
 /* ─── Historial y gráfico ────────────────────────────────────── */
@@ -141,11 +157,64 @@ function renderVolumenHistorial() {
   const bloque = VOLUMEN_BLOQUES.find(b => b.id === _volumenCanalActivo) || VOLUMEN_BLOQUES[0];
   document.querySelectorAll("#vc-canal-chips .vc-canal-chip").forEach(el => el.classList.toggle("on", el.dataset.canal === bloque.id));
 
+  renderVolumenResumen(bloque);
+
   const dias30 = volumenUltimosDias(30).map(fecha => findVolumen(fecha) || { fecha, _missing: true });
   renderVolumenChart(bloque, dias30);
 
   const dias14 = volumenUltimosDias(14).reverse().map(fecha => findVolumen(fecha) || { fecha, _missing: true });
   renderVolumenTable(bloque, dias14);
+}
+
+// Últimos 7 días vs. los 7 anteriores, por métrica del canal activo —
+// para no tener que comparar 14 filas de tabla a ojo.
+function volumenSumaRango(campo, dias) {
+  return dias.reduce((sum, fecha) => { const r = findVolumen(fecha); return sum + (r && r[campo] != null ? r[campo] : 0); }, 0);
+}
+
+function volumenRangoAnterior(n) {
+  const out = [];
+  const base = new Date();
+  base.setDate(base.getDate() - n);
+  const p = x => String(x).padStart(2, "0");
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(base); d.setDate(d.getDate() - i);
+    out.push(d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()));
+  }
+  return out;
+}
+
+function renderVolumenResumen(bloque) {
+  const out = document.getElementById("vc-resumen");
+  if (!out) return;
+  const actual = volumenUltimosDias(7);
+  const anterior = volumenRangoAnterior(7);
+  out.innerHTML = bloque.campos.map(c => {
+    const vActual = volumenSumaRango(c.key, actual);
+    const vAnterior = volumenSumaRango(c.key, anterior);
+    let sub = "Sin datos de la semana anterior";
+    if (vAnterior > 0) {
+      const delta = Math.round((vActual - vAnterior) / vAnterior * 100);
+      sub = (delta > 0 ? "+" : "") + delta + "% vs. semana anterior";
+    } else if (vActual > 0) {
+      sub = "Semana anterior sin carga";
+    }
+    return `<div class="metric"><div class="metric-label">${escapeHtml(c.label)} · 7 días</div><div class="metric-value">${vActual}</div><div class="metric-sub">${sub}</div></div>`;
+  }).join("");
+}
+
+function exportVolumenCSV() {
+  if (!DB.volumenCanales.length) { alert("No hay datos cargados todavía."); return; }
+  const cols = ["fecha", ...VOLUMEN_CAMPOS, "cargado_por", "veces_editado"];
+  const rows = DB.volumenCanales.slice().sort((a, b) => a.fecha.localeCompare(b.fecha)).map(r => cols.map(k => csvEscape(r[k])));
+  const csv = [cols.map(csvEscape), ...rows].map(r => r.join(",")).join("\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = Object.assign(document.createElement("a"), { href: url, download: "volumen_canales_" + volumenHoyLocal() + ".csv" });
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function renderVolumenChart(bloque, rows) {

@@ -112,6 +112,7 @@ async function reloadFromSheets() {
       const local={...payload,sheets_enviado:false};
       if(idx>=0) DB.volumenCanales[idx]={...DB.volumenCanales[idx],...local}; else DB.volumenCanales.push(local);
     });
+    if(window.updateVolumenMissingBadge) updateVolumenMissingBadge();
     updateSheetsUI("connected");
     populateSelects();
     renderDashboard();

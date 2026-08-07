@@ -77,6 +77,7 @@
       <button class="nav-item" onclick="showPage('volumen')">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 13h12v2H2zM3 7h2v5H3zM7 3h2v9H7zM11 5h2v7h-2z"/></svg>
         Volumen diario
+        <span class="offline-badge" id="vc-missing-badge" title="Días sin cargar en la última semana">0</span>
       </button>
       <button class="nav-item" onclick="showPage('registros')">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M1 2a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H2a1 1 0 01-1-1V2zm1 0v12h12V2H2z"/><path d="M4 5h8v1H4zM4 8h8v1H4zM4 11h5v1H4z"/></svg>
@@ -220,48 +221,48 @@
           <div class="vc-block">
             <div class="vc-block-head"><span class="vc-swatch" style="background:#16a34a"></span>WSP</div>
             <div class="vc-block-body">
-              <div class="field"><label>Ingreso</label><input type="number" min="0" id="vc-wsp_ingreso"/></div>
-              <div class="field"><label>Salida</label><input type="number" min="0" id="vc-wsp_salida"/></div>
+              <div class="field"><label>Ingreso<span class="vc-help" data-tip="Conversaciones nuevas iniciadas por el cliente en el día">ⓘ</span></label><input type="number" min="0" id="vc-wsp_ingreso"/></div>
+              <div class="field"><label>Salida<span class="vc-help" data-tip="Conversaciones cerradas o resueltas en el día">ⓘ</span></label><input type="number" min="0" id="vc-wsp_salida"/></div>
             </div>
           </div>
           <div class="vc-block">
             <div class="vc-block-head"><span class="vc-swatch" style="background:#7c9cbf"></span>Llamadas</div>
             <div class="vc-block-body">
-              <div class="field"><label>Atendidas</label><input type="number" min="0" id="vc-llamadas_atendidas"/></div>
-              <div class="field"><label>Desbordadas</label><input type="number" min="0" id="vc-llamadas_desbordadas"/></div>
-              <div class="field"><label>No respondidas</label><input type="number" min="0" id="vc-llamadas_no_respondidas"/></div>
+              <div class="field"><label>Atendidas<span class="vc-help" data-tip="Llamadas contestadas por el equipo">ⓘ</span></label><input type="number" min="0" id="vc-llamadas_atendidas"/></div>
+              <div class="field"><label>Desbordadas<span class="vc-help" data-tip="Llamadas que se cortaron por exceso de espera antes de ser atendidas">ⓘ</span></label><input type="number" min="0" id="vc-llamadas_desbordadas"/></div>
+              <div class="field"><label>No respondidas<span class="vc-help" data-tip="Llamadas que no llegaron a contestarse">ⓘ</span></label><input type="number" min="0" id="vc-llamadas_no_respondidas"/></div>
             </div>
           </div>
           <div class="vc-block">
-            <div class="vc-block-head"><span class="vc-swatch" style="background:#3b9c5f"></span>Redes</div>
+            <div class="vc-block-head"><span class="vc-swatch" style="background:#8b5cf6"></span>Redes</div>
             <div class="vc-block-body">
-              <div class="field"><label>Privados</label><input type="number" min="0" id="vc-redes_privados"/></div>
-              <div class="field"><label>Comentarios</label><input type="number" min="0" id="vc-redes_comentarios"/></div>
+              <div class="field"><label>Privados<span class="vc-help" data-tip="Mensajes directos/privados recibidos en redes sociales">ⓘ</span></label><input type="number" min="0" id="vc-redes_privados"/></div>
+              <div class="field"><label>Comentarios<span class="vc-help" data-tip="Comentarios públicos recibidos en publicaciones">ⓘ</span></label><input type="number" min="0" id="vc-redes_comentarios"/></div>
               <div class="field"><label>Min-privados</label><input type="number" min="0" id="vc-redes_min_privados"/></div>
             </div>
           </div>
           <div class="vc-block">
             <div class="vc-block-head"><span class="vc-swatch" style="background:#e08e45"></span>Mails</div>
             <div class="vc-block-body">
-              <div class="field"><label>Ingreso</label><input type="number" min="0" id="vc-mails_ingreso"/></div>
-              <div class="field"><label>Salida</label><input type="number" min="0" id="vc-mails_salida"/></div>
+              <div class="field"><label>Ingreso<span class="vc-help" data-tip="Mails nuevos recibidos en el día">ⓘ</span></label><input type="number" min="0" id="vc-mails_ingreso"/></div>
+              <div class="field"><label>Salida<span class="vc-help" data-tip="Mails respondidos/enviados en el día">ⓘ</span></label><input type="number" min="0" id="vc-mails_salida"/></div>
             </div>
           </div>
           <div class="vc-block">
             <div class="vc-block-head"><span class="vc-swatch" style="background:#6b7280"></span>Ventas</div>
             <div class="vc-block-body">
-              <div class="field"><label>Ingreso</label><input type="number" min="0" id="vc-ventas_ingreso"/></div>
-              <div class="field"><label>Salida</label><input type="number" min="0" id="vc-ventas_salida"/></div>
-              <div class="field"><label>Cancelados</label><input type="number" min="0" id="vc-ventas_cancelados"/></div>
+              <div class="field"><label>Ingreso<span class="vc-help" data-tip="Pedidos nuevos ingresados por el canal de ventas">ⓘ</span></label><input type="number" min="0" id="vc-ventas_ingreso"/></div>
+              <div class="field"><label>Salida<span class="vc-help" data-tip="Pedidos gestionados/cerrados por el canal de ventas">ⓘ</span></label><input type="number" min="0" id="vc-ventas_salida"/></div>
+              <div class="field"><label>Cancelados<span class="vc-help" data-tip="Pedidos cancelados en el día">ⓘ</span></label><input type="number" min="0" id="vc-ventas_cancelados"/></div>
             </div>
           </div>
           <div class="vc-block">
             <div class="vc-block-head"><span class="vc-swatch" style="background:#c99a1e"></span>Reembolsos / CC</div>
-            <div class="vc-block-body">
-              <div class="field"><label>Reembolsos PIM</label><input type="number" min="0" id="vc-reembolsos_pim"/></div>
-              <div class="field"><label>Pendientes PIM</label><input type="number" min="0" id="vc-pendientes_pim"/></div>
-              <div class="field"><label>CC gestionados</label><input type="number" min="0" id="vc-cc_gestionados"/></div>
-              <div class="field"><label>Reclamos</label><input type="number" min="0" id="vc-reclamos"/></div>
+            <div class="vc-block-body cols2">
+              <div class="field"><label>Reembolsos PIM<span class="vc-help" data-tip="Cantidad de reembolsos realizados en el día, desde PIM">ⓘ</span></label><input type="number" min="0" id="vc-reembolsos_pim"/></div>
+              <div class="field"><label>Pendientes PIM<span class="vc-help" data-tip="Cantidad de reembolsos pendientes que quedan sin gestionarse en PIM">ⓘ</span></label><input type="number" min="0" id="vc-pendientes_pim"/></div>
+              <div class="field"><label>CC gestionados<span class="vc-help" data-tip="Cantidad de contracargos gestionados en el día">ⓘ</span></label><input type="number" min="0" id="vc-cc_gestionados"/></div>
+              <div class="field"><label>Reclamos<span class="vc-help" data-tip="Reclamos recibidos en el día">ⓘ</span></label><input type="number" min="0" id="vc-reclamos"/></div>
             </div>
           </div>
         </div>
@@ -271,11 +272,18 @@
 
       <div data-volumen-tab="historial" class="hidden">
         <div class="filter-bar" id="vc-canal-chips" style="margin-bottom:16px"></div>
+        <div id="vc-resumen" class="metrics" style="margin-bottom:16px"></div>
         <div class="card" style="margin-bottom:16px">
           <div class="card-header"><div><div class="card-title" id="vc-chart-title">Evolución diaria</div></div></div>
           <div class="chart-wrap" style="height:220px"><canvas id="chart-volumen" role="img" aria-label="Evolución diaria del canal seleccionado"></canvas></div>
         </div>
-        <div class="form-section"><div class="section-title">Últimos 14 días</div><div id="vc-table" style="overflow:auto"></div></div>
+        <div class="form-section">
+          <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+            <span>Últimos 14 días</span>
+            <button class="btn sm" onclick="exportVolumenCSV()">↓ CSV</button>
+          </div>
+          <div id="vc-table" style="overflow:auto"></div>
+        </div>
       </div>
       </div>
     </div>

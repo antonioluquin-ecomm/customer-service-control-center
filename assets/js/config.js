@@ -73,7 +73,7 @@ const VOLUMEN_BLOQUES = [
     { key:"llamadas_atendidas", label:"Atendidas" }, { key:"llamadas_desbordadas", label:"Desbordadas" },
     { key:"llamadas_no_respondidas", label:"No respondidas" },
   ]},
-  { id:"redes",      label:"Redes",            color:"#3b9c5f", campos:[
+  { id:"redes",      label:"Redes",            color:"#8b5cf6", campos:[
     { key:"redes_privados", label:"Privados" }, { key:"redes_comentarios", label:"Comentarios" },
     { key:"redes_min_privados", label:"Min-privados" },
   ]},

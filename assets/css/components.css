@@ -137,6 +137,14 @@ th[data-sortable].sort-desc::after{content:' ↓';opacity:1;color:var(--primary)
 .vc-navbtn:hover{background:var(--surface)}
 .vc-canal-chip{font-size:12px;padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer}
 .vc-canal-chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.vc-block-body.cols2{grid-template-columns:1fr 1fr}
+.vc-block-body label{display:flex;align-items:center;gap:4px}
+
+/* Tooltip de ayuda (ⓘ) — explica qué significa cada métrica al pasar el mouse */
+.vc-help{position:relative;display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;color:var(--hint);font-size:11px;line-height:1;cursor:help;flex-shrink:0}
+.vc-help:hover{color:var(--accent)}
+.vc-help:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:var(--text);color:var(--card);font-size:11px;font-weight:400;padding:7px 10px;border-radius:6px;white-space:normal;width:190px;line-height:1.45;z-index:80;box-shadow:var(--shadow-lg);pointer-events:none}
+.vc-help:hover::before{content:"";position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--text);z-index:80;pointer-events:none}
 
 /* Toggle switch */
 .toggle{position:relative;display:inline-block;width:32px;height:18px}
