@@ -87,7 +87,11 @@ function queuePendingProductividad(productividad) {
   });
   savePendingQueue();
 }
+// Reemplaza (no apila) un upsert pendiente del mismo día — si el jefe de SAC
+// corrige un typo dos veces offline, al reconectar debe verse como 1 edición
+// real, no 2 (infla veces_editado sin que haya habido dos ediciones reales).
 function queuePendingVolumen(volumen) {
+  PENDING_QUEUE = PENDING_QUEUE.filter(item => !(item.operation === "upsert_volumen" && item.payload.fecha === volumen.fecha));
   PENDING_QUEUE.push({
     operation: "upsert_volumen",
     client_request_id: volumen.client_request_id || createClientRequestId(),

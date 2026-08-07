@@ -6,6 +6,14 @@
 
 let _volumenCanalActivo = "wsp";
 
+// "Hoy" en fecha local — nunca usar toISOString().slice(0,10) para esto:
+// convierte a UTC, y en Argentina (UTC-3) eso adelanta la fecha un día
+// a partir de las ~21:00 locales, justo cuando suele cerrarse la carga.
+function volumenHoyLocal() {
+  const d = new Date(), p = n => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+}
+
 function volumenFechaMeta(fecha) {
   const meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
   const d = new Date(fecha + "T12:00:00");
@@ -18,7 +26,7 @@ function findVolumen(fecha) { return DB.volumenCanales.find(r => r.fecha === fec
 
 function initVolumenForm() {
   const el = document.getElementById("vc-fecha");
-  if (el && !el.value) el.value = new Date().toISOString().slice(0, 10);
+  if (el && !el.value) el.value = volumenHoyLocal();
   loadVolumenDia();
 }
 
@@ -26,7 +34,8 @@ function volumenShiftDia(delta) {
   const el = document.getElementById("vc-fecha");
   const d = new Date(el.value + "T12:00:00");
   d.setDate(d.getDate() + delta);
-  el.value = d.toISOString().slice(0, 10);
+  const p = n => String(n).padStart(2, "0");
+  el.value = d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
   loadVolumenDia();
 }
 
@@ -119,9 +128,10 @@ function renderVolumenChipsOnce() {
 function volumenUltimosDias(n) {
   const out = [];
   const hoy = new Date();
+  const p = x => String(x).padStart(2, "0");
   for (let i = n - 1; i >= 0; i--) {
     const d = new Date(hoy); d.setDate(d.getDate() - i);
-    out.push(d.toISOString().slice(0, 10));
+    out.push(d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()));
   }
   return out;
 }
@@ -131,11 +141,11 @@ function renderVolumenHistorial() {
   const bloque = VOLUMEN_BLOQUES.find(b => b.id === _volumenCanalActivo) || VOLUMEN_BLOQUES[0];
   document.querySelectorAll("#vc-canal-chips .vc-canal-chip").forEach(el => el.classList.toggle("on", el.dataset.canal === bloque.id));
 
-  const cargados = DB.volumenCanales.slice().sort((a, b) => a.fecha.localeCompare(b.fecha));
-  renderVolumenChart(bloque, cargados.slice(-30));
+  const dias30 = volumenUltimosDias(30).map(fecha => findVolumen(fecha) || { fecha, _missing: true });
+  renderVolumenChart(bloque, dias30);
 
-  const dias = volumenUltimosDias(14).reverse().map(fecha => findVolumen(fecha) || { fecha, _missing: true });
-  renderVolumenTable(bloque, dias);
+  const dias14 = volumenUltimosDias(14).reverse().map(fecha => findVolumen(fecha) || { fecha, _missing: true });
+  renderVolumenTable(bloque, dias14);
 }
 
 function renderVolumenChart(bloque, rows) {
@@ -143,11 +153,13 @@ function renderVolumenChart(bloque, rows) {
   if (!canvas || typeof Chart === "undefined") return;
   const campo = bloque.campos[0].key;
   const labels = rows.map(r => r.fecha.slice(5));
-  const data = rows.map(r => r[campo] ?? null);
+  // null (no undefined) para los días sin carga — con spanGaps:false, Chart.js
+  // corta la línea en vez de unir dos días lejanos como si fueran seguidos.
+  const data = rows.map(r => r._missing ? null : (r[campo] ?? null));
   if (_charts.volumen) _charts.volumen.destroy();
   _charts.volumen = new Chart(canvas.getContext("2d"), {
     type: "line",
-    data: { labels, datasets: [{ label: `${bloque.label} — ${bloque.campos[0].label}`, data, borderColor: bloque.color, backgroundColor: bloque.color + "33", fill: true, tension: .35, pointRadius: 2 }] },
+    data: { labels, datasets: [{ label: `${bloque.label} — ${bloque.campos[0].label}`, data, borderColor: bloque.color, backgroundColor: bloque.color + "33", fill: true, tension: .35, pointRadius: 2, spanGaps: false }] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } },
   });
   const head = document.getElementById("vc-chart-title");

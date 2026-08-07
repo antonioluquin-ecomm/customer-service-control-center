@@ -39,7 +39,11 @@ function upsertVolumenCanales_(p, ses) {
   const now = new Date().toISOString();
 
   const fields = { fecha, anio: Number(p.anio) || 0, mes: p.mes || "", semana: Number(p.semana) || "" };
-  VOLUMEN_CAMPOS_NUMERICOS.forEach(c => { fields[c] = numberOrNull_(p[c]); });
+  VOLUMEN_CAMPOS_NUMERICOS.forEach(c => {
+    const val = numberOrNull_(p[c]);
+    if (val !== null && (isNaN(val) || val < 0)) throw new Error("Valor inválido en " + c + ": " + p[c]);
+    fields[c] = val;
+  });
 
   const lr = sheet.getLastRow();
   const rows = lr > 1 ? sheet.getRange(2, 1, lr - 1, headers.length).getValues() : [];
