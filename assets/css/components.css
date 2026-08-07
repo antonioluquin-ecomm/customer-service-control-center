@@ -127,7 +127,7 @@ th[data-sortable].sort-desc::after{content:' ↓';opacity:1;color:var(--primary)
 /* Volumen diario — bloques por canal y chip de filtro del historial */
 .vc-blocks{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media (max-width:760px){.vc-blocks{grid-template-columns:1fr}}
-.vc-block{border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.vc-block{border:1px solid var(--border);border-radius:var(--r)}
 .vc-block-head{display:flex;align-items:center;gap:9px;padding:11px 15px;border-bottom:1px solid var(--border);font-weight:600;font-size:13px}
 .vc-swatch{width:9px;height:9px;border-radius:3px;flex-shrink:0}
 .vc-block-body{padding:14px 15px;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px 12px}
