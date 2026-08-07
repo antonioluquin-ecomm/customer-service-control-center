@@ -3,14 +3,15 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.14.2',
+  number: '12.14.3',
   date:   '2026-08-07',
-  notes:  'Fix: el módulo Volumen diario faltaba en la matriz de permisos por rol'
+  notes:  'Subtítulo de login actualizado: "Control Center" en vez de "Sistema de Auditoría", refleja el alcance actual de la app'
 };
 
 /* Máximo 10 entradas (project-standards/application_shell.md §8.5) — descripción breve,
  * de una línea. Al agregar una versión nueva, quitar la más antigua del final. */
 const CHANGELOG = [
+  { v: '12.14.3', date: '2026-08-07', desc: 'Subtítulo de login: "Control Center · Customer Service" en vez de "Sistema de Auditoría" — la app ya cubre productividad y volumen, no solo auditoría de calidad.' },
   { v: '12.14.2', date: '2026-08-07', desc: 'Fix: el módulo "volumen" (Volumen diario) faltaba en la matriz de permisos de Roles y permisos — no se podía configurar Ver/Editar/Oculto por rol.' },
   { v: '12.14.1', date: '2026-08-07', desc: 'Configuración · Roles y permisos: se agrega botón "+ Nuevo rol", edición de nombre/descripción y Activar/Desactivar — antes solo se podían ver los permisos.' },
   { v: '12.14.0', date: '2026-08-07', desc: 'Link "Volver al Hub" en el sidebar, apunta a eCommerce Hub (navigation_standard.md §6).' },
@@ -21,7 +22,6 @@ const CHANGELOG = [
   { v: '12.12.0', date: '2026-08-07', desc: 'Nuevo módulo Volumen diario por canal (WSP, Llamadas, Redes, Mails, Ventas, Reembolsos/CC) con historial y auditoría de ediciones.' },
   { v: '12.11.2', date: '2026-07-23', desc: 'Nuevo logo de marca (chat con check) en sidebar, login y favicon.' },
   { v: '12.11.1', date: '2026-07-21', desc: 'Modal de usuario: mostrar/ocultar contraseña y botón "Generar".' },
-  { v: '12.11.0', date: '2026-06-28', desc: 'Colapso del sidebar en desktop, con estado persistido y anti-flash.' },
 ];
 
 const CONFIG = {
