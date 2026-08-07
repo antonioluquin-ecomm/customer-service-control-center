@@ -438,7 +438,7 @@ async function selectRolPermisos(id_rol){
     const r=await adminCall("getPermisosRol",{ id_rol:Number(id_rol) });
     const permisos=r.permisos||r.data||{};
     const estado=p=>p.editar?"editar":(p.ver?"ver":"oculto");
-    const mods=["dashboard","formulario","productividad","registros","observaciones","agentes","configuracion"];
+    const mods=["dashboard","formulario","productividad","registros","observaciones","agentes","volumen","configuracion"];
     const rows=mods.map(m=>{
       const st=estado(permisos[m]||{ver:false,editar:false});
       return `<tr>

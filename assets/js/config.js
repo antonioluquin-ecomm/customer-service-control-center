@@ -3,14 +3,15 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.14.1',
+  number: '12.14.2',
   date:   '2026-08-07',
-  notes:  'Configuración · Roles y permisos: alta y edición de roles personalizados (alineado al estándar de application_shell.md §6.4)'
+  notes:  'Fix: el módulo Volumen diario faltaba en la matriz de permisos por rol'
 };
 
 /* Máximo 10 entradas (project-standards/application_shell.md §8.5) — descripción breve,
  * de una línea. Al agregar una versión nueva, quitar la más antigua del final. */
 const CHANGELOG = [
+  { v: '12.14.2', date: '2026-08-07', desc: 'Fix: el módulo "volumen" (Volumen diario) faltaba en la matriz de permisos de Roles y permisos — no se podía configurar Ver/Editar/Oculto por rol.' },
   { v: '12.14.1', date: '2026-08-07', desc: 'Configuración · Roles y permisos: se agrega botón "+ Nuevo rol", edición de nombre/descripción y Activar/Desactivar — antes solo se podían ver los permisos.' },
   { v: '12.14.0', date: '2026-08-07', desc: 'Link "Volver al Hub" en el sidebar, apunta a eCommerce Hub (navigation_standard.md §6).' },
   { v: '12.13.3', date: '2026-08-07', desc: 'Fix: el tooltip de ayuda de Volumen diario había dejado de mostrarse (::after directamente sobre <svg> no es confiable).' },
