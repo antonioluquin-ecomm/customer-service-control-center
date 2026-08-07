@@ -24,10 +24,10 @@ function updateSheetsUI(state){
 }
 
 // Mapa de índice de nav por id de página
-const PAGE_MAP={dashboard:0,agentes:1,observaciones:2,formulario:3,productividad:4,registros:5,configuracion:6};
+const PAGE_MAP={dashboard:0,agentes:1,observaciones:2,formulario:3,productividad:4,volumen:5,registros:6,configuracion:7};
 
 // Etiqueta del breadcrumb (topbar global) por id de página
-const PAGE_LABELS={dashboard:"Inicio",agentes:"Agentes",observaciones:"Observaciones",formulario:"Nueva auditoría",productividad:"Productividad",registros:"Registros",configuracion:"Configuración"};
+const PAGE_LABELS={dashboard:"Inicio",agentes:"Agentes",observaciones:"Observaciones",formulario:"Nueva auditoría",productividad:"Productividad",volumen:"Volumen diario",registros:"Registros",configuracion:"Configuración"};
 
 // Muestra la página activa y dispara su render
 function showPage(id){
@@ -47,6 +47,7 @@ function showPage(id){
   if(id==="observaciones"){ populateObsFilters(); renderObservaciones(); }
   if(id==="agentes")       renderAgentes();
   if(id==="productividad"){ initProductividadForm(); renderProductividadRecords(); }
+  if(id==="volumen")       { initVolumenForm(); renderVolumenHistorial(); }
   // Cerrar sidebar en mobile al navegar
   if(window.innerWidth<=900){
     var sb=document.getElementById('sidebar');

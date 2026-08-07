@@ -87,3 +87,11 @@ function queuePendingProductividad(productividad) {
   });
   savePendingQueue();
 }
+function queuePendingVolumen(volumen) {
+  PENDING_QUEUE.push({
+    operation: "upsert_volumen",
+    client_request_id: volumen.client_request_id || createClientRequestId(),
+    payload: { ...volumen, _type: "upsert_volumen_canales" },
+  });
+  savePendingQueue();
+}

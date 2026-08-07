@@ -1,7 +1,7 @@
 # Apps Script — Referencia de API
 
-Backend (v8 — estándar): 9 archivos `.gs` en `apps-script/` desplegados como Web App en Google Apps Script:
-`Code.gs` (router) · `Auth.gs` · `Usuarios.gs` · `Auditorias.gs` · `Validators.gs` · `Logger.gs` · `Helpers.gs` · `Config.gs` · `Setup.gs`.
+Backend (v8 — estándar): 10 archivos `.gs` en `apps-script/` desplegados como Web App en Google Apps Script:
+`Code.gs` (router) · `Auth.gs` · `Usuarios.gs` · `Auditorias.gs` · `VolumenCanales.gs` · `Validators.gs` · `Logger.gs` · `Helpers.gs` · `Config.gs` · `Setup.gs`.
 
 Para desplegar paso a paso (incluida la migración del Sheet de producción), ver
 [`apps-script-deploy.md`](apps-script-deploy.md).
@@ -127,6 +127,24 @@ Devuelve los criterios de calidad configurados en la hoja `criterios_calidad`.
 
 ---
 
+### `?action=get_volumen_canales`
+
+Devuelve la carga diaria de volumen por canal (una fila por fecha, hoja `volumen_canales`).
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "volumen_canales": [
+    { "fecha": "2026-08-07", "anio": 2026, "mes": "Agosto", "semana": "32",
+      "wsp_ingreso": 21, "wsp_salida": 18, "mails_ingreso": 57, "veces_editado": 0,
+      "cargado_por": "lucia@luquin.com.ar", "fecha_registro": "2026-08-07", "fecha_actualizacion": "2026-08-07" }
+  ]
+}
+```
+
+---
+
 ## Endpoints POST
 
 Content-Type: `text/plain;charset=utf-8` (evita preflight CORS).  
@@ -237,6 +255,23 @@ Elimina filas en `auditorias`, `detalle_calidad`, `productividad` y `observacion
 
 ---
 
+### `_type: "upsert_volumen_canales"` — Cargar/editar el volumen de un día
+
+```json
+{
+  "_type": "upsert_volumen_canales",
+  "fecha": "2026-08-07",
+  "wsp_ingreso": 21, "wsp_salida": 18,
+  "mails_ingreso": 57, "mails_salida": null
+}
+```
+
+Upsert por `fecha` (una fila por día — mismo patrón que `upsert_productividad_semanal`). Si la fecha ya
+existe, sobreescribe la fila y suma 1 a `veces_editado`; conserva `fecha_registro` del alta original.
+Requiere permiso de edición sobre el módulo `volumen`.
+
+---
+
 ## Estructura de hojas
 
 ### `auditorias` (28 columnas)
@@ -258,6 +293,10 @@ Elimina filas en `auditorias`, `detalle_calidad`, `productividad` y `observacion
 ### `criterios_calidad` (6 columnas)
 
 `cod · bloque · nombre · peso · activo · ultima_actualizacion`
+
+### `volumen_canales` (24 columnas)
+
+`fecha · anio · mes · semana · wsp_ingreso · wsp_salida · llamadas_atendidas · llamadas_desbordadas · llamadas_no_respondidas · redes_privados · redes_comentarios · redes_min_privados · mails_ingreso · mails_salida · ventas_ingreso · ventas_salida · ventas_cancelados · reembolsos_pim · pendientes_pim · cc_gestionados · reclamos · cargado_por · fecha_registro · fecha_actualizacion · veces_editado`
 
 ---
 

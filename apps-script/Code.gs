@@ -21,6 +21,7 @@ function doGet(e) {
     if (action === "get_detalle")               return ok_(getDetalle_());
     if (action === "get_criterios")             return ok_(getCriterios_());
     if (action === "get_productividad_semanal") return ok_(getProductividadSemanal_());
+    if (action === "get_volumen_canales")       return ok_(getVolumenCanales_());
     if (action === "getPermisos")               return handleGetPermisos_(ses);
     return err_("Acción no permitida por GET: " + action);
   } catch (err) {
@@ -82,6 +83,7 @@ function routePost_(action, body, ses) {
     case "config_change":               return handleConfigChange_(body, ses);
     case "update_criterios":            return handleUpdateCriterios_(body.criterios || [], ses);
     case "upsert_productividad_semanal":return upsertProductividadSemanal_(body, ses);
+    case "upsert_volumen_canales":      return upsertVolumenCanales_(body, ses);
     case "delete_auditoria":            return deleteAuditoria_(body.id_auditoria, ses);
 
     // Gestión (admin)

@@ -11,10 +11,10 @@ window.escapeHtml = function (str) {
   // ── Permisos por defecto (usados hasta que el backend devuelva permisos) ──
   // Clave: id_rol — 1=admin, 2=supervisor, 3=auditor, 4=agente
   var _PERMISOS = {
-    1: { dashboard:{ver:true,editar:true},  formulario:{ver:true,editar:true},  productividad:{ver:true,editar:true},  registros:{ver:true,editar:true},  observaciones:{ver:true,editar:true},  agentes:{ver:true,editar:true},  configuracion:{ver:true,editar:true}  },
-    2: { dashboard:{ver:true,editar:false}, formulario:{ver:true,editar:true},  productividad:{ver:true,editar:true},  registros:{ver:true,editar:true},  observaciones:{ver:true,editar:false}, agentes:{ver:true,editar:false}, configuracion:{ver:false,editar:false} },
-    3: { dashboard:{ver:true,editar:false}, formulario:{ver:true,editar:true},  productividad:{ver:false,editar:false}, registros:{ver:true,editar:true},  observaciones:{ver:true,editar:false}, agentes:{ver:true,editar:false}, configuracion:{ver:false,editar:false} },
-    4: { dashboard:{ver:true,editar:false}, formulario:{ver:true,editar:false}, productividad:{ver:false,editar:false}, registros:{ver:true,editar:false}, observaciones:{ver:true,editar:false}, agentes:{ver:true,editar:false}, configuracion:{ver:false,editar:false} },
+    1: { dashboard:{ver:true,editar:true},  formulario:{ver:true,editar:true},  productividad:{ver:true,editar:true},  registros:{ver:true,editar:true},  observaciones:{ver:true,editar:true},  agentes:{ver:true,editar:true},  volumen:{ver:true,editar:true},  configuracion:{ver:true,editar:true}  },
+    2: { dashboard:{ver:true,editar:false}, formulario:{ver:true,editar:true},  productividad:{ver:true,editar:true},  registros:{ver:true,editar:true},  observaciones:{ver:true,editar:false}, agentes:{ver:true,editar:false}, volumen:{ver:true,editar:true},  configuracion:{ver:false,editar:false} },
+    3: { dashboard:{ver:true,editar:false}, formulario:{ver:true,editar:true},  productividad:{ver:false,editar:false}, registros:{ver:true,editar:true},  observaciones:{ver:true,editar:false}, agentes:{ver:true,editar:false}, volumen:{ver:true,editar:false}, configuracion:{ver:false,editar:false} },
+    4: { dashboard:{ver:true,editar:false}, formulario:{ver:true,editar:false}, productividad:{ver:false,editar:false}, registros:{ver:true,editar:false}, observaciones:{ver:true,editar:false}, agentes:{ver:true,editar:false}, volumen:{ver:false,editar:false}, configuracion:{ver:false,editar:false} },
   };
 
   function _getPermisos() {

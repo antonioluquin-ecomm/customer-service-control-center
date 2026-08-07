@@ -55,6 +55,10 @@ async function retrySyncPending(){
       const payload=item.payload;
       const idx=DB.productividadSemanal.findIndex(p=>p.agente===payload.agente&&Number(p.anio)===Number(payload.anio)&&Number(p.semana)===Number(payload.semana));
       if(idx>=0) DB.productividadSemanal[idx]={...DB.productividadSemanal[idx],sheets_enviado:true};
+    } else if(item.operation==="upsert_volumen"){
+      const payload=item.payload;
+      const idx=DB.volumenCanales.findIndex(v=>v.fecha===payload.fecha);
+      if(idx>=0) DB.volumenCanales[idx]={...DB.volumenCanales[idx],sheets_enviado:true};
     }
   }
   savePendingQueue();

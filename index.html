@@ -74,6 +74,10 @@
         <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 13h12v2H2zM3 7h2v5H3zM7 3h2v9H7zM11 5h2v7h-2z"/></svg>
         Productividad semanal
       </button>
+      <button class="nav-item" onclick="showPage('volumen')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 13h12v2H2zM3 7h2v5H3zM7 3h2v9H7zM11 5h2v7h-2z"/></svg>
+        Volumen diario
+      </button>
       <button class="nav-item" onclick="showPage('registros')">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M1 2a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H2a1 1 0 01-1-1V2zm1 0v12h12V2H2z"/><path d="M4 5h8v1H4zM4 8h8v1H4zM4 11h5v1H4z"/></svg>
         Registros
@@ -197,6 +201,84 @@
 
     <!-- PRODUCTIVIDAD -->
     <div id="page-productividad" class="page"><div class="page-header"><div class="page-header-text"><h1>Cargar productividad</h1><p class="subtitle">Una carga por agente y semana; los registros existentes se actualizan.</p></div></div><div class="card"><div class="filter-bar"><button class="btn primary" data-productividad-tab-btn="manual" onclick="setProductividadTab('manual')">Carga manual</button><button class="btn" data-productividad-tab-btn="excel" onclick="setProductividadTab('excel')">Importar Excel</button></div><div data-productividad-tab="manual"><div class="fg c3"><div class="field"><label>Agente *</label><select id="p-agente" oninput="productividadManualPreview()"><option value="">- Seleccionar -</option></select></div><div class="field"><label>Fecha de semana *</label><input type="date" id="p-fecha" oninput="productividadManualPreview()"/></div><div class="field"><label>Horas trabajadas *</label><input type="number" id="p-horas" min="0" step=".5" oninput="productividadManualPreview()"/></div><div class="field"><label>Interacciones reales *</label><input type="number" id="p-interacciones" min="0" oninput="productividadManualPreview()"/></div><div class="field"><label>Dias tarde *</label><input type="number" id="p-tarde" min="0" value="0" oninput="productividadManualPreview()"/></div><div class="field"><label>Dias faltas *</label><input type="number" id="p-faltas" min="0" value="0" oninput="productividadManualPreview()"/></div></div><div id="p-preview" class="info-box" style="margin-top:16px">Completa agente, fecha y horas para ver el resumen.</div><div id="p-alert" class="alert hidden"></div><div class="step-actions"><span></span><button class="btn success" onclick="submitProductividad()">Guardar productividad</button></div></div><div data-productividad-tab="excel" class="hidden"><p style="color:var(--muted)">Descarga la plantilla Excel y completala. Las filas existentes por agente+semana se actualizaran luego de la confirmacion.</p><button class="btn" onclick="downloadProductividadTemplate()">↓ Descargar plantilla Excel</button><input type="file" accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="importProductividadFile(this)" style="margin-left:10px"/><div id="p-import-preview" style="margin-top:16px"></div></div><div class="form-section" style="margin-top:24px"><div class="section-title">Registros de productividad</div><div id="p-records" style="overflow:auto"></div></div></div></div>
+
+    <!-- VOLUMEN DIARIO POR CANAL -->
+    <div id="page-volumen" class="page">
+      <div class="page-header"><div class="page-header-text"><h1>Volumen diario por canal</h1><p class="subtitle">Carga única del día — WSP, Llamadas, Redes, Mails, Ventas y Reembolsos/CC. Reemplaza la planilla de Excel.</p></div></div>
+      <div class="card"><div class="filter-bar"><button class="btn primary" data-volumen-tab-btn="carga" onclick="setVolumenTab('carga')">Carga diaria</button><button class="btn" data-volumen-tab-btn="historial" onclick="setVolumenTab('historial')">Historial y dashboard</button></div>
+
+      <div data-volumen-tab="carga">
+        <div class="vc-datebar" style="margin-bottom:16px">
+          <button class="vc-navbtn" onclick="volumenShiftDia(-1)" title="Día anterior">‹</button>
+          <input type="date" id="vc-fecha" oninput="loadVolumenDia()" style="width:auto"/>
+          <button class="vc-navbtn" onclick="volumenShiftDia(1)" title="Día siguiente">›</button>
+          <span id="vc-status" class="badge badge-local">Sin cargar</span>
+        </div>
+        <div id="vc-alert" class="alert hidden"></div>
+
+        <div class="vc-blocks">
+          <div class="vc-block">
+            <div class="vc-block-head"><span class="vc-swatch" style="background:#16a34a"></span>WSP</div>
+            <div class="vc-block-body">
+              <div class="field"><label>Ingreso</label><input type="number" min="0" id="vc-wsp_ingreso"/></div>
+              <div class="field"><label>Salida</label><input type="number" min="0" id="vc-wsp_salida"/></div>
+            </div>
+          </div>
+          <div class="vc-block">
+            <div class="vc-block-head"><span class="vc-swatch" style="background:#7c9cbf"></span>Llamadas</div>
+            <div class="vc-block-body">
+              <div class="field"><label>Atendidas</label><input type="number" min="0" id="vc-llamadas_atendidas"/></div>
+              <div class="field"><label>Desbordadas</label><input type="number" min="0" id="vc-llamadas_desbordadas"/></div>
+              <div class="field"><label>No respondidas</label><input type="number" min="0" id="vc-llamadas_no_respondidas"/></div>
+            </div>
+          </div>
+          <div class="vc-block">
+            <div class="vc-block-head"><span class="vc-swatch" style="background:#3b9c5f"></span>Redes</div>
+            <div class="vc-block-body">
+              <div class="field"><label>Privados</label><input type="number" min="0" id="vc-redes_privados"/></div>
+              <div class="field"><label>Comentarios</label><input type="number" min="0" id="vc-redes_comentarios"/></div>
+              <div class="field"><label>Min-privados</label><input type="number" min="0" id="vc-redes_min_privados"/></div>
+            </div>
+          </div>
+          <div class="vc-block">
+            <div class="vc-block-head"><span class="vc-swatch" style="background:#e08e45"></span>Mails</div>
+            <div class="vc-block-body">
+              <div class="field"><label>Ingreso</label><input type="number" min="0" id="vc-mails_ingreso"/></div>
+              <div class="field"><label>Salida</label><input type="number" min="0" id="vc-mails_salida"/></div>
+            </div>
+          </div>
+          <div class="vc-block">
+            <div class="vc-block-head"><span class="vc-swatch" style="background:#6b7280"></span>Ventas</div>
+            <div class="vc-block-body">
+              <div class="field"><label>Ingreso</label><input type="number" min="0" id="vc-ventas_ingreso"/></div>
+              <div class="field"><label>Salida</label><input type="number" min="0" id="vc-ventas_salida"/></div>
+              <div class="field"><label>Cancelados</label><input type="number" min="0" id="vc-ventas_cancelados"/></div>
+            </div>
+          </div>
+          <div class="vc-block">
+            <div class="vc-block-head"><span class="vc-swatch" style="background:#c99a1e"></span>Reembolsos / CC</div>
+            <div class="vc-block-body">
+              <div class="field"><label>Reembolsos PIM</label><input type="number" min="0" id="vc-reembolsos_pim"/></div>
+              <div class="field"><label>Pendientes PIM</label><input type="number" min="0" id="vc-pendientes_pim"/></div>
+              <div class="field"><label>CC gestionados</label><input type="number" min="0" id="vc-cc_gestionados"/></div>
+              <div class="field"><label>Reclamos</label><input type="number" min="0" id="vc-reclamos"/></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-actions"><span></span><button class="btn success" onclick="submitVolumen()">Guardar día</button></div>
+      </div>
+
+      <div data-volumen-tab="historial" class="hidden">
+        <div class="filter-bar" id="vc-canal-chips" style="margin-bottom:16px"></div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header"><div><div class="card-title" id="vc-chart-title">Evolución diaria</div></div></div>
+          <div class="chart-wrap" style="height:220px"><canvas id="chart-volumen" role="img" aria-label="Evolución diaria del canal seleccionado"></canvas></div>
+        </div>
+        <div class="form-section"><div class="section-title">Últimos 14 días</div><div id="vc-table" style="overflow:auto"></div></div>
+      </div>
+      </div>
+    </div>
 
     <!-- REGISTROS --><div id="page-registros" class="page">
       <div class="page-header">
@@ -408,6 +490,7 @@
 <script src="assets/js/forms.js"></script>
 <script src="assets/js/dashboard.js"></script>
 <script src="assets/js/productividad.js"></script>
+<script src="assets/js/volumen.js"></script>
 <script src="assets/js/records.js"></script>
 <script src="assets/js/settings.js"></script>
 <script src="assets/js/main.js"></script>

@@ -71,12 +71,13 @@ async function reloadFromSheets() {
   sub.textContent  = "Esto puede tardar unos segundos";
 
   try {
-    const [cfgR, audR, detR, critR, prodR] = await Promise.all([
+    const [cfgR, audR, detR, critR, prodR, volR] = await Promise.all([
       go(base + "&action=get_config"),
       go(base + "&action=get_auditorias"),
       go(base + "&action=get_detalle"),
       go(base + "&action=get_criterios"),
       go(base + "&action=get_productividad_semanal"),
+      go(base + "&action=get_volumen_canales"),
     ]);
     msg.textContent = "Procesando...";
     // Si el servidor rechaza la sesión, redirigir al login
@@ -104,6 +105,12 @@ async function reloadFromSheets() {
       const payload=item.payload, idx=DB.productividadSemanal.findIndex(p=>p.agente===payload.agente&&Number(p.anio)===Number(payload.anio)&&Number(p.semana)===Number(payload.semana));
       const local={...payload,sheets_enviado:false};
       if(idx>=0) DB.productividadSemanal[idx]={...DB.productividadSemanal[idx],...local}; else DB.productividadSemanal.push(local);
+    });
+    if(volR.ok){ const d=await volR.json(); if(d.status==="ok") DB.volumenCanales=d.volumen_canales||[]; }
+    PENDING_QUEUE.filter(item=>item.operation==="upsert_volumen").forEach(item=>{
+      const payload=item.payload, idx=DB.volumenCanales.findIndex(v=>v.fecha===payload.fecha);
+      const local={...payload,sheets_enviado:false};
+      if(idx>=0) DB.volumenCanales[idx]={...DB.volumenCanales[idx],...local}; else DB.volumenCanales.push(local);
     });
     updateSheetsUI("connected");
     populateSelects();

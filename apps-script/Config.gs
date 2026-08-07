@@ -16,6 +16,7 @@ const SHEETS = {
   CONFIGURACION:         "configuracion",
   CONFIG_LOG:            "log_configuracion",
   CRITERIOS:             "criterios_calidad",
+  VOLUMEN_CANALES:       "volumen_canales",
   USUARIOS_LEGACY:       "usuarios_legacy", // fuente de la migración — NO se modifica
   LOG_ENVIOS:            "log_envios",       // legacy, se conserva
   // Sistema (estándar)
@@ -68,10 +69,21 @@ const HEADERS_DOMINIO = {
   configuracion: ["parametro","valor","unidad","descripcion","ultima_actualizacion"],
   log_configuracion: ["id_log","timestamp","accion","detalle","agentes_lista","auditores_lista","parametros_json"],
   criterios_calidad: ["cod","bloque","nombre","peso","activo","ultima_actualizacion"],
+  // Carga diaria del jefe de SAC — una fila por fecha (reemplaza el Excel de SharePoint).
+  volumen_canales: [
+    "fecha","anio","mes","semana",
+    "wsp_ingreso","wsp_salida",
+    "llamadas_atendidas","llamadas_desbordadas","llamadas_no_respondidas",
+    "redes_privados","redes_comentarios","redes_min_privados",
+    "mails_ingreso","mails_salida",
+    "ventas_ingreso","ventas_salida","ventas_cancelados",
+    "reembolsos_pim","pendientes_pim","cc_gestionados","reclamos",
+    "cargado_por","fecha_registro","fecha_actualizacion","veces_editado",
+  ],
 };
 
 // ── RBAC: módulos del sistema ───────────────────────────────────
-const MODULOS = ["dashboard","formulario","productividad","registros","observaciones","agentes","configuracion"];
+const MODULOS = ["dashboard","formulario","productividad","registros","observaciones","agentes","volumen","configuracion"];
 
 // ── Seed de roles (id 1 = Administrador de sistema) ─────────────
 const ROLES_SEED = [
@@ -87,10 +99,10 @@ const ROLE_STRING_TO_ID = { admin:1, supervisor:2, auditor:3, agente:4 };
 // ── Seed de permisos por módulo (espeja DEFAULT_PERMISOS de auth.js) ──
 // puede_ver / puede_editar como SI/NO
 const PERMISOS_SEED = {
-  1: { dashboard:[1,1], formulario:[1,1], productividad:[1,1], registros:[1,1], observaciones:[1,1], agentes:[1,1], configuracion:[1,1] },
-  2: { dashboard:[1,0], formulario:[1,1], productividad:[1,1], registros:[1,1], observaciones:[1,0], agentes:[1,0], configuracion:[0,0] },
-  3: { dashboard:[1,0], formulario:[1,1], productividad:[0,0], registros:[1,1], observaciones:[1,0], agentes:[1,0], configuracion:[0,0] },
-  4: { dashboard:[1,0], formulario:[1,0], productividad:[0,0], registros:[1,0], observaciones:[1,0], agentes:[1,0], configuracion:[0,0] },
+  1: { dashboard:[1,1], formulario:[1,1], productividad:[1,1], registros:[1,1], observaciones:[1,1], agentes:[1,1], volumen:[1,1], configuracion:[1,1] },
+  2: { dashboard:[1,0], formulario:[1,1], productividad:[1,1], registros:[1,1], observaciones:[1,0], agentes:[1,0], volumen:[1,1], configuracion:[0,0] },
+  3: { dashboard:[1,0], formulario:[1,1], productividad:[0,0], registros:[1,1], observaciones:[1,0], agentes:[1,0], volumen:[1,0], configuracion:[0,0] },
+  4: { dashboard:[1,0], formulario:[1,0], productividad:[0,0], registros:[1,0], observaciones:[1,0], agentes:[1,0], volumen:[0,0], configuracion:[0,0] },
 };
 
 // ── Acciones que requieren rol Administrador (gestión del sistema) ──
@@ -105,6 +117,7 @@ const ACTION_MODULE_MAP = {
   "insert_auditoria":             ["formulario"],
   "delete_auditoria":             ["registros"],
   "upsert_productividad_semanal": ["productividad"],
+  "upsert_volumen_canales":       ["volumen"],
 };
 
 // ── Criterios de calidad por defecto ────────────────────────────
