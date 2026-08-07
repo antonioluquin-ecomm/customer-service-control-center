@@ -3,14 +3,15 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.13.1',
+  number: '12.13.2',
   date:   '2026-08-07',
-  notes:  'Fix: tooltip de ayuda en Volumen diario se cortaba por overflow:hidden en los bloques'
+  notes:  'Íconos de ayuda de Volumen diario pasan de glifo unicode a SVG propio'
 };
 
 /* Máximo 10 entradas (project-standards/application_shell.md §8.5) — descripción breve,
  * de una línea. Al agregar una versión nueva, quitar la más antigua del final. */
 const CHANGELOG = [
+  { v: '12.13.2', date: '2026-08-07', desc: 'Íconos de ayuda de Volumen diario pasan de glifo unicode (ⓘ) a SVG propio, más consistente entre fuentes/SO.' },
   { v: '12.13.1', date: '2026-08-07', desc: 'Fix: tooltip de ayuda en Volumen diario se cortaba por overflow:hidden en los bloques.' },
   { v: '12.13.0', date: '2026-08-07', desc: 'Volumen diario: tooltips por métrica, badge de días sin cargar, export CSV, resumen semanal y fixes de auditoría (fecha local, huecos del gráfico, validación de negativos).' },
   { v: '12.12.0', date: '2026-08-07', desc: 'Nuevo módulo Volumen diario por canal (WSP, Llamadas, Redes, Mails, Ventas, Reembolsos/CC) con historial y auditoría de ediciones.' },
@@ -20,7 +21,6 @@ const CHANGELOG = [
   { v: '12.10.0', date: '2026-06-27', desc: 'Fix de logout real al backend y refresco de permisos sin re-login.' },
   { v: '12.9.1', date: '2026-06-27', desc: 'Chart.js self-hosted y limpieza diaria de sesiones expiradas.' },
   { v: '12.9.0', date: '2026-06-27', desc: 'RBAC: denegado por defecto en módulos desconocidos y sync de TTL de sesión.' },
-  { v: '12.8.1', date: '2026-06-27', desc: 'Hotfix de auditoría crítica: migración de tema y logging de acciones.' },
 ];
 
 const CONFIG = {
