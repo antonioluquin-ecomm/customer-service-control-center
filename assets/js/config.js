@@ -3,14 +3,15 @@
 // ================================================================
 
 const VERSION = {
-  number: '12.14.3',
+  number: '12.14.4',
   date:   '2026-08-07',
-  notes:  'Subtítulo de login actualizado: "Control Center" en vez de "Sistema de Auditoría", refleja el alcance actual de la app'
+  notes:  'Fix: botones "Cargar"/"Editar" del historial de Volumen diario ahora usan el estilo de botón estándar, no un link suelto'
 };
 
 /* Máximo 10 entradas (project-standards/application_shell.md §8.5) — descripción breve,
  * de una línea. Al agregar una versión nueva, quitar la más antigua del final. */
 const CHANGELOG = [
+  { v: '12.14.4', date: '2026-08-07', desc: 'Fix: los botones "Cargar"/"Editar" de la tabla de historial en Volumen diario eran un <a> sin estilo — ahora son botón estándar (.btn xs), igual que en el resto de las tablas de la app.' },
   { v: '12.14.3', date: '2026-08-07', desc: 'Subtítulo de login: "Control Center · Customer Service" en vez de "Sistema de Auditoría" — la app ya cubre productividad y volumen, no solo auditoría de calidad.' },
   { v: '12.14.2', date: '2026-08-07', desc: 'Fix: el módulo "volumen" (Volumen diario) faltaba en la matriz de permisos de Roles y permisos — no se podía configurar Ver/Editar/Oculto por rol.' },
   { v: '12.14.1', date: '2026-08-07', desc: 'Configuración · Roles y permisos: se agrega botón "+ Nuevo rol", edición de nombre/descripción y Activar/Desactivar — antes solo se podían ver los permisos.' },
@@ -21,7 +22,6 @@ const CHANGELOG = [
   { v: '12.13.0', date: '2026-08-07', desc: 'Volumen diario: tooltips por métrica, badge de días sin cargar, export CSV, resumen semanal y fixes de auditoría (fecha local, huecos del gráfico, validación de negativos).' },
   { v: '12.12.0', date: '2026-08-07', desc: 'Nuevo módulo Volumen diario por canal (WSP, Llamadas, Redes, Mails, Ventas, Reembolsos/CC) con historial y auditoría de ediciones.' },
   { v: '12.11.2', date: '2026-07-23', desc: 'Nuevo logo de marca (chat con check) en sidebar, login y favicon.' },
-  { v: '12.11.1', date: '2026-07-21', desc: 'Modal de usuario: mostrar/ocultar contraseña y botón "Generar".' },
 ];
 
 const CONFIG = {

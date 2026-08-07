@@ -245,7 +245,7 @@ function renderVolumenTable(bloque, rows) {
         : r.sheets_enviado === false ? '<span class="badge badge-local">Pendiente sync</span>'
         : Number(r.veces_editado) > 0 ? `<span class="badge badge-correcta">Editado ${r.veces_editado}x</span>`
         : '<span class="badge badge-ok">Completo</span>';
-      return `<tr><td>${escapeHtml(r.fecha)}</td>${cols.map(c => `<td>${r[c.key] ?? "—"}</td>`).join("")}<td>${estado}</td><td>${escapeHtml(r.cargado_por || "—")}</td><td><a href="#" onclick="goToVolumenFecha('${r.fecha}');return false;">${r._missing ? "Cargar" : "Editar"}</a></td></tr>`;
+      return `<tr><td>${escapeHtml(r.fecha)}</td>${cols.map(c => `<td>${r[c.key] ?? "—"}</td>`).join("")}<td>${estado}</td><td>${escapeHtml(r.cargado_por || "—")}</td><td><button class="btn xs" onclick="goToVolumenFecha('${r.fecha}')">${r._missing ? "Cargar" : "Editar"}</button></td></tr>`;
     }).join("")
   }</tbody></table>`;
 }
