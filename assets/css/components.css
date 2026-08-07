@@ -140,8 +140,11 @@ th[data-sortable].sort-desc::after{content:' ↓';opacity:1;color:var(--primary)
 .vc-block-body.cols2{grid-template-columns:1fr 1fr}
 .vc-block-body label{display:flex;align-items:center;gap:4px}
 
-/* Tooltip de ayuda (ícono info) — explica qué significa cada métrica al pasar el mouse */
-.vc-help{position:relative;display:inline-block;width:13px;height:13px;color:var(--hint);cursor:help;flex-shrink:0;vertical-align:middle;transition:color .15s}
+/* Tooltip de ayuda (ícono info) — explica qué significa cada métrica al pasar el mouse.
+   El <span> (no el <svg>) es quien lleva data-tip y el ::after: ::before/::after sobre un
+   <svg> directamente no se renderiza de forma confiable entre navegadores. */
+.vc-help{position:relative;display:inline-flex;width:13px;height:13px;color:var(--hint);cursor:help;flex-shrink:0;vertical-align:middle;transition:color .15s}
+.vc-help svg{width:100%;height:100%;display:block}
 .vc-help:hover{color:var(--accent)}
 .vc-help:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:var(--text);color:var(--card);font-size:11px;font-weight:400;padding:7px 10px;border-radius:6px;white-space:normal;width:190px;line-height:1.45;z-index:80;box-shadow:var(--shadow-lg);pointer-events:none}
 .vc-help:hover::before{content:"";position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--text);z-index:80;pointer-events:none}
